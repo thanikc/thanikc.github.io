@@ -21,12 +21,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: '',
-    loadComponent: () =>
-      import('./features/ads/ad-banner.component').then(m => m.AdBannerComponent),
-    outlet: 'ads',
-  },
-  {
     path: '**',
     redirectTo: 'profile',
   },

@@ -19,6 +19,8 @@
   </main>
 
   <footer class="mt-auto py-4">
-    <router-outlet name="ads"></router-outlet>
+    @if (ads.showBanner()) {
+      <app-ad-banner></app-ad-banner>
+    }
   </footer>
 </div>

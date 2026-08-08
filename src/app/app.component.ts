@@ -1,16 +1,15 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './core/header/header.component';
+import { AdBannerComponent } from './features/ads/ad-banner.component';
+import { AdBannerService } from './features/ads/ad-banner.service';
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    HeaderComponent
-  ],
+  imports: [RouterOutlet, HeaderComponent, AdBannerComponent],
   templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Material + Tailwind Check';
+  readonly ads = inject(AdBannerService);
 }

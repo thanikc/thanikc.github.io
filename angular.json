@@ -56,9 +56,9 @@
               "sourceMap": true
             },
             "testing": {
-              "aot": false,
               "optimization": false,
               "extractLicenses": false,
+              "sourceMap": true,
               "polyfills": ["zone.js", "zone.js/testing"]
             }
           },
@@ -83,9 +83,8 @@
           "builder": "@angular/build:unit-test",
           "options": {
             "tsConfig": "tsconfig.spec.json",
-            "buildTarget": ":build:testing",
-            "runner": "vitest",
-            "runnerConfig": "vitest.config.ts"
+            "buildTarget": "thanikc:build:testing",
+            "runner": "vitest"
           }
         }
       }
