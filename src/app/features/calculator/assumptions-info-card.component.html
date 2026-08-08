@@ -1,0 +1,40 @@
+<mat-card
+  class="mt-6 border border-[var(--mat-sys-outline-variant)] bg-[var(--mat-sys-surface-container-low)]"
+>
+  <mat-card-header>
+    <mat-icon matCardAvatar aria-hidden="true" class="text-[var(--mat-sys-primary)]">info</mat-icon>
+    <mat-card-title class="text-base font-semibold text-[var(--mat-sys-on-surface)]">
+      How It Is Calculated & Underlying Assumptions
+    </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content class="mt-3 space-y-3 text-sm text-[var(--mat-sys-on-surface-variant)]">
+    <p>
+      <strong>1. Target Nest Egg:</strong> Based on the standard
+      <strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate</strong> (Trinity Study rule), your
+      required nest egg is calculated as:
+      <code
+        class="block my-1 rounded bg-[var(--mat-sys-surface-container-high)] p-2 font-mono text-xs"
+      >
+        Target Nest Egg = (Desired Monthly Income × 12) / {{ safeWithdrawalRate() / 100 }}
+      </code>
+    </p>
+
+    <p>
+      <strong>2. Current Net Worth Growth:</strong> Your existing net worth is assumed to compound
+      annually at an estimated rate of <strong>{{ estimatedAnnualReturn() }}%</strong> over the
+      remaining years until retirement:
+      <code
+        class="block my-1 rounded bg-[var(--mat-sys-surface-container-high)] p-2 font-mono text-xs"
+      >
+        Future Value of Net Worth = Current Net Worth × (1 + Return Rate)^Years
+      </code>
+    </p>
+
+    <p>
+      <strong>3. Required Monthly Contribution:</strong> The remaining gap between your target nest
+      egg and the future value of your current net worth is funded via monthly contributions
+      compounding over time at <strong>{{ estimatedAnnualReturn() }}% per year</strong>.
+    </p>
+  </mat-card-content>
+</mat-card>
