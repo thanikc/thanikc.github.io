@@ -4,14 +4,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": [
-      "vitest/globals"
-    ]
+    "types": ["vitest/globals"]
   },
-  "include": [
-    "src/**/*.spec.ts",
-    "src/**/*.d.ts"
-  ],
+  "include": ["src/**/*.spec.ts", "src/**/*.d.ts"],
+  "files": ["./src/vitest.setup.ts"],
   "angularCompilerOptions": {
     "extendedDiagnostics": {
       "checks": {
