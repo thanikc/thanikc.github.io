@@ -43,6 +43,7 @@
     "istanbul-lib-instrument": "^6.0.3",
     "jsdom": "^30.0.1",
     "lint-staged": "^15.5.2",
+    "ng-mocks": "^14.16.1",
     "prettier": "^3.9.6",
     "typescript": "~6.0.3",
     "vitest": "^4.1.10"
