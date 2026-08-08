@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Production Build
-        run: npm run build -- --configuration=production --base-href="https://github.io"
+        run: npm run build -- --configuration=production
 
       - name: Upload Build Artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3
