@@ -1,0 +1,189 @@
+<section class="calculator-container p-6 rounded-2xl">
+  <h2 class="text-2xl font-bold mb-6">Retirement Calculator</h2>
+
+  <form class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Current Net Worth</mat-label>
+      <span matPrefix class="px-2">$</span>
+      <input
+        matInput
+        type="number"
+        min="0"
+        [ngModel]="currentNetWorth()"
+        (ngModelChange)="onNetWorthChange($event)"
+        name="currentNetWorth"
+        aria-label="Current Net Worth in dollars"
+      />
+      <mat-icon matSuffix aria-hidden="true">account_balance</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Years Until Retirement</mat-label>
+      <input
+        matInput
+        type="number"
+        min="1"
+        max="80"
+        [ngModel]="yearsUntilRetirement()"
+        (ngModelChange)="onYearsChange($event)"
+        name="yearsUntilRetirement"
+        aria-label="Years until retirement"
+      />
+      <mat-icon matSuffix aria-hidden="true">hourglass_bottom</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Target Monthly Income</mat-label>
+      <span matPrefix class="px-2">$</span>
+      <input
+        matInput
+        type="number"
+        min="0"
+        [ngModel]="targetMonthlyIncome()"
+        (ngModelChange)="onTargetIncomeChange($event)"
+        name="targetMonthlyIncome"
+        aria-label="Target monthly income in dollars"
+      />
+      <mat-icon matSuffix aria-hidden="true">payments</mat-icon>
+    </mat-form-field>
+  </form>
+
+  <mat-accordion class="mb-8 block">
+    <mat-expansion-panel class="rounded-xl border border-[var(--mat-sys-outline-variant)]">
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex items-center gap-2 font-medium">
+          <mat-icon class="text-[var(--mat-sys-primary)]">tune</mat-icon>
+          Adjust Investment Assumptions
+        </mat-panel-title>
+        <mat-panel-description>
+          Default: {{ estimatedAnnualReturn() }}% return, {{ safeWithdrawalRate() }}% withdrawal
+          rate
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Estimated Annual Return (%)</mat-label>
+          <input
+            matInput
+            type="number"
+            step="0.5"
+            min="0"
+            max="30"
+            [ngModel]="estimatedAnnualReturn()"
+            (ngModelChange)="onAnnualReturnChange($event)"
+            name="estimatedAnnualReturn"
+            aria-label="Estimated annual investment return percentage"
+          />
+          <span matSuffix class="px-2">%</span>
+          <mat-hint>Historical stock market average (~7% adjusted for inflation)</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Safe Withdrawal Rate (%)</mat-label>
+          <input
+            matInput
+            type="number"
+            step="0.25"
+            min="0.5"
+            max="10"
+            [ngModel]="safeWithdrawalRate()"
+            (ngModelChange)="onWithdrawalRateChange($event)"
+            name="safeWithdrawalRate"
+            aria-label="Safe withdrawal rate percentage"
+          />
+          <span matSuffix class="px-2">%</span>
+          <mat-hint>Standard rule of thumb (~4% Trinity Study rule)</mat-hint>
+        </mat-form-field>
+      </div>
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <div class="summary-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card p-4 rounded-xl">
+      <span class="text-sm font-medium">Total Nest Egg Goal</span>
+      <p class="text-2xl font-semibold mt-1">
+        {{ totalNestEggNeeded() | currency: 'USD' : 'symbol' : '1.0-0' }}
+      </p>
+    </div>
+
+    <div class="card p-4 rounded-xl">
+      <span class="text-sm font-medium">Compounded Net Worth</span>
+      <p class="text-2xl font-semibold mt-1">
+        {{ futureNetWorth() | currency: 'USD' : 'symbol' : '1.0-0' }}
+      </p>
+    </div>
+
+    <div class="card p-4 rounded-xl">
+      <span class="text-sm font-medium">Remaining Gap</span>
+      <p class="text-2xl font-semibold mt-1">
+        {{ remainingTargetNestEgg() | currency: 'USD' : 'symbol' : '1.0-0' }}
+      </p>
+    </div>
+
+    <div class="card highlight p-4 rounded-xl">
+      <span class="text-sm font-medium">Required Monthly Savings</span>
+      <p class="text-2xl font-semibold mt-1">
+        {{ requiredMonthlyContribution() | currency: 'USD' : 'symbol' : '1.0-0' }}
+      </p>
+    </div>
+  </div>
+
+  <div
+    class="info-card p-6 rounded-2xl border border-[var(--mat-sys-outline-variant)] bg-[var(--mat-sys-surface-container-low)]"
+  >
+    <div class="flex items-center gap-2 mb-4">
+      <mat-icon aria-hidden="true" class="text-[var(--mat-sys-primary)]">info</mat-icon>
+      <h3 class="text-lg font-semibold">How It's Calculated</h3>
+    </div>
+
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-[var(--mat-sys-on-surface-variant)]"
+    >
+      <div class="space-y-3">
+        <h4 class="font-medium text-base text-[var(--mat-sys-on-surface)]">📐 Dynamic Formulas</h4>
+        <ul class="list-disc list-inside space-y-2">
+          <li>
+            <strong>Total Goal:</strong>
+            <code>(Target Monthly Income × 12) ÷ (Withdrawal Rate ÷ 100)</code>
+          </li>
+          <li>
+            <strong>Compounded Net Worth:</strong>
+            <code>Current Net Worth × (1 + Return Rate ÷ 100)^Years</code>
+          </li>
+          <li>
+            <strong>Remaining Gap:</strong> <code>Max(0, Total Goal - Compounded Net Worth)</code>
+          </li>
+          <li>
+            <strong>Monthly Savings:</strong>
+            <code>Gap × [ Monthly Rate ÷ ((1 + Monthly Rate)^Months - 1) ]</code>
+          </li>
+        </ul>
+      </div>
+
+      <div class="space-y-3">
+        <h4 class="font-medium text-base text-[var(--mat-sys-on-surface)]">💡 Active Parameters</h4>
+        <ul class="space-y-2">
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-base text-[var(--mat-sys-primary)] mt-0.5" aria-hidden="true"
+              >check_circle</mat-icon
+            >
+            <span
+              ><strong>{{ estimatedAnnualReturn() }}% Return Rate:</strong> Compounding rate applied
+              annually to current assets and monthly to savings.</span
+            >
+          </li>
+          <li class="flex items-start gap-2">
+            <mat-icon class="text-base text-[var(--mat-sys-primary)] mt-0.5" aria-hidden="true"
+              >check_circle</mat-icon
+            >
+            <span
+              ><strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate:</strong> Dictates the
+              target portfolio balance needed to generate income sustainably.</span
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

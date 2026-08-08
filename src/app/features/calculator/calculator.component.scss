@@ -1,0 +1,66 @@
+@reference "tailwindcss";
+
+:host {
+  @apply block min-h-screen;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+}
+
+.calculator-container {
+  @apply max-w-5xl mx-auto px-4 py-8;
+}
+
+.calculator-header {
+  @apply mb-8 text-center;
+  .title {
+    @apply text-3xl font-bold tracking-tight mb-2;
+  }
+  .subtitle {
+    @apply text-base;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.calculator-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.calc-card {
+  background: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.form-content {
+  @apply space-y-6 pt-4;
+}
+.field-group {
+  @apply flex flex-col gap-1;
+}
+.summary-content {
+  @apply flex flex-col justify-center space-y-6 pt-4 h-full;
+}
+
+.metric-highlight {
+  @apply flex flex-col items-center p-6 rounded-xl text-center;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+
+  .metric-label {
+    @apply text-sm uppercase tracking-wider font-medium mb-1;
+  }
+  .metric-value {
+    @apply text-4xl font-extrabold;
+  }
+}
+
+.metric-divider {
+  @apply my-2 border-t;
+  border-color: var(--mat-sys-outline-variant);
+}
+
+.metric-row {
+  @apply flex justify-between items-center text-sm;
+  .label {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
