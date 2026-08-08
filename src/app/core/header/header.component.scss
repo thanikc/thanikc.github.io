@@ -1,0 +1,30 @@
+@reference "tailwindcss";
+
+:host {
+    display: block;
+    width: 100%;
+}
+
+.app-header {
+    background-color: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+    .header-container {
+        @apply max-w-7xl mx-auto w-full flex items-center justify-between px-4;
+    }
+
+    .brand-link {
+        @apply flex items-center gap-2 font-bold text-lg no-underline;
+        color: var(--mat-sys-on-surface);
+    }
+
+    .nav-links {
+        @apply flex items-center gap-2;
+
+        .active-link {
+            background-color: var(--mat-sys-secondary-container);
+            color: var(--mat-sys-on-secondary-container);
+        }
+    }
+}
