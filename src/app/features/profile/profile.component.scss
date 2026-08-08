@@ -1,0 +1,27 @@
+@reference "tailwindcss";
+
+:host {
+  display: block;
+}
+
+.hero-card,
+.skill-card {
+  background-color: var(--mat-sys-surface-container-lowest);
+  color: var(--mat-sys-on-surface);
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
+.hero-subtitle,
+.skills-description {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.card-avatar {
+  background-color: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.skill-chip {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}

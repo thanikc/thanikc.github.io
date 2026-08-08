@@ -1,19 +1,14 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-
+import { HeaderComponent } from './core/header/header.component';
 @Component({
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule
+    HeaderComponent
   ],
   templateUrl: './app.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
