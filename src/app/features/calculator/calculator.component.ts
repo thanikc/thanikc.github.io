@@ -6,6 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { CalculatorService } from './calculator.service';
+import { AssumptionsInfoCardComponent } from './assumptions-info-card.component';
 
 @Component({
   selector: 'app-retirement-calculator',
@@ -17,6 +18,7 @@ import { CalculatorService } from './calculator.service';
     MatInputModule,
     MatIconModule,
     MatExpansionModule,
+    AssumptionsInfoCardComponent,
   ],
   templateUrl: './calculator.component.html',
   styleUrl: './calculator.component.scss',

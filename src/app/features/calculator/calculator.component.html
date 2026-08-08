@@ -129,61 +129,8 @@
     </div>
   </div>
 
-  <div
-    class="info-card p-6 rounded-2xl border border-[var(--mat-sys-outline-variant)] bg-[var(--mat-sys-surface-container-low)]"
-  >
-    <div class="flex items-center gap-2 mb-4">
-      <mat-icon aria-hidden="true" class="text-[var(--mat-sys-primary)]">info</mat-icon>
-      <h3 class="text-lg font-semibold">How It's Calculated</h3>
-    </div>
-
-    <div
-      class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-[var(--mat-sys-on-surface-variant)]"
-    >
-      <div class="space-y-3">
-        <h4 class="font-medium text-base text-[var(--mat-sys-on-surface)]">📐 Dynamic Formulas</h4>
-        <ul class="list-disc list-inside space-y-2">
-          <li>
-            <strong>Total Goal:</strong>
-            <code>(Target Monthly Income × 12) ÷ (Withdrawal Rate ÷ 100)</code>
-          </li>
-          <li>
-            <strong>Compounded Net Worth:</strong>
-            <code>Current Net Worth × (1 + Return Rate ÷ 100)^Years</code>
-          </li>
-          <li>
-            <strong>Remaining Gap:</strong> <code>Max(0, Total Goal - Compounded Net Worth)</code>
-          </li>
-          <li>
-            <strong>Monthly Savings:</strong>
-            <code>Gap × [ Monthly Rate ÷ ((1 + Monthly Rate)^Months - 1) ]</code>
-          </li>
-        </ul>
-      </div>
-
-      <div class="space-y-3">
-        <h4 class="font-medium text-base text-[var(--mat-sys-on-surface)]">💡 Active Parameters</h4>
-        <ul class="space-y-2">
-          <li class="flex items-start gap-2">
-            <mat-icon class="text-base text-[var(--mat-sys-primary)] mt-0.5" aria-hidden="true"
-              >check_circle</mat-icon
-            >
-            <span
-              ><strong>{{ estimatedAnnualReturn() }}% Return Rate:</strong> Compounding rate applied
-              annually to current assets and monthly to savings.</span
-            >
-          </li>
-          <li class="flex items-start gap-2">
-            <mat-icon class="text-base text-[var(--mat-sys-primary)] mt-0.5" aria-hidden="true"
-              >check_circle</mat-icon
-            >
-            <span
-              ><strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate:</strong> Dictates the
-              target portfolio balance needed to generate income sustainably.</span
-            >
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
+  <app-assumptions-info-card
+    [safeWithdrawalRate]="safeWithdrawalRate()"
+    [estimatedAnnualReturn]="estimatedAnnualReturn()"
+  />
 </section>
