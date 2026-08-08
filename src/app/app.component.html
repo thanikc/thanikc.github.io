@@ -1,3 +1,47 @@
-<h1 class="text-3xl font-bold underline">
-  Hello world!
-</h1>
+<div class="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+  
+  <mat-card class="max-w-md w-full p-6 bg-white rounded-2xl shadow-xl border border-slate-200">
+    
+    <!-- Test Tailwind Typography & Flex -->
+    <mat-card-header class="flex items-center gap-4 mb-4">
+      <div class="p-3 bg-indigo-500 text-white rounded-full flex items-center justify-center shadow-md">
+        <!-- Test Material Icon -->
+        <mat-icon>verified</mat-icon>
+      </div>
+      <div>
+        <mat-card-title class="text-xl font-bold text-slate-800 tracking-tight">
+          Integration Status
+        </mat-card-title>
+        <mat-card-subtitle class="text-sm font-medium text-emerald-600">
+          Tailwind CSS & Material UI Active
+        </mat-card-subtitle>
+      </div>
+    </mat-card-header>
+
+    <!-- Test Tailwind Grid & Spacing -->
+    <mat-card-content class="space-y-4 my-4">
+      <p class="text-slate-600 text-sm leading-relaxed">
+        If you see a properly styled card layout, spacing, and a clean typography hierarchy, <strong class="text-indigo-600">Tailwind</strong> is working.
+      </p>
+      
+      <div class="grid grid-cols-2 gap-2 text-center text-xs font-semibold">
+        <div class="p-2 bg-slate-100 rounded text-slate-700 border border-slate-200">Tailwind Grid 1</div>
+        <div class="p-2 bg-slate-100 rounded text-slate-700 border border-slate-200">Tailwind Grid 2</div>
+      </div>
+    </mat-card-content>
+
+    <!-- Test Material Button Interactions with Tailwind hover utilities -->
+    <mat-card-actions class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+      <button mat-button class="text-slate-500 hover:bg-slate-100 px-4 py-2 rounded-lg transition-colors">
+        Dismiss
+      </button>
+      <button mat-raised-button color="primary" class="shadow-lg hover:scale-105 transform transition-transform duration-200">
+        Confirm Material
+      </button>
+    </mat-card-actions>
+
+  </mat-card>
+
+</div>
+
+<router-outlet></router-outlet>
