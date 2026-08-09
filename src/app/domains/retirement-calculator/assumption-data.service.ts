@@ -10,28 +10,27 @@ export type WorldBankResponse = [
     sourceid: string;
     lastupdated: string;
   },
-  [
-    {
-      indicator: {
-        id: string;
-        value: string;
-      };
-      country: {
-        id: string;
-        value: string;
-      };
-      countryiso3code: string;
-      date: string;
-      value: number;
-      unit: string;
-      obs_status: string;
-      decimal: number;
-    },
-  ],
+  Array<{
+    indicator: {
+      id: string;
+      value: string;
+    };
+    country: {
+      id: string;
+      value: string;
+    };
+    countryiso3code: string;
+    date: string;
+    value: number | null;
+    unit: string;
+    obs_status: string;
+    decimal: number;
+  }>,
 ];
 
-const getMarketDataEndpoint = (country: string, indicator: string) => {
-  return `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=1`;
+// https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures
+const getMarketDataEndpoint = (country: string, indicator: string, perPage = 1) => {
+  return `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=${perPage}`;
 };
 
 const getWorldBankResponseValue = (
@@ -40,6 +39,20 @@ const getWorldBankResponseValue = (
 ): number => {
   const rawVal = res.value()?.[1]?.[0]?.value;
   return typeof rawVal === 'number' ? rawVal : defaultValue;
+};
+
+/** Compute the average of all valid (non-null) values from a multi-entry response.
+ *  Falls back to defaultValue when no entry has a valid numeric value. */
+const getWorldBankResponseAverage = (
+  res: HttpResourceRef<WorldBankResponse | undefined>,
+  defaultValue: number,
+): number => {
+  const entries = res.value()?.[1];
+  if (!entries || entries.length === 0) return defaultValue;
+
+  const valid = entries.map(e => e.value).filter((v): v is number => typeof v === 'number');
+
+  return valid.length > 0 ? valid.reduce((sum, v) => sum + v, 0) / valid.length : defaultValue;
 };
 
 @Injectable({
@@ -55,7 +68,7 @@ export class AssumptionDataService {
   );
 
   readonly marketReturnResource = httpResource<WorldBankResponse>(() =>
-    getMarketDataEndpoint('USA', 'NY.GDP.MKTP.KD.ZG'),
+    getMarketDataEndpoint('USA', 'CM.MKT.INDX.ZG', 15),
   );
 
   // Computed Signal: Inflation Rate (Live API or Fallback)
@@ -65,8 +78,8 @@ export class AssumptionDataService {
 
   // Computed Signal: Dynamic Estimated Annual Return (Live API or Fallback)
   readonly estimatedAnnualReturn = computed(() => {
-    const num = getWorldBankResponseValue(this.marketReturnResource, this.DEFAULT_ANNUAL_RETURN);
-    return +num.toFixed(2);
+    const avg = getWorldBankResponseAverage(this.marketReturnResource, this.DEFAULT_ANNUAL_RETURN);
+    return +avg.toFixed(2);
   });
 
   // Derived Real Return Rate (Nominal Return - Inflation)
