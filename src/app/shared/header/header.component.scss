@@ -20,7 +20,9 @@
   }
 
   .nav-links {
-    @apply flex items-center gap-2;
+    // `display` is intentionally not set here: the template controls it via
+    // `hidden md:flex` so the nav collapses below the md breakpoint.
+    @apply items-center gap-2;
 
     .active-link {
       background-color: var(--mat-sys-secondary-container);
