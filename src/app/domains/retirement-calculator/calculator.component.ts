@@ -8,6 +8,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CalculatorService } from './calculator.service';
 import { AssumptionsInfoCardComponent } from './assumptions-info-card.component';
 import { AssumptionDataService } from './assumption-data.service';
+import { SelectOnFocusDirective } from '../../shared/directives/select-on-focus.directive';
 
 @Component({
   selector: 'app-retirement-calculator',
@@ -20,6 +21,7 @@ import { AssumptionDataService } from './assumption-data.service';
     MatIconModule,
     MatExpansionModule,
     AssumptionsInfoCardComponent,
+    SelectOnFocusDirective,
   ],
   templateUrl: './calculator.component.html',
   styleUrl: './calculator.component.scss',

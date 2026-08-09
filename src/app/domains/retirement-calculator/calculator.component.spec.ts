@@ -98,6 +98,25 @@ describe('RetirementCalculatorComponent', () => {
     expect(component.isLoading()).toBeFalsy();
   });
 
+  describe('Select on focus', () => {
+    const inputSelectors = [
+      'input[aria-label="Current Net Worth in dollars"]',
+      'input[aria-label="Years until retirement"]',
+      'input[aria-label="Target monthly income in dollars"]',
+      'input[aria-label="Estimated annual investment return percentage"]',
+      'input[aria-label="Safe withdrawal rate percentage"]',
+    ];
+
+    inputSelectors.forEach(selector => {
+      it(`should select all text when ${selector} receives focus`, () => {
+        const input: HTMLInputElement = fixture.nativeElement.querySelector(selector);
+        const selectSpy = vi.spyOn(input, 'select');
+        input.dispatchEvent(new FocusEvent('focus'));
+        expect(selectSpy).toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('Input change handlers', () => {
     it('should delegate onNetWorthChange to CalculatorService', () => {
       component.onNetWorthChange(50000);
