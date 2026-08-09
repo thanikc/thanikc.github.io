@@ -21,13 +21,39 @@ describe('AssumptionDataService', () => {
 
   const mockMarketResponse = [
     {},
+    [{ country: { id: 'US', value: 'United States' }, date: '2026', value: 10 }],
+  ];
+
+  /** 15 entries: 10 valid values (10,20,…,100), 5 nulls → average = 55 */
+  const mockMarketMultiResponse = [
+    {},
     [
-      {
-        country: { id: 'US', value: 'United States' },
-        date: '2026',
-        value: 10, // 10% market return
-      },
+      { country: { id: 'US', value: 'United States' }, date: '2020', value: 10 },
+      { country: { id: 'US', value: 'United States' }, date: '2021', value: 20 },
+      { country: { id: 'US', value: 'United States' }, date: '2022', value: 30 },
+      { country: { id: 'US', value: 'United States' }, date: '2023', value: 40 },
+      { country: { id: 'US', value: 'United States' }, date: '2024', value: 50 },
+      { country: { id: 'US', value: 'United States' }, date: '2025', value: 60 },
+      { country: { id: 'US', value: 'United States' }, date: '2026', value: 70 },
+      { country: { id: 'US', value: 'United States' }, date: '2027', value: 80 },
+      { country: { id: 'US', value: 'United States' }, date: '2028', value: 90 },
+      { country: { id: 'US', value: 'United States' }, date: '2029', value: 100 },
+      { country: { id: 'US', value: 'United States' }, date: '2030', value: null },
+      { country: { id: 'US', value: 'United States' }, date: '2031', value: null },
+      { country: { id: 'US', value: 'United States' }, date: '2032', value: null },
+      { country: { id: 'US', value: 'United States' }, date: '2033', value: null },
+      { country: { id: 'US', value: 'United States' }, date: '2034', value: null },
     ],
+  ];
+
+  /** 15 entries, all null → should fall back to default 7 */
+  const mockMarketAllNullResponse = [
+    {},
+    Array.from({ length: 15 }, (_, i) => ({
+      country: { id: 'US', value: 'United States' },
+      date: String(2020 + i),
+      value: null as unknown as number,
+    })),
   ];
 
   beforeEach(() => {
@@ -49,43 +75,37 @@ describe('AssumptionDataService', () => {
 
   it('should return default fallbacks before HTTP requests resolve', () => {
     expect(service.isLive()).toBeFalsy();
-    expect(service.inflationRate()).toBe(0.025); // 2.5% baseline
-    expect(service.estimatedAnnualReturn()).toBe(7); // Math.round(0.07 * 100) = 7
+    expect(service.inflationRate()).toBe(0.025);
+    expect(service.estimatedAnnualReturn()).toBe(7);
     expect(service.safeWithdrawalRate()).toBe(4.0);
   });
 
   it('should fetch macroeconomic data and update computed signals on success', async () => {
-    TestBed.tick(); // run httpResource load effects so requests are issued
+    TestBed.tick();
     const reqs = httpMock.match(req => true);
     expect(reqs.length).toBe(2);
 
     const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
-    const marketReq = reqs.find(req => req.request.url.includes('NY.GDP.MKTP.KD.ZG'));
+    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
 
     expect(inflationReq).toBeTruthy();
     expect(marketReq).toBeTruthy();
 
-    // Flush mock responses
     inflationReq!.flush(mockInflationResponse);
     marketReq!.flush(mockMarketResponse);
 
-    // httpResource commits the flushed response to its state signal asynchronously
-    // (its loader resolves a promise awaited in the resource's load effect), so wait
-    // for the app to stabilize before asserting on the computed signals.
     await TestBed.inject(ApplicationRef).whenStable();
 
-    // Verify dynamic reactive computed values
     expect(service.isLive()).toBeTruthy();
-    expect(service.inflationRate()).toBe(0.034); // 3.4 / 100
-    expect(service.estimatedAnnualReturn()).toBe(10); // Math.round(0.1 * 100)
-    expect(service.realAnnualReturn()).toBe(10 - 0.034); // 9.966
+    expect(service.inflationRate()).toBe(0.034);
+    expect(service.estimatedAnnualReturn()).toBe(10); // single valid value → average = 10
+    expect(service.realAnnualReturn()).toBe(10 - 0.034);
   });
 
   it('should gracefully handle API errors by using fallbacks', () => {
-    TestBed.tick(); // run httpResource load effects so requests are issued
+    TestBed.tick();
     const reqs = httpMock.match(req => true);
 
-    // Simulate 500 error on both endpoints
     reqs.forEach(req =>
       req.flush('Error fetching data', {
         status: 500,
@@ -93,9 +113,42 @@ describe('AssumptionDataService', () => {
       }),
     );
 
-    // Assert service falls back to default assumptions
     expect(service.isLive()).toBeFalsy();
     expect(service.inflationRate()).toBe(0.025);
+    expect(service.estimatedAnnualReturn()).toBe(7);
+  });
+
+  it('should average valid market return values, ignoring null entries', async () => {
+    TestBed.tick();
+    const reqs = httpMock.match(req => true);
+
+    // Flush inflation with a basic mock so both resources resolve
+    const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
+    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
+    expect(inflationReq).toBeTruthy();
+    expect(marketReq).toBeTruthy();
+
+    inflationReq!.flush(mockInflationResponse);
+    marketReq!.flush(mockMarketMultiResponse);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    // (10+20+30+40+50+60+70+80+90+100) / 10 = 550 / 10 = 55
+    expect(service.estimatedAnnualReturn()).toBe(55);
+  });
+
+  it('should fall back to default when all market return entries are null', async () => {
+    TestBed.tick();
+    const reqs = httpMock.match(req => true);
+
+    const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
+    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
+    expect(inflationReq).toBeTruthy();
+    expect(marketReq).toBeTruthy();
+
+    inflationReq!.flush(mockInflationResponse);
+    marketReq!.flush(mockMarketAllNullResponse);
+    await TestBed.inject(ApplicationRef).whenStable();
+
     expect(service.estimatedAnnualReturn()).toBe(7);
   });
 });
