@@ -19,8 +19,6 @@
   </main>
 
   <footer class="mt-auto py-4">
-    @if (ads.showBanner()) {
-      <app-ad-banner />
-    }
+    <app-ad-banner [visible]="ads.showBanner()" />
   </footer>
 </div>

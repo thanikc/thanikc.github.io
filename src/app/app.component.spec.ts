@@ -43,9 +43,11 @@ describe('AppComponent', () => {
   });
 
   it('should display the ad banner when showBanner signal is true', () => {
-    const bannerEl = fixture.debugElement.query(By.directive(AdBannerComponent));
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
 
-    expect(bannerEl).not.toBeNull();
+    expect(bannerComponent.visible()).toBe(true);
   });
 
   it('should remove the ad banner from the DOM when showBanner signal becomes false', () => {
@@ -53,8 +55,10 @@ describe('AppComponent', () => {
 
     fixture.detectChanges();
 
-    const bannerEl = fixture.debugElement.query(By.directive(AdBannerComponent));
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
 
-    expect(bannerEl).toBeNull();
+    expect(bannerComponent.visible()).toBe(false);
   });
 });
