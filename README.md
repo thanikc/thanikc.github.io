@@ -1,27 +1,40 @@
 # Thanikc
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.7.
+Personal portfolio website built with Angular — showcasing a Full-Stack Engineer profile and an interactive retirement calculator that uses live World Bank API data for nest-egg projections. Standalone components, Signals, Angular Material, and Tailwind CSS.
+
+## Project Structure
+
+```text
+src/
+├── app/
+│   ├── domains/                     # Domain-driven feature modules
+│   │   ├── ads/                     # Ads domain (Google AdSense)
+│   │   ├── portfolio/               # Portfolio domain (profile, experience timeline)
+│   │   └── retirement-calculator/   # Retirement calculator domain (data fetching, state, logic, charts)
+│   │
+│   ├── shared/                      # Cross-domain reusable UI components & layout wrappers
+│   │
+│   ├── app.component.ts             # Root layout component
+│   ├── app.config.ts                # App configuration & providers
+│   └── app.routes.ts                # Application routing
+│
+├── assets/                          # Static assets & images
+└── styles/                          # Global styles & Tailwind CSS configuration
+
+```
+
+- **Domain-Driven Architecture**: Each feature (`portfolio`, `retirement-calculator`) is fully self-contained with its own data services, state management, components, and models.
+- **Signal-Based Reactive State**: Calculations and external World Bank API data streams are managed reactively using Angular Signals.
+- **Shared UI Layer**: Non-domain-specific components, global navigation, and Material helpers are isolated under `shared/`.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+Run `ng serve` and navigate to `http://localhost:4200/`.
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `ng build` to build the project. Artifacts land in `dist/`.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Run `ng test` to execute unit tests via Vitest.
