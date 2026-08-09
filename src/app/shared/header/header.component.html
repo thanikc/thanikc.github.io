@@ -5,7 +5,7 @@
       <span>Dev Portfolio</span>
     </a>
 
-    <nav aria-label="Main Navigation" class="nav-links">
+    <nav aria-label="Main Navigation" class="nav-links hidden md:flex">
       <a mat-button routerLink="/profile" routerLinkActive="active-link">
         <mat-icon aria-hidden="true">person</mat-icon>
         Profile
@@ -18,5 +18,13 @@
 
       <app-ad-banner-toggle></app-ad-banner-toggle>
     </nav>
+
+    @defer (on viewport) {
+      <app-burger-menu class="md:hidden" />
+    } @placeholder {
+      <button mat-icon-button aria-label="Open menu" class="md:hidden">
+        <mat-icon aria-hidden="true">menu</mat-icon>
+      </button>
+    }
   </div>
 </mat-toolbar>
