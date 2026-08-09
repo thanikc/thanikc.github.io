@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { AdBannerService } from './domains/ads/ad-banner.service';
 import { AdBannerComponent } from './domains/ads/ad-banner.component';
+import { NavigationEnd, provideRouter, Router } from '@angular/router';
+import { vi } from 'vitest';
+import { Subject } from 'rxjs';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -14,6 +16,10 @@ describe('AppComponent', () => {
   const mockAdBannerService = {
     showBanner: mockShowBanner,
   };
+
+  afterEach(() => {
+    delete (window as any).gtag;
+  });
 
   beforeEach(async () => {
     mockShowBanner.set(true);
@@ -60,5 +66,27 @@ describe('AppComponent', () => {
     ).componentInstance;
 
     expect(bannerComponent.visible()).toBe(false);
+  });
+
+  it('should send a gtag page_view event on navigation end', async () => {
+    (window as any).gtag = vi.fn();
+
+    fixture.detectChanges();
+
+    const router = TestBed.inject(Router);
+    const events = router.events as unknown as Subject<NavigationEnd>;
+    events.next(new NavigationEnd(1, '/', '/'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect((window as any).gtag).toHaveBeenCalledWith(
+      'event',
+      'page_view',
+      expect.objectContaining({
+        page_title: document.title,
+        page_path: '/',
+        page_location: window.location.origin + '/',
+      }),
+    );
   });
 });
