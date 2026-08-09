@@ -3,8 +3,8 @@ import { provideRouter } from '@angular/router';
 import { AppComponent } from './app.component';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
-import { AdBannerService } from './features/ads/ad-banner.service';
-import { AdBannerComponent } from './features/ads/ad-banner.component';
+import { AdBannerService } from './domains/ads/ad-banner.service';
+import { AdBannerComponent } from './domains/ads/ad-banner.component';
 
 describe('AppComponent', () => {
   let component: AppComponent;

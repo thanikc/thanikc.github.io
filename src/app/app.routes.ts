@@ -10,13 +10,13 @@ export const routes: Routes = [
     path: 'profile',
     title: 'Profile Summary',
     loadComponent: () =>
-      import('./features/profile/profile.component').then(m => m.ProfileComponent),
+      import('./domains/profile/profile.component').then(m => m.ProfileComponent),
   },
   {
     path: 'calculator',
     title: 'Retirement Calculator',
     loadComponent: () =>
-      import('./features/calculator/calculator.component').then(
+      import('./domains/retirement-calculator/calculator.component').then(
         m => m.RetirementCalculatorComponent,
       ),
   },
