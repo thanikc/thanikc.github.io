@@ -1,12 +1,9 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
-
-  "instructions": [
-    ".kilo/rules/*.md"
-  ],
+  "instructions": [".kilo/rules/*.md"],
   "permission": {
-    "bash": "deny",      // Prevent models from running unwanted terminal scripts
-    "read": "allow",     // Allow models to see your lore books and chapters
-    "edit": "allow"      // Allow models to write text to your manuscript
-  }
+    "bash": "deny", // Prevent models from running unwanted terminal scripts
+    "read": "allow", // Allow models to see your lore books and chapters
+    "edit": "allow", // Allow models to write text to your manuscript
+  },
 }
