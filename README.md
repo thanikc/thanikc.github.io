@@ -23,6 +23,9 @@ src/
 
 ```
 
+## Key Features & Standards
+
+- **Accessibility (a11y) & Semantic HTML**: Built with screen-reader friendly elements, keyboard navigation, and proper ARIA guidelines to ensure an inclusive web experience.
 - **Domain-Driven Architecture**: Each feature (`portfolio`, `retirement-calculator`) is fully self-contained with its own data services, state management, components, and models.
 - **Signal-Based Reactive State**: Calculations and external World Bank API data streams are managed reactively using Angular Signals.
 - **Shared UI Layer**: Non-domain-specific components, global navigation, and Material helpers are isolated under `shared/`.
