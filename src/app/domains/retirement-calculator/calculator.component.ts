@@ -58,7 +58,12 @@ export class RetirementCalculatorComponent {
         const safeWithdrawalRate = this.assumptionService.safeWithdrawalRate();
         this.safeWithdrawalRate.set(safeWithdrawalRate);
         this.service.safeWithdrawalRate.set(safeWithdrawalRate);
+      },
+      { allowSignalWrites: true },
+    );
 
+    effect(
+      () => {
         const estimatedAnnualReturn = this.assumptionService.estimatedAnnualReturn();
         this.estimatedAnnualReturn.set(estimatedAnnualReturn);
         this.service.estimatedAnnualReturn.set(estimatedAnnualReturn);
@@ -81,10 +86,14 @@ export class RetirementCalculatorComponent {
   }
 
   onAnnualReturnChange(value: number): void {
-    this.service.estimatedAnnualReturn.set(Number(value) || 0);
+    const num = Number(value) || 0;
+    this.estimatedAnnualReturn.set(num);
+    this.service.estimatedAnnualReturn.set(num);
   }
 
   onWithdrawalRateChange(value: number): void {
-    this.service.safeWithdrawalRate.set(Number(value) || 0);
+    const num = Number(value) || 0;
+    this.safeWithdrawalRate.set(num);
+    this.service.safeWithdrawalRate.set(num);
   }
 }
