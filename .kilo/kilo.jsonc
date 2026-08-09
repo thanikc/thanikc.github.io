@@ -1,6 +1,22 @@
 {
   "$schema": "https://app.kilo.ai/config.json",
-  "instructions": [".kilo/rules/*.md"],
+  "agent": {
+    "code": {
+      "model": "openrouter/deepseek/deepseek-v4-flash-0731",
+    },
+    "plan": {
+      "model": "openrouter/deepseek/deepseek-v4-pro",
+    },
+    "debug": {
+      "model": "openrouter/deepseek/deepseek-v4-pro",
+    },
+    "ask": {
+      "model": "google/gemini-2.5-flash",
+    },
+    "orchestrator": {
+      "model": "openrouter/deepseek/deepseek-r1",
+    },
+  },
   "permission": {
     "bash": "deny", // Prevent models from running unwanted terminal scripts
     "read": "allow", // Allow models to see your lore books and chapters
