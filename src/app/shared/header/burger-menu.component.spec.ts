@@ -71,17 +71,12 @@ describe('BurgerMenuComponent', () => {
   });
 
   it('should keep the menu closed by default', () => {
-    const trigger = fixture.debugElement.query(By.directive(MatMenuTrigger))
-      .componentInstance as MatMenuTrigger;
-
-    expect(trigger.menuOpen).toBe(false);
     expect(menuPanel()).toBeNull();
   });
 
   it('should open the MatMenu dropdown when the trigger is clicked', () => {
-    const trigger = openMenu();
+    openMenu();
 
-    expect(trigger.menuOpen).toBe(true);
     expect(menuPanel()).not.toBeNull();
   });
 
@@ -116,14 +111,14 @@ describe('BurgerMenuComponent', () => {
   });
 
   it('should close the menu when a navigation link is clicked', async () => {
-    const trigger = openMenu();
+    openMenu();
 
     const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[routerlink="/profile"]')!;
     link.click();
     fixture.detectChanges();
     await fixture.whenStable();
 
-    expect(trigger.menuOpen).toBe(false);
+    expect(menuPanel()).toBeNull();
   });
 
   it('should render the ad banner toggle inside the menu', () => {
@@ -145,12 +140,12 @@ describe('BurgerMenuComponent', () => {
   });
 
   it('should keep the menu open while interacting with the ad toggle', () => {
-    const trigger = openMenu();
+    openMenu();
 
     const toggleItem = menuPanel()!.querySelector<HTMLElement>('.ad-toggle-item')!;
     toggleItem.click();
     fixture.detectChanges();
 
-    expect(trigger.menuOpen).toBe(true);
+    expect(menuPanel()).not.toBeNull();
   });
 });

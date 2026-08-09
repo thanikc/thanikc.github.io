@@ -1,4 +1,4 @@
-import { Component, AfterViewInit } from '@angular/core';
+import { Component, AfterViewInit, input } from '@angular/core';
 
 declare global {
   interface Window {
@@ -12,7 +12,12 @@ declare global {
   templateUrl: './ad-banner.component.html',
 })
 export class AdBannerComponent implements AfterViewInit {
+  visible = input(true);
+
+  private initialized = false;
+
   ngAfterViewInit(): void {
+    this.initialized = true;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch (e) {
