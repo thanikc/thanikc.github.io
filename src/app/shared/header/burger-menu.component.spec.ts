@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { expect, it, describe, beforeEach } from 'vitest';
 import { BurgerMenuComponent } from './burger-menu.component';
@@ -46,7 +45,6 @@ describe('BurgerMenuComponent', () => {
           { path: 'profile', component: RoutedStubComponent },
           { path: 'calculator', component: RoutedStubComponent },
         ]),
-        provideNoopAnimations(),
         { provide: AdBannerService, useValue: mockAdBannerService },
       ],
     }).compileComponents();
@@ -115,6 +113,14 @@ describe('BurgerMenuComponent', () => {
 
     const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[routerlink="/profile"]')!;
     link.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // Material's menu exit relies on a CSS animation; jsdom never fires it, so simulate
+    // the animationend event the component listens for, including the animation name.
+    const exitAnimationEvent = new Event('animationend', { bubbles: true }) as AnimationEvent;
+    Object.defineProperty(exitAnimationEvent, 'animationName', { value: '_mat-menu-exit' });
+    menuPanel()?.dispatchEvent(exitAnimationEvent);
     fixture.detectChanges();
     await fixture.whenStable();
 

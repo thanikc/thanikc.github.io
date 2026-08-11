@@ -16,8 +16,8 @@ export const routes: Routes = [
     path: 'calculator',
     title: 'Retirement Calculator',
     loadComponent: () =>
-      import('./domains/retirement-calculator/calculator.component').then(
-        m => m.RetirementCalculatorComponent,
+      import('./domains/retirement-calculator/calculator-shell.component').then(
+        m => m.CalculatorShellComponent,
       ),
   },
   {

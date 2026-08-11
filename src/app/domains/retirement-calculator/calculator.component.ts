@@ -55,23 +55,17 @@ export class RetirementCalculatorComponent {
   });
 
   constructor() {
-    effect(
-      () => {
-        const safeWithdrawalRate = this.assumptionService.safeWithdrawalRate();
-        this.safeWithdrawalRate.set(safeWithdrawalRate);
-        this.service.safeWithdrawalRate.set(safeWithdrawalRate);
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const safeWithdrawalRate = this.assumptionService.safeWithdrawalRate();
+      this.safeWithdrawalRate.set(safeWithdrawalRate);
+      this.service.safeWithdrawalRate.set(safeWithdrawalRate);
+    });
 
-    effect(
-      () => {
-        const estimatedAnnualReturn = this.assumptionService.estimatedAnnualReturn();
-        this.estimatedAnnualReturn.set(estimatedAnnualReturn);
-        this.service.estimatedAnnualReturn.set(estimatedAnnualReturn);
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      const estimatedAnnualReturn = this.assumptionService.estimatedAnnualReturn();
+      this.estimatedAnnualReturn.set(estimatedAnnualReturn);
+      this.service.estimatedAnnualReturn.set(estimatedAnnualReturn);
+    });
   }
 
   // Input change handlers (thin delegation to the service)
