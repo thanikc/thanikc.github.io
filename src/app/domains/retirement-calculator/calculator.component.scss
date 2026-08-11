@@ -4,61 +4,6 @@
   @apply max-w-5xl mx-auto px-4 py-8;
 }
 
-.calculator-header {
-  @apply mb-8 text-center;
-  .title {
-    @apply text-3xl font-bold tracking-tight mb-2;
-  }
-  .subtitle {
-    @apply text-base;
-    color: var(--mat-sys-on-surface-variant);
-  }
-}
-
-.calculator-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-6;
-}
-
-.calc-card {
-  background: var(--mat-sys-surface-container-lowest);
-  border: 1px solid var(--mat-sys-outline-variant);
-}
-
-.form-content {
-  @apply space-y-6 pt-4;
-}
-.field-group {
-  @apply flex flex-col gap-1;
-}
-.summary-content {
-  @apply flex flex-col justify-center space-y-6 pt-4 h-full;
-}
-
-.metric-highlight {
-  @apply flex flex-col items-center p-6 rounded-xl text-center;
-  background: var(--mat-sys-primary-container);
-  color: var(--mat-sys-on-primary-container);
-
-  .metric-label {
-    @apply text-sm uppercase tracking-wider font-medium mb-1;
-  }
-  .metric-value {
-    @apply text-4xl font-extrabold;
-  }
-}
-
-.metric-divider {
-  @apply my-2 border-t;
-  border-color: var(--mat-sys-outline-variant);
-}
-
-.metric-row {
-  @apply flex justify-between items-center text-sm;
-  .label {
-    color: var(--mat-sys-on-surface-variant);
-  }
-}
-
 .assumptions-panel {
   ::ng-deep .mat-expansion-panel-header {
     height: auto;
@@ -68,22 +13,22 @@
   ::ng-deep .mat-content {
     overflow: hidden;
   }
+
+  ::ng-deep mat-panel-description {
+    @media (max-width: 599px) {
+      margin-left: 0;
+      white-space: normal;
+    }
+  }
 }
 
-@media (max-width: 599px) {
-  .assumptions-panel-header {
+.assumptions-panel-header {
+  @media (max-width: 599px) {
     ::ng-deep .mat-content {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
       gap: 4px;
-    }
-  }
-
-  .assumptions-panel {
-    ::ng-deep mat-panel-description {
-      margin-left: 0;
-      white-space: normal;
     }
   }
 }
