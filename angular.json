@@ -27,8 +27,7 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              "src/ads.txt"
+              }
             ],
             "styles": ["src/styles/tailwind.css", "src/styles/material.scss"],
             "scripts": []
