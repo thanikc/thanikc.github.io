@@ -38,7 +38,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Production Build
-        run: pnpm build -- --configuration=production
+        run: pnpm build --configuration=production
 
       - name: Upload Build Artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3
