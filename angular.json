@@ -99,6 +99,11 @@
       }
     }
   },
+  "cli": {
+    "cache": {
+      "enabled": false
+    }
+  },
   "schematics": {
     "@schematics/angular:component": {
       "type": "component"
