@@ -30,7 +30,17 @@
               }
             ],
             "styles": ["src/styles/tailwind.css", "src/styles/material.scss"],
-            "scripts": []
+            "scripts": [],
+            "server": "src/main.server.ts",
+            "outputMode": "static",
+            "security": {
+              "allowedHosts": []
+            },
+            "optimization": {
+              "styles": {
+                "inlineCritical": false
+              }
+            }
           },
           "configurations": {
             "production": {
@@ -87,6 +97,11 @@
           }
         }
       }
+    }
+  },
+  "cli": {
+    "cache": {
+      "enabled": false
     }
   },
   "schematics": {
