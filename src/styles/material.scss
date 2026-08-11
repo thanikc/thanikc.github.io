@@ -3,10 +3,16 @@
 :root {
   color-scheme: light dark;
 
-  @include mat.theme((color: (primary: mat.$azure-palette, tertiary: mat.$blue-palette),
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
       typography: Roboto,
       density: 0,
-    ));
+    )
+  );
 }
 
 html,
@@ -19,4 +25,21 @@ body {
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
+}
+
+// The generated M3 neutral palette is fairly desaturated, which makes the
+// dark theme read as near-black. Override the dark-mode surfaces with a
+// fixed dark-navy scale (tinted towards the primary hue) so it feels like a
+// deep blue rather than plain black/grey.
+@media (prefers-color-scheme: dark) {
+  :root {
+    --mat-sys-surface: #10182b;
+    --mat-sys-surface-dim: #10182b;
+    --mat-sys-surface-bright: #37415a;
+    --mat-sys-surface-container-lowest: #0b1120;
+    --mat-sys-surface-container-low: #182234;
+    --mat-sys-surface-container: #1e293f;
+    --mat-sys-surface-container-high: #29344a;
+    --mat-sys-surface-container-highest: #343f56;
+  }
 }

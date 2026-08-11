@@ -32,3 +32,31 @@
     }
   }
 }
+
+.summary-cards {
+  .card {
+    background-color: var(--mat-sys-surface-container-low);
+    border: 1px solid var(--mat-sys-outline-variant);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+      border-color: color-mix(in srgb, var(--mat-sys-primary) 35%, var(--mat-sys-outline-variant));
+    }
+
+    &.highlight {
+      background: linear-gradient(
+        135deg,
+        var(--mat-sys-primary-container),
+        color-mix(in srgb, var(--mat-sys-tertiary-container) 60%, var(--mat-sys-primary-container))
+      );
+      color: var(--mat-sys-on-primary-container);
+      border-color: transparent;
+      box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+    }
+  }
+}
