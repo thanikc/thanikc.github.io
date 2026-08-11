@@ -3,11 +3,6 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'profile',
-    pathMatch: 'full',
-  },
-  {
-    path: 'profile',
     title: 'Profile Summary',
     loadComponent: () =>
       import('./domains/profile/profile.component').then(m => m.ProfileComponent),
@@ -22,6 +17,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'profile',
+    redirectTo: '',
   },
 ];

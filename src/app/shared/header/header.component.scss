@@ -17,6 +17,11 @@
   .brand-link {
     @apply flex items-center gap-2 font-bold text-lg no-underline;
     color: var(--mat-sys-on-surface);
+
+    .brand-logo {
+      display: block;
+      border-radius: 6px;
+    }
   }
 
   .nav-links {
