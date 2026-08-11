@@ -6,9 +6,12 @@
 }
 
 .app-header {
-  background-color: var(--mat-sys-surface-container);
+  background-color: color-mix(in srgb, var(--mat-sys-surface-container) 82%, transparent);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   color: var(--mat-sys-on-surface);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  transition: box-shadow 0.25s ease;
 
   .header-container {
     @apply max-w-7xl mx-auto w-full flex items-center justify-between px-4;
@@ -17,10 +20,20 @@
   .brand-link {
     @apply flex items-center gap-2 font-bold text-lg no-underline;
     color: var(--mat-sys-on-surface);
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+
+      .brand-logo {
+        transform: rotate(-6deg) scale(1.08);
+      }
+    }
 
     .brand-logo {
       display: block;
       border-radius: 6px;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
   }
 
@@ -29,9 +42,36 @@
     // `hidden md:flex` so the nav collapses below the md breakpoint.
     @apply items-center gap-2;
 
+    a[mat-button] {
+      position: relative;
+      overflow: hidden;
+      transition: color 0.2s ease;
+
+      &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 4px;
+        height: 2px;
+        width: 0;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--mat-sys-primary), var(--mat-sys-tertiary));
+        transform: translateX(-50%);
+        transition: width 0.25s ease;
+      }
+
+      &:hover::after {
+        width: calc(100% - 24px);
+      }
+    }
+
     .active-link {
       background-color: var(--mat-sys-secondary-container);
       color: var(--mat-sys-on-secondary-container);
+
+      &::after {
+        width: calc(100% - 24px);
+      }
     }
   }
 }

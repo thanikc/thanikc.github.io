@@ -1,0 +1,36 @@
+.app-shell {
+  background-color: var(--mat-sys-surface);
+  background-image:
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in srgb, var(--mat-sys-primary) 8%, transparent) 0%,
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 85% 15%,
+      color-mix(in srgb, var(--mat-sys-tertiary) 8%, transparent) 0%,
+      transparent 45%
+    );
+  background-attachment: fixed;
+}
+
+main {
+  animation: page-fade 0.35s ease;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main {
+    animation: none;
+  }
+}
