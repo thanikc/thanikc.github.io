@@ -38,7 +38,7 @@
             },
             "optimization": {
               "styles": {
-                "inlineCritical": false
+                "inlineCritical": true
               }
             }
           },
