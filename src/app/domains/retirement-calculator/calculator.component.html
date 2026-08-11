@@ -52,19 +52,21 @@
   </form>
 
   <mat-accordion class="mb-8 block">
-    <mat-expansion-panel class="rounded-xl border border-[var(--mat-sys-outline-variant)]">
-      <mat-expansion-panel-header>
-        <mat-panel-title class="flex items-center gap-2 font-medium">
+    <mat-expansion-panel
+      class="assumptions-panel rounded-xl border border-[var(--mat-sys-outline-variant)]"
+    >
+      <mat-expansion-panel-header class="assumptions-panel-header">
+        <mat-panel-title class="flex items-center gap-2 font-medium shrink-0">
           <mat-icon class="text-[var(--mat-sys-primary)]">tune</mat-icon>
-          Adjust Investment Assumptions
+          <span class="truncate">Adjust Investment Assumptions</span>
         </mat-panel-title>
-        <mat-panel-description>
+        <mat-panel-description class="truncate">
           {{ estimatedAnnualReturn() }}% return, {{ safeWithdrawalRate() }}% withdrawal rate
         </mat-panel-description>
       </mat-expansion-panel-header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="w-full mb-4">
           <mat-label>Estimated Annual Return (%)</mat-label>
           <input
             matInput
@@ -82,7 +84,7 @@
           <mat-hint>Historical stock market average (~7% adjusted for inflation)</mat-hint>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-full">
+        <mat-form-field appearance="outline" class="w-full mb-4">
           <mat-label>Safe Withdrawal Rate (%)</mat-label>
           <input
             matInput
