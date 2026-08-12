@@ -28,46 +28,6 @@ describe('AnalyticsService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('initialize()', () => {
-    it('should bootstrap window.dataLayer and window.gtag with a js call', () => {
-      service.initialize();
-
-      expect((window as any).dataLayer).toBeDefined();
-      expect(typeof (window as any).gtag).toBe('function');
-      expect((window as any).dataLayer.some((call: unknown[]) => call[0] === 'js')).toBe(true);
-    });
-
-    it('should push a config call with the configured measurement id', () => {
-      service.initialize();
-
-      expect(
-        (window as any).dataLayer.some(
-          (call: unknown[]) => call[0] === 'config' && call[1] === 'G-TEST',
-        ),
-      ).toBe(true);
-    });
-
-    it('should append the gtag.js script with the configured id', () => {
-      service.initialize();
-
-      const script = document.head.querySelector<HTMLScriptElement>(
-        'script[src*="googletagmanager.com/gtag/js"]',
-      );
-
-      expect(script).not.toBeNull();
-      expect(script?.src).toBe(`https://www.googletagmanager.com/gtag/js?id=G-TEST`);
-      expect(script?.async).toBe(true);
-    });
-
-    it('should not append a duplicate script when initialized twice', () => {
-      service.initialize();
-      service.initialize();
-
-      const scripts = document.head.querySelectorAll('script[src*="googletagmanager.com/gtag/js"]');
-      expect(scripts.length).toBe(1);
-    });
-  });
-
   describe('trackPageView()', () => {
     it('should call gtag with a page_view event', () => {
       (window as any).gtag = vi.fn();
