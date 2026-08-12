@@ -28,17 +28,6 @@ describe('provideAnalytics()', () => {
     expect(TestBed.inject(GA_MEASUREMENT_ID)).toBe('G-TEST');
   });
 
-  it('should call AnalyticsService.initialize() once via the environment initializer', () => {
-    const initSpy = vi.spyOn(AnalyticsService.prototype, 'initialize').mockImplementation(() => {});
-
-    configure('G-TEST');
-    TestBed.inject(EnvironmentInjector);
-
-    expect(initSpy).toHaveBeenCalledTimes(1);
-
-    initSpy.mockRestore();
-  });
-
   it('should track a page_view with urlAfterRedirects on NavigationEnd', () => {
     const trackSpy = vi
       .spyOn(AnalyticsService.prototype, 'trackPageView')

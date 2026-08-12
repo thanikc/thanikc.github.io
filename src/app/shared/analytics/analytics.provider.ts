@@ -18,8 +18,6 @@ export function provideAnalytics(measurementId = 'G-HSC8QB0EQL'): EnvironmentPro
       const service = inject(AnalyticsService);
       const router = inject(Router);
 
-      service.initialize();
-
       const navigationEnd = toSignal(
         router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)),
       );
