@@ -1,9 +1,3 @@
-@reference "tailwindcss";
-
-.calculator-container {
-  @apply max-w-5xl mx-auto px-4 py-8;
-}
-
 .assumptions-panel {
   ::ng-deep .mat-expansion-panel-header {
     height: auto;
