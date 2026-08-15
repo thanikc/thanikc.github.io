@@ -8,6 +8,13 @@ export interface TechSkill {
   icon: string;
 }
 
+export interface SideProject {
+  name: string;
+  description: string;
+  url: string;
+  icon: string;
+}
+
 const SKILL_CATEGORIES: readonly TechSkill[] = [
   {
     category: 'Frontend Excellence',
@@ -26,6 +33,16 @@ const SKILL_CATEGORIES: readonly TechSkill[] = [
   },
 ];
 
+const SIDE_PROJECTS: readonly SideProject[] = [
+  {
+    name: 'CrashDash',
+    description:
+      'A dashboard gauging the risk of a market crash by tracking a range of macro and market indicators.',
+    url: 'https://crashdash.singdee.de/',
+    icon: 'trending_down',
+  },
+];
+
 @Component({
   selector: 'app-profile',
   imports: [MatButtonModule, MatIconModule],
@@ -38,4 +55,5 @@ export class ProfileComponent {
   readonly title = 'Full-Stack Engineer';
   readonly subtitle = 'Enterprise Angular • Spring Boot • OpenShift Solutions';
   readonly skillCategories = SKILL_CATEGORIES;
+  readonly sideProjects = SIDE_PROJECTS;
 }

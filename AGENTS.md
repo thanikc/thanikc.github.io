@@ -1,7 +1,7 @@
 # Rule: Angular TDD & Clean Code Workflow
 
 Follow strict TDD with modern Angular (v22+, Standalone, Signals, inject(), Material, Tailwind).
-CRITICAL GUARDRAIL: Never execute test commands (`ng test`) automatically. Always stop and prompt user to run tests.
+Run the tests yourself (`ng test --watch=false`) at every RED and GREEN step — do not stop to ask. Report failures with the actual output.
 
 ## Output Constraints
 
@@ -28,8 +28,8 @@ When generating plans, avoid generic summaries. Outputs **must** strictly includ
 
 ## TDD Workflow
 
-1. **RED Phase**: Write ONLY the spec file (`*.spec.ts`). Prompt user to run tests (`ng test`).
-2. **GREEN Phase**: Write minimal implementation code (`*.ts`, `*.html`) using Signals, `inject()`, control flow (`@if`, `@for`), Material, Tailwind. Prompt user to run tests.
+1. **RED Phase**: Write ONLY the spec file (`*.spec.ts`). Run `ng test --watch=false` and confirm it fails for the expected reason.
+2. **GREEN Phase**: Write minimal implementation code (`*.ts`, `*.html`) using Signals, `inject()`, control flow (`@if`, `@for`), Material, Tailwind. Run `ng test --watch=false` until green.
 3. **REFACTOR Phase**: Apply clean-code, DRY, or Signal optimizations without breaking behavior. Summarize in 1 sentence.
 
 ## Available Skills & Capabilities
