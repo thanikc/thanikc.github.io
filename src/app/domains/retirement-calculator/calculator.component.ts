@@ -1,5 +1,5 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, WritableSignal } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,9 +12,8 @@ import { SelectOnFocusDirective } from '../../shared/directives/select-on-focus.
 
 @Component({
   selector: 'app-retirement-calculator',
-  standalone: true,
   imports: [
-    CommonModule,
+    CurrencyPipe,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
@@ -25,71 +24,31 @@ import { SelectOnFocusDirective } from '../../shared/directives/select-on-focus.
   ],
   templateUrl: './calculator.component.html',
   styleUrl: './calculator.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RetirementCalculatorComponent {
-  private readonly assumptionService = inject(AssumptionDataService);
-  private readonly service = inject(CalculatorService);
+  private readonly assumptions = inject(AssumptionDataService);
+  private readonly calculator = inject(CalculatorService);
 
-  // Writable inputs initialized with sensible dynamic values
-  readonly safeWithdrawalRate = signal(this.assumptionService.safeWithdrawalRate());
-  readonly estimatedAnnualReturn = signal(this.assumptionService.estimatedAnnualReturn());
+  // Editable state lives in CalculatorService; the template binds to it directly.
+  readonly currentNetWorth = this.calculator.currentNetWorth;
+  readonly yearsUntilRetirement = this.calculator.yearsUntilRetirement;
+  readonly targetMonthlyIncome = this.calculator.targetMonthlyIncome;
+  readonly estimatedAnnualReturn = this.calculator.estimatedAnnualReturn;
+  readonly safeWithdrawalRate = this.calculator.safeWithdrawalRate;
 
-  readonly targetMonthlyIncome = signal(4000);
-  readonly yearsUntilRetirement = signal(40);
-  readonly currentNetWorth = signal(0);
+  // Derived results.
+  readonly totalNestEggNeeded = this.calculator.totalNestEggNeeded;
+  readonly futureNetWorth = this.calculator.futureNetWorth;
+  readonly remainingTargetNestEgg = this.calculator.remainingTargetNestEgg;
+  readonly requiredMonthlyContribution = this.calculator.requiredMonthlyContribution;
 
-  // --- Computed signals (readonly pass-throughs to the service) ---
-  readonly totalNestEggNeeded = this.service.totalNestEggNeeded;
-  readonly futureNetWorth = this.service.futureNetWorth;
-  readonly remainingTargetNestEgg = this.service.remainingTargetNestEgg;
-  readonly requiredMonthlyContribution = this.service.requiredMonthlyContribution;
+  // Live data status.
+  readonly isLive = this.assumptions.isLive;
+  readonly isLoading = this.assumptions.isLoading;
 
-  // Expose live status & indicators directly to template
-  readonly isLive = this.assumptionService.isLive;
-  readonly isLoading = this.assumptionService.inflationResource.isLoading;
-
-  // Computed calculations update automatically when signals change
-  readonly requiredNestEgg = computed(() => {
-    const rate = this.safeWithdrawalRate() / 100;
-    return rate > 0 ? (this.targetMonthlyIncome() * 12) / rate : 0;
-  });
-
-  constructor() {
-    effect(() => {
-      const safeWithdrawalRate = this.assumptionService.safeWithdrawalRate();
-      this.safeWithdrawalRate.set(safeWithdrawalRate);
-      this.service.safeWithdrawalRate.set(safeWithdrawalRate);
-    });
-
-    effect(() => {
-      const estimatedAnnualReturn = this.assumptionService.estimatedAnnualReturn();
-      this.estimatedAnnualReturn.set(estimatedAnnualReturn);
-      this.service.estimatedAnnualReturn.set(estimatedAnnualReturn);
-    });
-  }
-
-  // Input change handlers (thin delegation to the service)
-  onNetWorthChange(value: number): void {
-    this.service.currentNetWorth.set(Number(value) || 0);
-  }
-
-  onYearsChange(value: number): void {
-    this.service.yearsUntilRetirement.set(Number(value) || 0);
-  }
-
-  onTargetIncomeChange(value: number): void {
-    this.service.targetMonthlyIncome.set(Number(value) || 0);
-  }
-
-  onAnnualReturnChange(value: number): void {
-    const num = Number(value) || 0;
-    this.estimatedAnnualReturn.set(num);
-    this.service.estimatedAnnualReturn.set(num);
-  }
-
-  onWithdrawalRateChange(value: number): void {
-    const num = Number(value) || 0;
-    this.safeWithdrawalRate.set(num);
-    this.service.safeWithdrawalRate.set(num);
+  /** Writes a numeric form value, falling back to 0 for empty or invalid input. */
+  updateAmount(target: WritableSignal<number>, value: number): void {
+    target.set(Number(value) || 0);
   }
 }

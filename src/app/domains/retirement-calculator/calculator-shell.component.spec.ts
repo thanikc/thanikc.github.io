@@ -30,9 +30,7 @@ describe('CalculatorShellComponent', () => {
       safeWithdrawalRate: signal(4.0),
       estimatedAnnualReturn: signal(7.0),
       isLive: signal(true),
-      inflationResource: {
-        isLoading: signal(false),
-      } as any,
+      isLoading: signal(false),
     };
 
     mockCalculatorService = {

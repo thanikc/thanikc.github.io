@@ -8,15 +8,12 @@
 </button>
 
 <mat-menu #menu="matMenu">
-  <a mat-menu-item routerLink="/profile" (click)="menuTrigger.closeMenu()">
-    <mat-icon aria-hidden="true">person</mat-icon>
-    Profile
-  </a>
-
-  <a mat-menu-item routerLink="/calculator" (click)="menuTrigger.closeMenu()">
-    <mat-icon aria-hidden="true">calculate</mat-icon>
-    Calculator
-  </a>
+  @for (link of navLinks; track link.path) {
+    <a mat-menu-item [routerLink]="link.path" (click)="menuTrigger.closeMenu()">
+      <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
+      {{ link.label }}
+    </a>
+  }
 
   <div mat-menu-item class="ad-toggle-item" (click)="$event.stopPropagation()">
     <app-ad-banner-toggle />

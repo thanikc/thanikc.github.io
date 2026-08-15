@@ -13,9 +13,9 @@
     tabindex="-1"
     class="flex-grow container mx-auto px-4 py-8 max-w-6xl focus:outline-none"
   >
-    <router-outlet></router-outlet>
+    <router-outlet />
   </main>
 
   <app-footer class="mt-auto" />
-  <app-ad-banner [visible]="ads.showBanner()" />
+  <app-ad-banner [visible]="showBanner()" />
 </div>

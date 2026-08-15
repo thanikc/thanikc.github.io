@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { HeaderComponent } from './header.component';
+import { NAV_LINKS } from './nav-links';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -28,11 +29,14 @@ describe('HeaderComponent', () => {
     expect(titleEl?.textContent).toBeTruthy();
   });
 
-  it('should render navigation links with correct routerLinks', () => {
+  it('should render one navigation link per configured nav entry', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const navLinks = compiled.querySelectorAll('a[routerLink]');
+    const navLinks = compiled.querySelectorAll('nav a[href]');
 
-    expect(navLinks.length).toBeGreaterThan(0);
+    expect(navLinks.length).toBe(NAV_LINKS.length);
+    expect([...navLinks].map(link => link.getAttribute('href'))).toEqual(
+      NAV_LINKS.map(link => link.path),
+    );
   });
 
   it('should meet accessibility standard with an explicit nav landmark', () => {

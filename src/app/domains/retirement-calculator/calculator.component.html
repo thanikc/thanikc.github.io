@@ -11,7 +11,7 @@
         min="0"
         appSelectOnFocus
         [ngModel]="currentNetWorth()"
-        (ngModelChange)="onNetWorthChange($event)"
+        (ngModelChange)="updateAmount(currentNetWorth, $event)"
         name="currentNetWorth"
         aria-label="Current Net Worth in dollars"
       />
@@ -27,7 +27,7 @@
         max="80"
         appSelectOnFocus
         [ngModel]="yearsUntilRetirement()"
-        (ngModelChange)="onYearsChange($event)"
+        (ngModelChange)="updateAmount(yearsUntilRetirement, $event)"
         name="yearsUntilRetirement"
         aria-label="Years until retirement"
       />
@@ -43,7 +43,7 @@
         min="0"
         appSelectOnFocus
         [ngModel]="targetMonthlyIncome()"
-        (ngModelChange)="onTargetIncomeChange($event)"
+        (ngModelChange)="updateAmount(targetMonthlyIncome, $event)"
         name="targetMonthlyIncome"
         aria-label="Target monthly income in dollars"
       />
@@ -76,7 +76,7 @@
             max="30"
             appSelectOnFocus
             [ngModel]="estimatedAnnualReturn()"
-            (ngModelChange)="onAnnualReturnChange($event)"
+            (ngModelChange)="updateAmount(estimatedAnnualReturn, $event)"
             name="estimatedAnnualReturn"
             aria-label="Estimated annual investment return percentage"
           />
@@ -94,7 +94,7 @@
             max="10"
             appSelectOnFocus
             [ngModel]="safeWithdrawalRate()"
-            (ngModelChange)="onWithdrawalRateChange($event)"
+            (ngModelChange)="updateAmount(safeWithdrawalRate, $event)"
             name="safeWithdrawalRate"
             aria-label="Safe withdrawal rate percentage"
           />
@@ -139,5 +139,6 @@
     [safeWithdrawalRate]="safeWithdrawalRate()"
     [estimatedAnnualReturn]="estimatedAnnualReturn()"
     [isLive]="isLive()"
+    [isLoading]="isLoading()"
   />
 </section>

@@ -1,5 +1,6 @@
-import { Directive, ElementRef, HostListener } from '@angular/core';
+import { Directive } from '@angular/core';
 
+/** Selects the whole value when a text/number input gains focus, so typing replaces it. */
 @Directive({
   selector: '[appSelectOnFocus]',
   host: {
@@ -7,9 +8,9 @@ import { Directive, ElementRef, HostListener } from '@angular/core';
   },
 })
 export class SelectOnFocusDirective {
-  onFocus(e: FocusEvent): void {
-    if (e.currentTarget instanceof HTMLInputElement) {
-      e.currentTarget.select();
+  onFocus(event: FocusEvent): void {
+    if (event.currentTarget instanceof HTMLInputElement) {
+      event.currentTarget.select();
     }
   }
 }

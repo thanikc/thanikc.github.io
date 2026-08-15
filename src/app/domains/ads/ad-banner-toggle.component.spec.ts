@@ -34,6 +34,17 @@ describe('AdBannerToggleComponent', () => {
     expect(component).toBeDefined();
   });
 
+  it('should reflect the current service state instead of local state', () => {
+    mockShowBanner.set(false);
+    fixture.detectChanges();
+
+    const toggleButton = fixture.nativeElement.querySelector(
+      'mat-slide-toggle button',
+    ) as HTMLButtonElement;
+
+    expect(toggleButton.getAttribute('aria-checked')).toBe('false');
+  });
+
   it('should call the service and change the signal when the toggle changes', () => {
     // Find the Material Slide Toggle component in the DOM
     const toggleDebugEl = fixture.debugElement.query(By.directive(MatSlideToggle));

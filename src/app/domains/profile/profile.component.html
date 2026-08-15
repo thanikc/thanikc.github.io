@@ -6,13 +6,13 @@
     >
       <div class="space-y-2">
         <span class="hero-badge flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
-          {{ title() }}
+          {{ title }}
         </span>
         <h1 class="hero-name text-3xl sm:text-4xl font-extrabold tracking-tight">
           Thanik Cheowtirakul
         </h1>
         <p class="hero-subtitle text-lg font-medium max-w-2xl">
-          {{ subtitle() }}
+          {{ subtitle }}
         </p>
       </div>
 
@@ -38,7 +38,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      @for (cat of skillCategories(); track cat.category; let i = $index) {
+      @for (cat of skillCategories; track cat.category; let i = $index) {
         <article
           class="skill-card rounded-xl p-6 flex flex-col justify-between shadow-sm"
           [style.animation-delay.ms]="i * 80"
