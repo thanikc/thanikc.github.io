@@ -13,5 +13,5 @@ import { AdBannerService } from './domains/ads/ad-banner.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  readonly ads = inject(AdBannerService);
+  readonly showBanner = inject(AdBannerService).showBanner.asReadonly();
 }

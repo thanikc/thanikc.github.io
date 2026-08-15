@@ -1,33 +1,30 @@
 import {
-  makeEnvironmentProviders,
   EnvironmentProviders,
-  provideEnvironmentInitializer,
   inject,
-  effect,
+  makeEnvironmentProviders,
+  provideEnvironmentInitializer,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AnalyticsService } from './analytics.service';
 import { GA_MEASUREMENT_ID } from './ga-measurement-id.token';
 
-export function provideAnalytics(measurementId = 'G-HSC8QB0EQL'): EnvironmentProviders {
+const DEFAULT_MEASUREMENT_ID = 'G-HSC8QB0EQL';
+
+/** Reports every completed navigation to Google Analytics as a page view. */
+export function provideAnalytics(measurementId = DEFAULT_MEASUREMENT_ID): EnvironmentProviders {
   return makeEnvironmentProviders([
     { provide: GA_MEASUREMENT_ID, useValue: measurementId },
     provideEnvironmentInitializer(() => {
-      const service = inject(AnalyticsService);
-      const router = inject(Router);
+      const analytics = inject(AnalyticsService);
 
-      const navigationEnd = toSignal(
-        router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)),
-      );
-
-      effect(() => {
-        const event = navigationEnd();
-        if (event) {
-          service.trackPageView(event.urlAfterRedirects);
-        }
-      });
+      inject(Router)
+        .events.pipe(
+          filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+          takeUntilDestroyed(),
+        )
+        .subscribe(event => analytics.trackPageView(event.urlAfterRedirects));
     }),
   ]);
 }

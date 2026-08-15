@@ -6,17 +6,19 @@
     </a>
 
     <nav aria-label="Main Navigation" class="nav-links hidden md:flex">
-      <a mat-button routerLink="/profile" routerLinkActive="active-link">
-        <mat-icon aria-hidden="true">person</mat-icon>
-        Profile
-      </a>
+      @for (link of navLinks; track link.path) {
+        <a
+          mat-button
+          [routerLink]="link.path"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="link.activeOptions"
+        >
+          <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
+          {{ link.label }}
+        </a>
+      }
 
-      <a mat-button routerLink="/calculator" routerLinkActive="active-link">
-        <mat-icon aria-hidden="true">calculate</mat-icon>
-        Calculator
-      </a>
-
-      <app-ad-banner-toggle></app-ad-banner-toggle>
+      <app-ad-banner-toggle />
     </nav>
 
     @defer (on viewport) {

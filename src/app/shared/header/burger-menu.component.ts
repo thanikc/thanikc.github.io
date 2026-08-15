@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { AdBannerToggleComponent } from '../../domains/ads/ad-banner-toggle.component';
+import { NAV_LINKS } from './nav-links';
 
 @Component({
   selector: 'app-burger-menu',
@@ -11,4 +12,6 @@ import { AdBannerToggleComponent } from '../../domains/ads/ad-banner-toggle.comp
   templateUrl: './burger-menu.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BurgerMenuComponent {}
+export class BurgerMenuComponent {
+  readonly navLinks = NAV_LINKS;
+}

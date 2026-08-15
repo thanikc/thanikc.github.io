@@ -1,5 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { httpResource, HttpResourceRef } from '@angular/common/http';
+import {
+  DEFAULT_ANNUAL_RETURN,
+  DEFAULT_INFLATION,
+  DEFAULT_SAFE_WITHDRAWAL_RATE,
+} from './calculator.constants';
 
 export type WorldBankResponse = [
   {
@@ -28,68 +33,74 @@ export type WorldBankResponse = [
   }>,
 ];
 
+type WorldBankResource = HttpResourceRef<WorldBankResponse | undefined>;
+
+/** Consumer price inflation, annual %. */
+const INFLATION_INDICATOR = 'FP.CPI.TOTL.ZG';
+/** S&P Global Equity Indices, annual % change. */
+const MARKET_RETURN_INDICATOR = 'CM.MKT.INDX.ZG';
+const COUNTRY = 'USA';
+/** Years of market data averaged out to smooth single-year swings. */
+const MARKET_RETURN_YEARS = 15;
+
 // https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures
-const getMarketDataEndpoint = (country: string, indicator: string, perPage = 1) => {
-  return `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=${perPage}`;
+const marketDataEndpoint = (country: string, indicator: string, perPage = 1) =>
+  `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=${perPage}`;
+
+/** First reported value of a response, or `defaultValue` when none is numeric. */
+const firstValueOf = (res: WorldBankResource, defaultValue: number): number => {
+  const value = res.value()?.[1]?.[0]?.value;
+
+  return typeof value === 'number' ? value : defaultValue;
 };
 
-const getWorldBankResponseValue = (
-  res: HttpResourceRef<WorldBankResponse | undefined>,
-  defaultValue: number,
-): number => {
-  const rawVal = res.value()?.[1]?.[0]?.value;
-  return typeof rawVal === 'number' ? rawVal : defaultValue;
+/** Average of all reported (non-null) values, or `defaultValue` when none is numeric. */
+const averageValueOf = (res: WorldBankResource, defaultValue: number): number => {
+  const reported = (res.value()?.[1] ?? [])
+    .map(entry => entry.value)
+    .filter((value): value is number => typeof value === 'number');
+
+  if (reported.length === 0) return defaultValue;
+
+  return reported.reduce((sum, value) => sum + value, 0) / reported.length;
 };
 
-/** Compute the average of all valid (non-null) values from a multi-entry response.
- *  Falls back to defaultValue when no entry has a valid numeric value. */
-const getWorldBankResponseAverage = (
-  res: HttpResourceRef<WorldBankResponse | undefined>,
-  defaultValue: number,
-): number => {
-  const entries = res.value()?.[1];
-  if (!entries || entries.length === 0) return defaultValue;
-
-  const valid = entries.map(e => e.value).filter((v): v is number => typeof v === 'number');
-
-  return valid.length > 0 ? valid.reduce((sum, v) => sum + v, 0) / valid.length : defaultValue;
-};
-
+/**
+ * Live macroeconomic assumptions sourced from the World Bank open data API.
+ * Every rate is expressed as a percentage (e.g. `2.5` means 2.5%).
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class AssumptionDataService {
-  // Default fallbacks in case APIs fail or offline
-  private readonly DEFAULT_INFLATION = 2.5; // 2.5%
-  private readonly DEFAULT_ANNUAL_RETURN = 7; // 7.0%
-
   readonly inflationResource = httpResource<WorldBankResponse>(() =>
-    getMarketDataEndpoint('USA', 'FP.CPI.TOTL.ZG'),
+    marketDataEndpoint(COUNTRY, INFLATION_INDICATOR),
   );
 
   readonly marketReturnResource = httpResource<WorldBankResponse>(() =>
-    getMarketDataEndpoint('USA', 'CM.MKT.INDX.ZG', 15),
+    marketDataEndpoint(COUNTRY, MARKET_RETURN_INDICATOR, MARKET_RETURN_YEARS),
   );
 
-  // Computed Signal: Inflation Rate (Live API or Fallback)
-  readonly inflationRate = computed(() => {
-    return getWorldBankResponseValue(this.inflationResource, this.DEFAULT_INFLATION) / 100;
-  });
+  /** Latest reported annual inflation, in percent. */
+  readonly inflationRate = computed(() => firstValueOf(this.inflationResource, DEFAULT_INFLATION));
 
-  // Computed Signal: Dynamic Estimated Annual Return (Live API or Fallback)
-  readonly estimatedAnnualReturn = computed(() => {
-    const avg = getWorldBankResponseAverage(this.marketReturnResource, this.DEFAULT_ANNUAL_RETURN);
-    return +avg.toFixed(2);
-  });
+  /** Multi-year average market return, in percent. */
+  readonly estimatedAnnualReturn = computed(() =>
+    Number(averageValueOf(this.marketReturnResource, DEFAULT_ANNUAL_RETURN).toFixed(2)),
+  );
 
-  // Derived Real Return Rate (Nominal Return - Inflation)
-  readonly realAnnualReturn = computed(() => {
-    return this.estimatedAnnualReturn() - this.inflationRate();
-  });
+  /** Inflation-adjusted market return, in percent. */
+  readonly realAnnualReturn = computed(() => this.estimatedAnnualReturn() - this.inflationRate());
 
-  readonly isLive = computed(() => {
-    return this.inflationResource.hasValue() || this.marketReturnResource.hasValue();
-  });
+  readonly safeWithdrawalRate = signal(DEFAULT_SAFE_WITHDRAWAL_RATE);
 
-  readonly safeWithdrawalRate = signal(4.0); // Standard Trinity rule baseline
+  /** Whether at least one indicator resolved from the live API rather than a fallback. */
+  readonly isLive = computed(
+    () => this.inflationResource.hasValue() || this.marketReturnResource.hasValue(),
+  );
+
+  /** Whether any indicator is still in flight. */
+  readonly isLoading = computed(
+    () => this.inflationResource.isLoading() || this.marketReturnResource.isLoading(),
+  );
 }

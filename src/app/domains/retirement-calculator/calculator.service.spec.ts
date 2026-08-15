@@ -1,11 +1,29 @@
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { AssumptionDataService } from './assumption-data.service';
+import { DEFAULT_ANNUAL_RETURN, DEFAULT_SAFE_WITHDRAWAL_RATE } from './calculator.constants';
 import { CalculatorService } from './calculator.service';
 
 describe('CalculatorService', () => {
   let service: CalculatorService;
+  let liveAnnualReturn: WritableSignal<number>;
+  let liveSafeWithdrawalRate: WritableSignal<number>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    liveAnnualReturn = signal(DEFAULT_ANNUAL_RETURN);
+    liveSafeWithdrawalRate = signal(DEFAULT_SAFE_WITHDRAWAL_RATE);
+
+    TestBed.configureTestingModule({
+      providers: [
+        {
+          provide: AssumptionDataService,
+          useValue: {
+            estimatedAnnualReturn: liveAnnualReturn,
+            safeWithdrawalRate: liveSafeWithdrawalRate,
+          } satisfies Partial<AssumptionDataService>,
+        },
+      ],
+    });
     service = TestBed.inject(CalculatorService);
   });
 
@@ -40,6 +58,24 @@ describe('CalculatorService', () => {
     const returnAt8Percent = service.futureNetWorth();
 
     expect(returnAt8Percent).toBeGreaterThan(returnAt5Percent);
+  });
+
+  // --- Live assumption seeding ---
+
+  it('should adopt live assumptions when the macroeconomic data resolves', () => {
+    liveAnnualReturn.set(9.5);
+    liveSafeWithdrawalRate.set(3.5);
+
+    expect(service.estimatedAnnualReturn()).toBe(9.5);
+    expect(service.safeWithdrawalRate()).toBe(3.5);
+  });
+
+  it('should keep a user override until new live data arrives', () => {
+    service.estimatedAnnualReturn.set(12);
+    expect(service.estimatedAnnualReturn()).toBe(12);
+
+    liveAnnualReturn.set(9.5);
+    expect(service.estimatedAnnualReturn()).toBe(9.5);
   });
 
   // --- Edge cases ---

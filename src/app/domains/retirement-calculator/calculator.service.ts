@@ -1,55 +1,55 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, linkedSignal, signal } from '@angular/core';
+import { AssumptionDataService } from './assumption-data.service';
+import { DEFAULT_SAFE_WITHDRAWAL_RATE, MONTHS_PER_YEAR } from './calculator.constants';
 
 @Injectable({ providedIn: 'root' })
 export class CalculatorService {
-  // --- Core Inputs (Writable Signals) ---
-  currentNetWorth = signal<number>(0);
-  yearsUntilRetirement = signal<number>(30);
-  targetMonthlyIncome = signal<number>(4000);
+  private readonly assumptions = inject(AssumptionDataService);
 
-  // --- Adjustable Assumptions (Writable Signals with Sensible Defaults) ---
-  estimatedAnnualReturn = signal<number>(7); // Default: 7% annual market return
-  safeWithdrawalRate = signal<number>(4); // Default: 4% Safe Withdrawal Rate (Trinity Study)
+  // --- Core inputs ---
+  readonly currentNetWorth = signal(0);
+  readonly yearsUntilRetirement = signal(30);
+  readonly targetMonthlyIncome = signal(4000);
 
-  // --- Computed Signals ---
+  // --- Adjustable assumptions: user-writable, reseeded whenever live data arrives ---
+  readonly estimatedAnnualReturn = linkedSignal(() => this.assumptions.estimatedAnnualReturn());
+  readonly safeWithdrawalRate = linkedSignal(() => this.assumptions.safeWithdrawalRate());
 
-  // Total target nest egg needed based on annual withdrawal rate assumption
-  totalNestEggNeeded = computed(() => {
-    const swrDecimal = (this.safeWithdrawalRate() || 4) / 100;
-    if (swrDecimal <= 0) return 0;
-    const annualIncomeNeeded = this.targetMonthlyIncome() * 12;
-    return annualIncomeNeeded / swrDecimal;
+  /** Target nest egg that sustains the desired income at the safe withdrawal rate. */
+  readonly totalNestEggNeeded = computed(() => {
+    const withdrawalRate = (this.safeWithdrawalRate() || DEFAULT_SAFE_WITHDRAWAL_RATE) / 100;
+    if (withdrawalRate <= 0) return 0;
+
+    return (this.targetMonthlyIncome() * MONTHS_PER_YEAR) / withdrawalRate;
   });
 
-  // Future value of current net worth compounded until retirement
-  futureNetWorth = computed(() => {
-    const rateDecimal = (this.estimatedAnnualReturn() || 0) / 100;
-    const years = this.yearsUntilRetirement();
-    return this.currentNetWorth() * Math.pow(1 + rateDecimal, years);
+  /** Future value of the current net worth compounded until retirement. */
+  readonly futureNetWorth = computed(() => {
+    const rate = (this.estimatedAnnualReturn() || 0) / 100;
+
+    return this.currentNetWorth() * Math.pow(1 + rate, this.yearsUntilRetirement());
   });
 
-  // Remaining nest egg needed to reach retirement goal
-  remainingTargetNestEgg = computed(() => {
-    const remaining = this.totalNestEggNeeded() - this.futureNetWorth();
-    return Math.max(0, remaining);
-  });
+  /** Nest egg still to be funded after the current net worth has compounded. */
+  readonly remainingTargetNestEgg = computed(() =>
+    Math.max(0, this.totalNestEggNeeded() - this.futureNetWorth()),
+  );
 
-  // Monthly contribution needed to bridge the remaining gap
-  requiredMonthlyContribution = computed(() => {
+  /** Monthly contribution that closes the remaining gap by the retirement date. */
+  readonly requiredMonthlyContribution = computed(() => {
     const years = this.yearsUntilRetirement();
     const gap = this.remainingTargetNestEgg();
 
     if (years <= 0 || gap <= 0) return 0;
 
-    const annualRateDecimal = (this.estimatedAnnualReturn() || 0) / 100;
-    const monthlyRate = annualRateDecimal / 12;
-    const totalMonths = years * 12;
+    const monthlyRate = (this.estimatedAnnualReturn() || 0) / 100 / MONTHS_PER_YEAR;
+    const totalMonths = years * MONTHS_PER_YEAR;
 
     if (monthlyRate <= 0) {
       return gap / totalMonths;
     }
 
-    // Future Value of an Annuity formula: FV = PMT * (((1 + r)^n - 1) / r)
+    // Payment of an annuity whose future value is the gap: PMT = FV * r / ((1 + r)^n - 1)
     return gap * (monthlyRate / (Math.pow(1 + monthlyRate, totalMonths) - 1));
   });
 }

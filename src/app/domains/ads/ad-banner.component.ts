@@ -1,28 +1,31 @@
-import { Component, input, afterNextRender } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 declare global {
   interface Window {
-    adsbygoogle: any[];
+    /** Ad request queue created by the AdSense script loaded in index.html. */
+    adsbygoogle?: Record<string, unknown>[];
   }
 }
 
 @Component({
   selector: 'app-ad-banner',
-  standalone: true,
   templateUrl: './ad-banner.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdBannerComponent {
-  visible = input(true);
-
-  private initialized = false;
+  /**
+   * Hides the banner without removing it: AdSense fills the `<ins>` element once,
+   * and a destroyed slot is never refilled.
+   */
+  readonly visible = input(true);
 
   constructor() {
+    // Browser-only: the slot must exist in the DOM before AdSense is asked to fill it.
     afterNextRender(() => {
-      this.initialized = true;
       try {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      } catch (e) {
-        console.error('AdSense error:', e);
+        (window.adsbygoogle ??= []).push({});
+      } catch (error) {
+        console.error('AdSense error:', error);
       }
     });
   }

@@ -1,21 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal, WritableSignal } from '@angular/core';
 import { RetirementCalculatorComponent } from './calculator.component';
 import { AssumptionDataService } from './assumption-data.service';
 import { CalculatorService } from './calculator.service';
-import { signal, WritableSignal } from '@angular/core';
 
 describe('RetirementCalculatorComponent', () => {
   let component: RetirementCalculatorComponent;
   let fixture: ComponentFixture<RetirementCalculatorComponent>;
 
-  // Mock Signal properties required for CalculatorService
+  // Editable state owned by CalculatorService
   let currentNetWorthMockSignal: WritableSignal<number>;
   let yearsUntilRetirementMockSignal: WritableSignal<number>;
   let targetMonthlyIncomeMockSignal: WritableSignal<number>;
   let estimatedAnnualReturnMockSignal: WritableSignal<number>;
   let safeWithdrawalRateMockSignal: WritableSignal<number>;
 
-  // Spy object mocks
   let mockAssumptionService: Partial<AssumptionDataService>;
   let mockCalculatorService: Partial<CalculatorService>;
 
@@ -27,12 +26,8 @@ describe('RetirementCalculatorComponent', () => {
     safeWithdrawalRateMockSignal = signal(4);
 
     mockAssumptionService = {
-      safeWithdrawalRate: signal(4.0),
-      estimatedAnnualReturn: signal(7.0),
       isLive: signal(true),
-      inflationResource: {
-        isLoading: signal(false),
-      } as any,
+      isLoading: signal(false),
     };
 
     mockCalculatorService = {
@@ -64,26 +59,18 @@ describe('RetirementCalculatorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize input signals with defaults from assumption data service', () => {
-    expect(component.safeWithdrawalRate()).toBe(4.0);
-    expect(component.estimatedAnnualReturn()).toBe(7.0);
+  it('should expose the editable state owned by CalculatorService', () => {
+    expect(component.safeWithdrawalRate()).toBe(4);
+    expect(component.estimatedAnnualReturn()).toBe(7);
     expect(component.targetMonthlyIncome()).toBe(4000);
     expect(component.yearsUntilRetirement()).toBe(40);
     expect(component.currentNetWorth()).toBe(0);
   });
 
-  it('should calculate requiredNestEgg based on safeWithdrawalRate and targetMonthlyIncome', () => {
-    // Default: (4000 * 12) / (4 / 100) = 48000 / 0.04 = 1,200,000
-    expect(component.requiredNestEgg()).toBe(1200000);
+  it('should reflect service state changes in the exposed signals', () => {
+    currentNetWorthMockSignal.set(50000);
 
-    // Update safe withdrawal rate locally
-    component.safeWithdrawalRate.set(5); // (4000 * 12) / 0.05 = 960,000
-    expect(component.requiredNestEgg()).toBe(960000);
-  });
-
-  it('should return 0 for requiredNestEgg if safeWithdrawalRate is 0 or less', () => {
-    component.safeWithdrawalRate.set(0);
-    expect(component.requiredNestEgg()).toBe(0);
+    expect(component.currentNetWorth()).toBe(50000);
   });
 
   it('should pass calculated service properties through from CalculatorService', () => {
@@ -117,35 +104,42 @@ describe('RetirementCalculatorComponent', () => {
     });
   });
 
-  describe('Input change handlers', () => {
-    it('should delegate onNetWorthChange to CalculatorService', () => {
-      component.onNetWorthChange(50000);
-      expect(mockCalculatorService.currentNetWorth?.()).toBe(50000);
+  describe('updateAmount()', () => {
+    it('should write the value into the target service signal', () => {
+      component.updateAmount(component.currentNetWorth, 50000);
+      expect(currentNetWorthMockSignal()).toBe(50000);
+
+      component.updateAmount(component.yearsUntilRetirement, 25);
+      expect(yearsUntilRetirementMockSignal()).toBe(25);
+
+      component.updateAmount(component.targetMonthlyIncome, 6000);
+      expect(targetMonthlyIncomeMockSignal()).toBe(6000);
+
+      component.updateAmount(component.estimatedAnnualReturn, 8.5);
+      expect(estimatedAnnualReturnMockSignal()).toBe(8.5);
+
+      component.updateAmount(component.safeWithdrawalRate, 3.5);
+      expect(safeWithdrawalRateMockSignal()).toBe(3.5);
     });
 
-    it('should delegate onYearsChange to CalculatorService', () => {
-      component.onYearsChange(25);
-      expect(mockCalculatorService.yearsUntilRetirement?.()).toBe(25);
+    it('should default invalid/NaN input to 0', () => {
+      component.updateAmount(component.currentNetWorth, NaN);
+      expect(currentNetWorthMockSignal()).toBe(0);
     });
+  });
 
-    it('should delegate onTargetIncomeChange to CalculatorService', () => {
-      component.onTargetIncomeChange(6000);
-      expect(mockCalculatorService.targetMonthlyIncome?.()).toBe(6000);
-    });
+  describe('template bindings', () => {
+    it('should render the current service values in the number inputs', async () => {
+      currentNetWorthMockSignal.set(12345);
+      fixture.detectChanges();
+      // NgModel writes the value to the DOM in a microtask.
+      await fixture.whenStable();
 
-    it('should delegate onAnnualReturnChange to CalculatorService', () => {
-      component.onAnnualReturnChange(8.5);
-      expect(mockCalculatorService.estimatedAnnualReturn?.()).toBe(8.5);
-    });
+      const input: HTMLInputElement = fixture.nativeElement.querySelector(
+        'input[aria-label="Current Net Worth in dollars"]',
+      );
 
-    it('should delegate onWithdrawalRateChange to CalculatorService', () => {
-      component.onWithdrawalRateChange(3.5);
-      expect(mockCalculatorService.safeWithdrawalRate?.()).toBe(3.5);
-    });
-
-    it('should default invalid/NaN inputs to 0 in handlers', () => {
-      component.onNetWorthChange(NaN);
-      expect(mockCalculatorService.currentNetWorth?.()).toBe(0);
+      expect(input.value).toBe('12345');
     });
   });
 });

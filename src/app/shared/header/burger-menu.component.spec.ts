@@ -42,7 +42,7 @@ describe('BurgerMenuComponent', () => {
       imports: [BurgerMenuComponent],
       providers: [
         provideRouter([
-          { path: 'profile', component: RoutedStubComponent },
+          { path: '', component: RoutedStubComponent },
           { path: 'calculator', component: RoutedStubComponent },
         ]),
         { provide: AdBannerService, useValue: mockAdBannerService },
@@ -89,7 +89,7 @@ describe('BurgerMenuComponent', () => {
   it('should contain a Profile link with the person icon', () => {
     openMenu();
 
-    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[routerlink="/profile"]');
+    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[href="/"]');
 
     expect(link).not.toBeNull();
     expect(link!.classList.contains('mat-mdc-menu-item')).toBe(true);
@@ -100,7 +100,7 @@ describe('BurgerMenuComponent', () => {
   it('should contain a Calculator link with the calculate icon', () => {
     openMenu();
 
-    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[routerlink="/calculator"]');
+    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[href="/calculator"]');
 
     expect(link).not.toBeNull();
     expect(link!.classList.contains('mat-mdc-menu-item')).toBe(true);
@@ -111,7 +111,7 @@ describe('BurgerMenuComponent', () => {
   it('should close the menu when a navigation link is clicked', async () => {
     openMenu();
 
-    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[routerlink="/profile"]')!;
+    const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[href="/"]')!;
     link.click();
     fixture.detectChanges();
     await fixture.whenStable();

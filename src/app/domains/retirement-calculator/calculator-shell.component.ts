@@ -1,9 +1,8 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RetirementCalculatorComponent } from './calculator.component';
 
 @Component({
   selector: 'app-calculator-shell',
-  standalone: true,
   imports: [RetirementCalculatorComponent],
   template: `
     @defer (on immediate) {
@@ -15,5 +14,6 @@ import { RetirementCalculatorComponent } from './calculator.component';
       </section>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalculatorShellComponent {}

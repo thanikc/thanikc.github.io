@@ -75,7 +75,7 @@ describe('AssumptionDataService', () => {
 
   it('should return default fallbacks before HTTP requests resolve', () => {
     expect(service.isLive()).toBeFalsy();
-    expect(service.inflationRate()).toBe(0.025);
+    expect(service.inflationRate()).toBe(2.5);
     expect(service.estimatedAnnualReturn()).toBe(7);
     expect(service.safeWithdrawalRate()).toBe(4.0);
   });
@@ -97,9 +97,9 @@ describe('AssumptionDataService', () => {
     await TestBed.inject(ApplicationRef).whenStable();
 
     expect(service.isLive()).toBeTruthy();
-    expect(service.inflationRate()).toBe(0.034);
+    expect(service.inflationRate()).toBe(3.4);
     expect(service.estimatedAnnualReturn()).toBe(10); // single valid value → average = 10
-    expect(service.realAnnualReturn()).toBe(10 - 0.034);
+    expect(service.realAnnualReturn()).toBe(10 - 3.4);
   });
 
   it('should gracefully handle API errors by using fallbacks', () => {
@@ -114,7 +114,7 @@ describe('AssumptionDataService', () => {
     );
 
     expect(service.isLive()).toBeFalsy();
-    expect(service.inflationRate()).toBe(0.025);
+    expect(service.inflationRate()).toBe(2.5);
     expect(service.estimatedAnnualReturn()).toBe(7);
   });
 
