@@ -87,6 +87,19 @@
   }
 }
 
+.project-card {
+  text-decoration: none;
+}
+
+.external-icon {
+  color: var(--mat-sys-on-surface-variant);
+  transition: transform 0.25s ease;
+
+  .project-card:hover & {
+    transform: translate(2px, -2px);
+  }
+}
+
 .skill-chip {
   background-color: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
