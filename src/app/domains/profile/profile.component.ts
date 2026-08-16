@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -13,6 +14,8 @@ export interface SideProject {
   description: string;
   url: string;
   icon: string;
+  /** External projects open in a new tab; in-app routes navigate via the router. */
+  external: boolean;
 }
 
 const SKILL_CATEGORIES: readonly TechSkill[] = [
@@ -35,17 +38,26 @@ const SKILL_CATEGORIES: readonly TechSkill[] = [
 
 const SIDE_PROJECTS: readonly SideProject[] = [
   {
+    name: 'Retirement Calculator',
+    description:
+      'Projects the net worth and monthly contributions needed to hit your retirement number.',
+    url: '/calculator',
+    icon: 'calculate',
+    external: false,
+  },
+  {
     name: 'CrashDash',
     description:
       'A dashboard gauging the risk of a market crash by tracking a range of macro and market indicators.',
     url: 'https://crashdash.singdee.de/',
     icon: 'trending_down',
+    external: true,
   },
 ];
 
 @Component({
   selector: 'app-profile',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatButtonModule, MatIconModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

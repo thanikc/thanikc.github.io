@@ -9,5 +9,4 @@ export interface NavLink {
 /** Single source of truth for the desktop toolbar and the mobile burger menu. */
 export const NAV_LINKS: readonly NavLink[] = [
   { path: '/', label: 'Profile', icon: 'person', activeOptions: { exact: true } },
-  { path: '/calculator', label: 'Calculator', icon: 'calculate', activeOptions: { exact: false } },
 ];
