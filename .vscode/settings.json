@@ -15,14 +15,5 @@
   },
   "[scss]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "explorer.fileNesting.enabled": true,
-  "explorer.fileNesting.expand": false,
-  "explorer.fileNesting.patterns": {
-    "*.component.ts": "$(capture).component.html, $(capture).component.scss, $(capture).component.css, $(capture).component.spec.ts, $(capture).component.stories.ts",
-    "*.service.ts": "$(capture).service.spec.ts",
-    "*.pipe.ts": "$(capture).pipe.spec.ts",
-    "*.directive.ts": "$(capture).directive.spec.ts",
-    "*.module.ts": "$(capture)-routing.module.ts"
   }
 }
