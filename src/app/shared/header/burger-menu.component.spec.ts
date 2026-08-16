@@ -78,12 +78,12 @@ describe('BurgerMenuComponent', () => {
     expect(menuPanel()).not.toBeNull();
   });
 
-  it('should render exactly three menu items mirroring the desktop nav', () => {
+  it('should render exactly two menu items mirroring the desktop nav', () => {
     openMenu();
 
     const items = menuPanel()!.querySelectorAll('.mat-mdc-menu-item');
 
-    expect(items.length).toBe(3);
+    expect(items.length).toBe(2);
   });
 
   it('should contain a Profile link with the person icon', () => {
@@ -97,15 +97,12 @@ describe('BurgerMenuComponent', () => {
     expect(link!.textContent).toContain('Profile');
   });
 
-  it('should contain a Calculator link with the calculate icon', () => {
+  it('should not contain a Calculator link', () => {
     openMenu();
 
     const link = menuPanel()!.querySelector<HTMLAnchorElement>('a[href="/calculator"]');
 
-    expect(link).not.toBeNull();
-    expect(link!.classList.contains('mat-mdc-menu-item')).toBe(true);
-    expect(link!.querySelector('mat-icon')?.textContent?.trim()).toBe('calculate');
-    expect(link!.textContent).toContain('Calculator');
+    expect(link).toBeNull();
   });
 
   it('should close the menu when a navigation link is clicked', async () => {

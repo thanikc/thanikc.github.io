@@ -72,23 +72,40 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (project of sideProjects; track project.url; let i = $index) {
-        <a
-          [href]="project.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="skill-card project-card rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
-          [style.animation-delay.ms]="i * 80"
-          [attr.data-cta-tracking]="project.name"
-        >
-          <div class="flex items-center gap-4">
-            <div class="card-avatar p-3 rounded-lg flex items-center justify-center">
-              <mat-icon>{{ project.icon }}</mat-icon>
+        @if (project.external) {
+          <a
+            [href]="project.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="skill-card project-card rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
+            [style.animation-delay.ms]="i * 80"
+            [attr.data-cta-tracking]="project.name"
+          >
+            <div class="flex items-center gap-4">
+              <div class="card-avatar p-3 rounded-lg flex items-center justify-center">
+                <mat-icon>{{ project.icon }}</mat-icon>
+              </div>
+              <h3 class="text-lg font-bold">{{ project.name }}</h3>
+              <mat-icon class="external-icon ml-auto" aria-hidden="true">open_in_new</mat-icon>
             </div>
-            <h3 class="text-lg font-bold">{{ project.name }}</h3>
-            <mat-icon class="external-icon ml-auto" aria-hidden="true">open_in_new</mat-icon>
-          </div>
-          <p class="hero-subtitle text-sm">{{ project.description }}</p>
-        </a>
+            <p class="hero-subtitle text-sm">{{ project.description }}</p>
+          </a>
+        } @else {
+          <a
+            [routerLink]="project.url"
+            class="skill-card project-card rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
+            [style.animation-delay.ms]="i * 80"
+            [attr.data-cta-tracking]="project.name"
+          >
+            <div class="flex items-center gap-4">
+              <div class="card-avatar p-3 rounded-lg flex items-center justify-center">
+                <mat-icon>{{ project.icon }}</mat-icon>
+              </div>
+              <h3 class="text-lg font-bold">{{ project.name }}</h3>
+            </div>
+            <p class="hero-subtitle text-sm">{{ project.description }}</p>
+          </a>
+        }
       }
     </div>
   </section>

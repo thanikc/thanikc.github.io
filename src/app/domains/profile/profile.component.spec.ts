@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { expect, it, describe, beforeEach } from 'vitest';
 import { ProfileComponent } from './profile.component';
 
@@ -13,6 +14,7 @@ describe('ProfileComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
@@ -42,9 +44,22 @@ describe('ProfileComponent', () => {
   });
 
   it('should open external project links safely in a new tab', () => {
-    for (const link of projectLinks()) {
+    const externalLinks = projectLinks().filter(link =>
+      link.getAttribute('href')?.startsWith('http'),
+    );
+
+    expect(externalLinks.length).toBeGreaterThan(0);
+    for (const link of externalLinks) {
       expect(link.getAttribute('target')).toBe('_blank');
       expect(link.getAttribute('rel')).toBe('noopener noreferrer');
     }
+  });
+
+  it('should link to the Retirement Calculator as an in-app route', () => {
+    const calculatorLink = projectLinks().find(link => link.getAttribute('href') === '/calculator');
+
+    expect(calculatorLink).toBeDefined();
+    expect(calculatorLink!.textContent).toContain('Retirement Calculator');
+    expect(calculatorLink!.getAttribute('target')).toBeNull();
   });
 });
