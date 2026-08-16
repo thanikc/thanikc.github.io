@@ -1,0 +1,28 @@
+@if (visible()) {
+  <div
+    class="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-3 border-t border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between dark:border-slate-700 dark:bg-slate-900/95"
+    role="dialog"
+    aria-live="polite"
+    aria-label="Cookie consent"
+  >
+    <p class="text-sm text-slate-700 dark:text-slate-300">
+      This site uses cookies for analytics and ads. You can accept or reject non-essential cookies.
+    </p>
+    <div class="flex shrink-0 gap-2 self-end sm:self-auto">
+      <button
+        type="button"
+        class="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+        (click)="reject()"
+      >
+        Reject
+      </button>
+      <button
+        type="button"
+        class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
+        (click)="accept()"
+      >
+        Accept
+      </button>
+    </div>
+  </div>
+}

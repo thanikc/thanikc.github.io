@@ -6,6 +6,15 @@ export interface GtagWindow extends Window {
   gtag?: (...args: unknown[]) => void;
 }
 
+export type ConsentState = 'granted' | 'denied';
+
+export interface ConsentUpdate {
+  analytics_storage: ConsentState;
+  ad_storage: ConsentState;
+  ad_user_data: ConsentState;
+  ad_personalization: ConsentState;
+}
+
 function isGtagWindow(view: unknown): view is GtagWindow {
   return view !== null && typeof view === 'object' && 'document' in view && 'location' in view;
 }
@@ -43,6 +52,17 @@ export class AnalyticsService {
     }
 
     view.gtag('event', name, params);
+  }
+
+  /** Forwards a Consent Mode v2 update to the gtag.js queued in index.html. */
+  updateConsent(consent: ConsentUpdate): void {
+    const view = this.getWindow();
+
+    if (!view?.gtag) {
+      return;
+    }
+
+    view.gtag('consent', 'update', consent);
   }
 
   private getWindow(): GtagWindow | undefined {

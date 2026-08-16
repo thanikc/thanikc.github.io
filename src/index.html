@@ -36,13 +36,26 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
       rel="stylesheet"
     />
-    <script
-      id="Cookiebot"
-      src="https://consent.cookiebot.com/uc.js"
-      data-cbid="cb78c730-f919-4ff5-b9e5-ba0ffe9702bc"
-      type="text/javascript"
-      async
-    ></script>
+    <!--
+      Consent Mode v2 defaults must be queued before gtag.js/adsbygoogle load so
+      those scripts see "denied" on first read. The cookie consent banner
+      (CookieConsentService) calls gtag('consent', 'update', ...) once the user
+      makes a choice.
+    -->
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+      });
+      gtag('js', new Date());
+      gtag('config', 'G-HSC8QB0EQL');
+    </script>
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7075497553401538"
@@ -50,14 +63,6 @@
     ></script>
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSC8QB0EQL"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('js', new Date());
-      gtag('config', 'G-HSC8QB0EQL');
-    </script>
   </head>
   <body>
     <app-root></app-root>
