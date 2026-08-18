@@ -1,4 +1,4 @@
-<div class="container mx-auto px-4 py-8 max-w-5xl flex flex-col flex-1">
+<div class="profile-page flex flex-col flex-1">
   <section class="hero-card rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden flex flex-col">
     <div class="hero-photo" aria-hidden="true"></div>
     <div class="hero-glow" aria-hidden="true"></div>
@@ -9,10 +9,8 @@
         <span class="hero-badge flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
           {{ title }}
         </span>
-        <h1 class="hero-name text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Thanik Cheowtirakul
-        </h1>
-        <p class="hero-subtitle text-lg font-medium max-w-2xl">
+        <h1 class="hero-name text-3xl sm:text-4xl font-bold tracking-tight">Thanik Cheowtirakul</h1>
+        <p class="hero-subtitle text-base font-medium max-w-2xl">
           {{ subtitle }}
         </p>
         <p class="hero-intro text-base max-w-2xl leading-relaxed mt-auto pt-8">
@@ -50,6 +48,8 @@
             </div>
           </div>
         </article>
+      } @empty {
+        <p class="hero-subtitle text-sm">No skill categories to show yet.</p>
       }
     </div>
   </section>
@@ -96,6 +96,8 @@
             <p class="hero-subtitle text-sm">{{ project.description }}</p>
           </a>
         }
+      } @empty {
+        <p class="hero-subtitle text-sm">No side projects to show yet.</p>
       }
     </div>
   </section>

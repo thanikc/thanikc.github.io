@@ -1,0 +1,58 @@
+.info-card {
+  background-color: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline);
+}
+
+.info-icon {
+  color: var(--mat-sys-primary);
+}
+
+.info-title {
+  color: var(--mat-sys-on-surface);
+}
+
+.info-body {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.formula {
+  background-color: var(--mat-sys-surface-container-high);
+}
+
+// Green/amber carry the live-vs-baseline distinction, but the icon and label
+// carry it too, so the tone is never the only signal. `light-dark()` keeps the
+// pair following the same `color-scheme` the theme toggle sets on :root.
+.data-source-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &.live {
+    background-color: light-dark(#d1fae5, #05271c);
+    color: light-dark(#04543c, #6ee7b7);
+  }
+
+  &.baseline {
+    background-color: light-dark(#fef3c7, #2e1a03);
+    color: light-dark(#7a350c, #fcd34d);
+  }
+
+  &.loading {
+    background-color: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface-variant);
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+  }
+}
+
+.chip-icon {
+  font-size: 0.875rem;
+  width: 0.875rem;
+  height: 0.875rem;
+}

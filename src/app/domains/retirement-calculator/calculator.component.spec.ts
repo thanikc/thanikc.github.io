@@ -142,4 +142,26 @@ describe('RetirementCalculatorComponent', () => {
       expect(input.value).toBe('12345');
     });
   });
+
+  describe('document structure', () => {
+    // The calculator is the whole page on /calculator, so its title is the page
+    // title. Starting the outline at <h2> skipped the top level entirely.
+    it('titles the page with exactly one h1', () => {
+      const el = fixture.nativeElement as HTMLElement;
+
+      expect(el.querySelectorAll('h1').length).toBe(1);
+      expect(el.querySelector('h1')?.textContent).toContain('Retirement Calculator');
+    });
+
+    // Both forms are always rendered; a media query picks one, so the collapsed
+    // header never has to wrap or clip the live numbers.
+    it('offers a full and a compact summary of the assumptions', () => {
+      const description = (fixture.nativeElement as HTMLElement).querySelector(
+        'mat-panel-description',
+      );
+
+      expect(description?.textContent).toContain('7% return, 4% withdrawal rate');
+      expect(description?.textContent).toContain('7% / 4%');
+    });
+  });
 });

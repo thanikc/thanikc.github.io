@@ -43,6 +43,7 @@ const SOCIAL_LINKS: readonly SocialLink[] = [
   selector: 'app-footer',
   imports: [AdBannerToggleComponent],
   templateUrl: './footer.component.html',
+  styleUrl: './footer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FooterComponent {

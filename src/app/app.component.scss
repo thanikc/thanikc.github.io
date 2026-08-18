@@ -1,3 +1,10 @@
+// The skip link only becomes visible on focus, so it keeps the browser's own
+// focus ring rather than suppressing it.
+.skip-link:focus {
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}
+
 .app-shell {
   background-color: var(--mat-sys-surface);
   background-image:

@@ -3,13 +3,13 @@
 >
   <app-ad-banner-toggle />
 
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-2">
     @for (link of socialLinks; track link.label) {
       <a
         [href]="link.href"
         [attr.target]="link.external ? '_blank' : null"
         [attr.rel]="link.external ? 'noopener noreferrer' : null"
-        class="inline-flex items-center text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition-all duration-200 hover:-translate-y-0.5"
+        class="social-link inline-flex min-h-11 min-w-11 items-center justify-center rounded-full transition-transform duration-200 hover:-translate-y-0.5"
         [attr.aria-label]="link.ariaLabel"
         [attr.data-cta-tracking]="link.label"
       >

@@ -1,50 +1,38 @@
-<mat-card
-  class="mt-6 border border-[var(--mat-sys-outline-variant)] bg-[var(--mat-sys-surface-container-low)]"
->
-  <mat-card-header class="flex items-start">
+<mat-card class="info-card mt-6">
+  <mat-card-header class="flex items-start gap-2">
     <div class="flex grow">
-      <mat-icon matCardAvatar aria-hidden="true" class="text-[var(--mat-sys-primary)]"
-        >info</mat-icon
-      >
-      <mat-card-title class="text-base font-semibold text-[var(--mat-sys-on-surface)]">
+      <mat-icon matCardAvatar aria-hidden="true" class="info-icon">info</mat-icon>
+      <mat-card-title class="info-title text-base font-semibold">
         How It Is Calculated & Underlying Assumptions
       </mat-card-title>
     </div>
 
     <div class="flex justify-self-end">
       @if (isLoading()) {
-        <div
-          class="flex items-center gap-1.5 rounded-full bg-[var(--mat-sys-surface-container-high)] px-3 py-1 text-xs font-medium text-[var(--mat-sys-on-surface-variant)]"
-        >
+        <div class="data-source-chip loading">
           <mat-spinner diameter="12"></mat-spinner>
           <span>Fetching live rates...</span>
         </div>
       } @else if (isLive()) {
-        <span
-          class="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-950/50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:text-emerald-300"
-        >
-          <mat-icon class="!h-3.5 !w-3.5 !text-xs" aria-hidden="true">check_circle</mat-icon>
+        <span class="data-source-chip live">
+          <mat-icon class="chip-icon" aria-hidden="true">check_circle</mat-icon>
           Live Economic Data
         </span>
       } @else {
-        <span
-          class="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-950/50 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300"
-        >
-          <mat-icon class="!h-3.5 !w-3.5 !text-xs" aria-hidden="true">history</mat-icon>
+        <span class="data-source-chip baseline">
+          <mat-icon class="chip-icon" aria-hidden="true">history</mat-icon>
           Baseline Assumptions
         </span>
       }
     </div>
   </mat-card-header>
 
-  <mat-card-content class="mt-3 space-y-3 text-sm text-[var(--mat-sys-on-surface-variant)]">
+  <mat-card-content class="info-body mt-3 space-y-3 text-sm">
     <p>
       <strong>1. Target Nest Egg:</strong> Based on the standard
       <strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate</strong> (Trinity Study rule), your
       required nest egg is calculated as:
-      <code
-        class="block my-1 rounded bg-[var(--mat-sys-surface-container-high)] p-2 font-mono text-xs"
-      >
+      <code class="formula block my-1 rounded p-2 font-mono text-xs">
         Target Nest Egg = (Desired Monthly Income × 12) / {{ safeWithdrawalRate() / 100 }}
       </code>
     </p>
@@ -53,9 +41,7 @@
       <strong>2. Current Net Worth Growth:</strong> Your existing net worth is assumed to compound
       annually at an estimated rate of <strong>{{ estimatedAnnualReturn() }}%</strong> over the
       remaining years until retirement:
-      <code
-        class="block my-1 rounded bg-[var(--mat-sys-surface-container-high)] p-2 font-mono text-xs"
-      >
+      <code class="formula block my-1 rounded p-2 font-mono text-xs">
         Future Value of Net Worth = Current Net Worth × (1 + Return Rate)^Years
       </code>
     </p>

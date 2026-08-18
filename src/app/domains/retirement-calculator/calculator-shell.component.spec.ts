@@ -59,7 +59,7 @@ describe('CalculatorShellComponent', () => {
     fixture = TestBed.createComponent(CalculatorShellComponent);
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('h2')?.textContent).toContain('Retirement Calculator');
+    expect(el.querySelector('h1')?.textContent).toContain('Retirement Calculator');
     expect(el.querySelector('app-retirement-calculator')).toBeNull();
   });
 
@@ -69,5 +69,15 @@ describe('CalculatorShellComponent', () => {
     const deferBlocks = await fixture.getDeferBlocks();
     await deferBlocks[0].render(DeferBlockState.Complete);
     expect(fixture.nativeElement.querySelector('app-retirement-calculator')).not.toBeNull();
+  });
+
+  // The placeholder is swapped for a much taller calculator; without a reserved
+  // box the footer jumps down the moment the defer block resolves.
+  it('reserves the calculator height in the placeholder', () => {
+    fixture = TestBed.createComponent(CalculatorShellComponent);
+    fixture.detectChanges();
+    const section = (fixture.nativeElement as HTMLElement).querySelector('section');
+
+    expect(section?.classList.contains('min-h-160')).toBe(true);
   });
 });

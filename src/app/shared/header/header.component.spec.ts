@@ -34,4 +34,12 @@ describe('HeaderComponent', () => {
 
     expect(compiled.querySelector('app-theme-toggle')).not.toBeNull();
   });
+
+  // Header, <main> and the footer share one content column; a wider header made
+  // the brand mark hang outside the page content on large screens.
+  it('should align the header content with the main content column', () => {
+    const container = (fixture.nativeElement as HTMLElement).querySelector('.header-container');
+
+    expect(container?.classList.contains('max-w-6xl')).toBe(true);
+  });
 });

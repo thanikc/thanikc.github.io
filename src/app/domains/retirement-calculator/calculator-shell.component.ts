@@ -8,8 +8,10 @@ import { RetirementCalculatorComponent } from './calculator.component';
     @defer (on immediate) {
       <app-retirement-calculator />
     } @placeholder {
-      <section class="calculator-container mx-auto max-w-5xl rounded-2xl px-4 py-8">
-        <h2 class="text-2xl font-bold mb-6">Retirement Calculator</h2>
+      <!-- min-h matches the rendered calculator so the footer does not jump
+           when the defer block resolves. -->
+      <section class="min-h-160">
+        <h1 class="text-2xl font-bold mb-6">Retirement Calculator</h1>
         <p aria-live="polite">Loading…</p>
       </section>
     }

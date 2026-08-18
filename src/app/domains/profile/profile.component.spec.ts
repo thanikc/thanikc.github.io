@@ -114,10 +114,10 @@ describe('ProfileComponent', () => {
 
   it('pins the ad slot to the bottom of the page above the footer', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const container = compiled.querySelector('.container');
+    const page = compiled.querySelector('.profile-page');
     const adSlot = compiled.querySelector('.ad-slot');
 
-    expect(container?.classList.contains('flex-1')).toBe(true);
+    expect(page?.classList.contains('flex-1')).toBe(true);
     expect(adSlot?.classList.contains('mt-auto')).toBe(true);
   });
 
@@ -160,5 +160,15 @@ describe('ProfileComponent', () => {
     ).componentInstance;
 
     expect(bannerComponent.visible()).toBe(false);
+  });
+
+  // <main> already applies the page container, gutters and max width; repeating
+  // them here inset the content twice and pinned it to a narrower column.
+  it('does not repeat the page gutters already applied by <main>', () => {
+    const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
+
+    expect(page?.classList.contains('container')).toBe(false);
+    expect(page?.classList.contains('px-4')).toBe(false);
+    expect(page?.classList.contains('max-w-5xl')).toBe(false);
   });
 });

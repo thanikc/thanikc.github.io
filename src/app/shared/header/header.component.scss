@@ -4,6 +4,10 @@
 }
 
 .app-header {
+  // The inner container owns the page gutter. The toolbar's own 16px padding
+  // stacks on top of it and pushes the brand 16px outside the content column
+  // at every width the max-width does not absorb (i.e. below ~1184px).
+  padding: 0;
   background-color: color-mix(in srgb, var(--mat-sys-surface-container) 82%, transparent);
   backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
