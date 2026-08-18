@@ -26,6 +26,14 @@ describe('ProfileComponent', () => {
     expect(component).toBeDefined();
   });
 
+  it('should render the intro paragraph in the hero section', () => {
+    const intro = (fixture.nativeElement as HTMLElement).querySelector('.hero-intro');
+
+    expect(intro).not.toBeNull();
+    expect(intro!.textContent?.trim()).toBe(component.intro);
+    expect(component.intro.length).toBeGreaterThan(0);
+  });
+
   it('should render one card per configured side project', () => {
     expect(projectLinks().length).toBe(component.sideProjects.length);
     expect(projectLinks().map(link => link.getAttribute('href'))).toEqual(
