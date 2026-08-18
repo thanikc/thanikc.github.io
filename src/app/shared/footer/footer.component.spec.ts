@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { FooterComponent } from './footer.component';
 
 describe('FooterComponent', () => {
@@ -14,6 +15,7 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FooterComponent],
+      providers: [provideRouter([])], // Provides Router & ActivatedRoute for AdBannerService
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);
@@ -40,9 +42,18 @@ describe('FooterComponent', () => {
     expect(footer?.classList.contains('max-w-6xl')).toBe(true);
   });
 
-  it('should right-align the links', () => {
+  it('should space the ad toggle and the links apart', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('footer')?.classList.contains('justify-end')).toBe(true);
+    expect(compiled.querySelector('footer')?.classList.contains('justify-between')).toBe(true);
+  });
+
+  it('should render the ad banner toggle aligned to the left', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const footer = compiled.querySelector('footer');
+    const toggle = footer?.querySelector('app-ad-banner-toggle');
+
+    expect(toggle).not.toBeNull();
+    expect(footer?.firstElementChild).toBe(toggle);
   });
 
   it('should render exactly one tracked, icon-only link each for Email, GitHub, and LinkedIn', () => {
