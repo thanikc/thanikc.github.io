@@ -26,7 +26,10 @@
   }
 }
 
+// The photo crowds the narrow mobile layout, so it only appears once the hero
+// is wide enough for the text to sit clear of it.
 .hero-photo {
+  display: none;
   position: absolute;
   inset: 0;
   background-image:
@@ -39,6 +42,10 @@
     url('/hero-lagoon.jpg');
   background-size: cover, cover;
   background-position: center, center;
+
+  @media (min-width: 768px) {
+    display: block;
+  }
 }
 
 .hero-glow {
