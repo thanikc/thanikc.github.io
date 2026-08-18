@@ -12,6 +12,7 @@
 }
 
 .hero-card {
+  min-height: 320px;
   background:
     radial-gradient(
       120% 140% at 100% 0%,
@@ -19,6 +20,25 @@
       transparent 60%
     ),
     var(--mat-sys-surface-container-lowest);
+
+  @media (min-width: 768px) {
+    min-height: 420px;
+  }
+}
+
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 94%, transparent) 0%,
+      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 55%, transparent) 45%,
+      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 20%, transparent) 100%
+    ),
+    url('/hero-lagoon.jpg');
+  background-size: cover, cover;
+  background-position: center, center;
 }
 
 .hero-glow {
@@ -121,6 +141,7 @@
     color: #000;
   }
 
+  .hero-photo,
   .hero-glow {
     display: none;
   }
