@@ -1,29 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { signal } from '@angular/core';
-import { By } from '@angular/platform-browser';
-import { AdBannerService } from './domains/ads/ad-banner.service';
-import { AdBannerComponent } from './domains/ads/ad-banner.component';
 import { provideRouter } from '@angular/router';
 
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
 
-  const mockShowBanner = signal(true);
-  const mockRouteAllowsAds = signal(true);
-  const mockAdBannerService = {
-    showBanner: mockShowBanner,
-    routeAllowsAds: mockRouteAllowsAds,
-  };
-
   beforeEach(async () => {
-    mockShowBanner.set(true);
-    mockRouteAllowsAds.set(true);
-
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([]), { provide: AdBannerService, useValue: mockAdBannerService }],
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppComponent);
@@ -43,37 +29,5 @@ describe('AppComponent', () => {
   it('should contain a main router outlet for lazy loaded views', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('router-outlet')).not.toBeNull();
-  });
-
-  it('should display the ad banner when showBanner signal is true', () => {
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(true);
-  });
-
-  it('should remove the ad banner from the DOM when showBanner signal becomes false', () => {
-    mockShowBanner.set(false);
-
-    fixture.detectChanges();
-
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(false);
-  });
-
-  it('hides the ad banner on routes that disallow ads regardless of user preference', () => {
-    mockRouteAllowsAds.set(false);
-
-    fixture.detectChanges();
-
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(false);
   });
 });

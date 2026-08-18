@@ -1,7 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach } from 'vitest';
 import { ProfileComponent } from './profile.component';
+import { AdBannerService } from '../ads/ad-banner.service';
+import { AdBannerComponent } from '../ads/ad-banner.component';
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
@@ -11,10 +15,20 @@ describe('ProfileComponent', () => {
     ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.project-card'),
   ];
 
+  const mockShowBanner = signal(true);
+  const mockRouteAllowsAds = signal(true);
+  const mockAdBannerService = {
+    showBanner: mockShowBanner,
+    routeAllowsAds: mockRouteAllowsAds,
+  };
+
   beforeEach(async () => {
+    mockShowBanner.set(true);
+    mockRouteAllowsAds.set(true);
+
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: AdBannerService, useValue: mockAdBannerService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
@@ -69,5 +83,67 @@ describe('ProfileComponent', () => {
     expect(calculatorLink).toBeDefined();
     expect(calculatorLink!.textContent).toContain('Retirement Calculator');
     expect(calculatorLink!.getAttribute('target')).toBeNull();
+  });
+
+  it('renders a labeled ad slot directly after the side projects section', () => {
+    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
+    const sideProjectsSection = sections.find(section =>
+      section.textContent?.includes('Side Projects'),
+    );
+    const adSlot = sideProjectsSection?.nextElementSibling;
+
+    expect(adSlot?.classList.contains('ad-slot')).toBe(true);
+    expect(adSlot?.textContent).toContain('Advertisement');
+    expect(adSlot?.querySelector('app-ad-banner')).not.toBeNull();
+  });
+
+  it('pins the ad slot to the bottom of the page above the footer', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const container = compiled.querySelector('.container');
+    const adSlot = compiled.querySelector('.ad-slot');
+
+    expect(container?.classList.contains('flex-1')).toBe(true);
+    expect(adSlot?.classList.contains('mt-auto')).toBe(true);
+  });
+
+  it('keeps at least a 2rem gap between the side projects section and the ad slot', () => {
+    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
+    const sideProjectsSection = sections.find(section =>
+      section.textContent?.includes('Side Projects'),
+    );
+
+    // mb-8 = 2rem, applied as a fixed margin so it survives even when the
+    // ad slot's mt-auto collapses to 0 on a short page.
+    expect(sideProjectsSection?.classList.contains('mb-8')).toBe(true);
+  });
+
+  it('should display the ad banner when showBanner signal is true', () => {
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
+
+    expect(bannerComponent.visible()).toBe(true);
+  });
+
+  it('should hide the ad banner when showBanner signal becomes false', () => {
+    mockShowBanner.set(false);
+    fixture.detectChanges();
+
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
+
+    expect(bannerComponent.visible()).toBe(false);
+  });
+
+  it('hides the ad banner on routes that disallow ads regardless of user preference', () => {
+    mockRouteAllowsAds.set(false);
+    fixture.detectChanges();
+
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
+
+    expect(bannerComponent.visible()).toBe(false);
   });
 });

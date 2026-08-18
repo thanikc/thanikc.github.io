@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { AdBannerComponent } from '../ads/ad-banner.component';
+import { AdBannerService } from '../ads/ad-banner.service';
 
 export interface TechSkill {
   category: string;
@@ -56,12 +58,14 @@ const SIDE_PROJECTS: readonly SideProject[] = [
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, MatIconModule],
+  imports: [RouterLink, MatIconModule, AdBannerComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileComponent {
+  private readonly adBanner = inject(AdBannerService);
+
   // Static presentation content: no reactivity needed.
   readonly title = 'Full-Stack Engineer';
   readonly subtitle = 'Enterprise Angular • Spring Boot • OpenShift Solutions';
@@ -69,4 +73,7 @@ export class ProfileComponent {
     'I build enterprise web applications end to end: Angular front ends with Signals and standalone components, backed by Spring Boot microservices running on Kubernetes and OpenShift. AI assistants are part of my day-to-day workflow, from scaffolding tests to reviewing architecture decisions. This site is also my sandbox for trying out new patterns in production.';
   readonly skillCategories = SKILL_CATEGORIES;
   readonly sideProjects = SIDE_PROJECTS;
+  readonly showBanner = computed(
+    () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),
+  );
 }
