@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { HeaderComponent } from './header.component';
-import { NAV_LINKS } from './nav-links';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
@@ -22,34 +21,23 @@ describe('HeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the application title in the toolbar', () => {
+  it('should render the brand link to the home route', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const titleEl = compiled.querySelector('.app-title') || compiled.querySelector('mat-toolbar');
+    const brandLink = compiled.querySelector('.brand-link');
 
-    expect(titleEl?.textContent).toBeTruthy();
-  });
-
-  it('should render one navigation link per configured nav entry', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const navLinks = compiled.querySelectorAll('nav a[href]');
-
-    expect(navLinks.length).toBe(NAV_LINKS.length);
-    expect([...navLinks].map(link => link.getAttribute('href'))).toEqual(
-      NAV_LINKS.map(link => link.path),
-    );
-  });
-
-  it('should meet accessibility standard with an explicit nav landmark', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const navElement = compiled.querySelector('nav');
-
-    expect(navElement).not.toBeNull();
-    expect(navElement?.getAttribute('aria-label')).toBeTruthy();
+    expect(brandLink?.getAttribute('href')).toBe('/');
+    expect(brandLink?.textContent).toContain('Dev Info');
   });
 
   it('should render the theme toggle', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('app-theme-toggle')).not.toBeNull();
+  });
+
+  it('should not render a burger menu', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('app-burger-menu')).toBeNull();
   });
 });

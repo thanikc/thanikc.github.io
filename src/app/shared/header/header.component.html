@@ -5,31 +5,6 @@
       <span>Dev Info</span>
     </a>
 
-    <nav aria-label="Main Navigation" class="nav-links hidden items-center gap-2 md:flex">
-      @for (link of navLinks; track link.path) {
-        <a
-          mat-button
-          [routerLink]="link.path"
-          routerLinkActive="active-link"
-          [routerLinkActiveOptions]="link.activeOptions"
-        >
-          <mat-icon aria-hidden="true">{{ link.icon }}</mat-icon>
-          {{ link.label }}
-        </a>
-      }
-
-      <app-ad-banner-toggle />
-      <app-theme-toggle />
-    </nav>
-
-    <app-theme-toggle class="md:hidden" />
-
-    @defer (on viewport) {
-      <app-burger-menu class="md:hidden" />
-    } @placeholder {
-      <button mat-icon-button aria-label="Open menu" class="md:hidden">
-        <mat-icon aria-hidden="true">menu</mat-icon>
-      </button>
-    }
+    <app-theme-toggle />
   </div>
 </mat-toolbar>
