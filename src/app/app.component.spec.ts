@@ -2,6 +2,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 
+// Tailwind palette utilities are frozen to one hex value and ignore the theme
+// toggle; themed colour must come from the `--mat-sys-*` tokens instead.
+const PALETTE_CLASS =
+  /^(?:(?:hover|focus|focus-visible|active|dark|sm|md|lg):)*(?:bg|text|border|ring|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?$/;
+
+const paletteClassesIn = (root: Element): string[] =>
+  [root, ...root.querySelectorAll('*')].flatMap(el =>
+    [...el.classList].filter(c => PALETTE_CLASS.test(c)),
+  );
+
 describe('AppComponent', () => {
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
@@ -41,5 +51,24 @@ describe('AppComponent', () => {
     const classes = Array.from(shell!.classList);
 
     expect(classes.filter(c => /^(dark:)?text-slate-/.test(c))).toEqual([]);
+  });
+
+  it('should colour the skip link from theme tokens, not the Tailwind palette', () => {
+    const skipLink = (fixture.nativeElement as HTMLElement).querySelector(
+      'a[href="#main-content"]',
+    );
+
+    expect(skipLink).not.toBeNull();
+    expect(paletteClassesIn(skipLink!)).toEqual([]);
+  });
+
+  // The skip link focuses <main> programmatically. Suppressing its outline left
+  // keyboard users with no indication of where focus landed, and without a
+  // scroll margin the sticky header covered the top of the target.
+  it('should keep the skip-link target visible below the sticky header', () => {
+    const main = (fixture.nativeElement as HTMLElement).querySelector('main');
+
+    expect(main?.classList.contains('focus:outline-none')).toBe(false);
+    expect([...main!.classList].some(c => /^scroll-mt-/.test(c))).toBe(true);
   });
 });

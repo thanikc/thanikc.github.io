@@ -33,9 +33,15 @@
   }
 }
 
+// Paired with `background-size: 200% auto`: the sweep starts on the left half of
+// the gradient and settles on the right half, so a single run has a defined
+// resting state and nothing has to loop.
 @keyframes shine {
+  from {
+    background-position: 0% center;
+  }
   to {
-    background-position: 200% center;
+    background-position: 100% center;
   }
 }
 

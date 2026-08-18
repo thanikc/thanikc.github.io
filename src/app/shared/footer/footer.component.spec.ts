@@ -2,6 +2,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { FooterComponent } from './footer.component';
 
+// Tailwind palette utilities are frozen to one hex value and ignore the theme
+// toggle; themed colour must come from the `--mat-sys-*` tokens instead.
+const PALETTE_CLASS =
+  /^(?:(?:hover|focus|focus-visible|active|dark|sm|md|lg):)*(?:bg|text|border|ring|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?$/;
+
+const paletteClassesIn = (root: Element): string[] =>
+  [root, ...root.querySelectorAll('*')].flatMap(el =>
+    [...el.classList].filter(c => PALETTE_CLASS.test(c)),
+  );
+
 describe('FooterComponent', () => {
   let component: FooterComponent;
   let fixture: ComponentFixture<FooterComponent>;
@@ -90,5 +100,20 @@ describe('FooterComponent', () => {
     expect(linkFor('LinkedIn')?.getAttribute('href')).toBe(
       'https://de.linkedin.com/in/thanik-cheowtirakul-7a259526',
     );
+  });
+
+  // Icon-only links wrapped nothing but a 20px SVG, so the tap target was 20px.
+  it('should give every social link a 44px minimum hit area', () => {
+    for (const link of links()) {
+      expect(link.classList.contains('min-h-11')).toBe(true);
+      expect(link.classList.contains('min-w-11')).toBe(true);
+      expect(link.classList.contains('justify-center')).toBe(true);
+    }
+  });
+
+  it('should colour the social links from theme tokens, not the Tailwind palette', () => {
+    for (const link of links()) {
+      expect(paletteClassesIn(link)).toEqual([]);
+    }
   });
 });

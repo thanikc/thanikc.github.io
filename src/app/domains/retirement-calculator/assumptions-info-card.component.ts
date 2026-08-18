@@ -8,6 +8,7 @@ import { DEFAULT_ANNUAL_RETURN, DEFAULT_SAFE_WITHDRAWAL_RATE } from './calculato
   selector: 'app-assumptions-info-card',
   imports: [MatCardModule, MatIconModule, MatProgressSpinnerModule],
   templateUrl: './assumptions-info-card.component.html',
+  styleUrl: './assumptions-info-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssumptionsInfoCardComponent {

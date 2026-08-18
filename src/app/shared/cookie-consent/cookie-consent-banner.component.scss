@@ -1,0 +1,9 @@
+.cookie-banner {
+  background-color: color-mix(in srgb, var(--mat-sys-surface-container) 95%, transparent);
+  border-color: var(--mat-sys-outline-variant);
+  color: var(--mat-sys-on-surface);
+}
+
+.cookie-text {
+  color: var(--mat-sys-on-surface-variant);
+}

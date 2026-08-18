@@ -1,5 +1,5 @@
-<section class="calculator-container mx-auto max-w-5xl rounded-2xl px-4 py-8">
-  <h2 class="text-2xl font-bold mb-6">Retirement Calculator</h2>
+<section>
+  <h1 class="text-2xl font-bold mb-6">Retirement Calculator</h1>
 
   <form class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
     <mat-form-field appearance="outline" class="w-full">
@@ -52,16 +52,24 @@
   </form>
 
   <mat-accordion class="mb-8 block">
-    <mat-expansion-panel
-      class="assumptions-panel rounded-xl border border-[var(--mat-sys-outline-variant)]"
-    >
-      <mat-expansion-panel-header class="assumptions-panel-header">
-        <mat-panel-title class="flex items-center gap-2 font-medium shrink-0">
-          <mat-icon class="text-[var(--mat-sys-primary)]">tune</mat-icon>
-          <span class="truncate">Adjust Investment Assumptions</span>
+    <mat-expansion-panel class="assumptions-panel rounded-xl">
+      <!-- The header stays a single Material-sized row at every width: the
+           label shortens and the summary switches to a compact form rather
+           than wrapping. The summary never shrinks — the live numbers are the
+           part worth reading while the panel is closed. -->
+      <mat-expansion-panel-header>
+        <mat-panel-title class="flex flex-none items-center gap-2 font-medium">
+          <mat-icon class="panel-icon" aria-hidden="true">tune</mat-icon>
+          <span class="sm:hidden">Assumptions</span>
+          <span class="hidden sm:inline">Investment Assumptions</span>
         </mat-panel-title>
-        <mat-panel-description class="truncate">
-          {{ estimatedAnnualReturn() }}% return, {{ safeWithdrawalRate() }}% withdrawal rate
+        <mat-panel-description class="grow justify-end whitespace-nowrap">
+          <span class="hidden sm:inline">
+            {{ estimatedAnnualReturn() }}% return, {{ safeWithdrawalRate() }}% withdrawal rate
+          </span>
+          <span class="sm:hidden">
+            {{ estimatedAnnualReturn() }}% / {{ safeWithdrawalRate() }}%
+          </span>
         </mat-panel-description>
       </mat-expansion-panel-header>
 
