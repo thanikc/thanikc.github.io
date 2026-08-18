@@ -1,1 +1,18 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* By default `dark:` keys off the OS `prefers-color-scheme`, which ignores the
+   theme toggle's `data-theme` override and leaves Tailwind-coloured text
+   fighting token-coloured backgrounds. Mirror the resolution used for the
+   surface tokens in material.scss: an explicit override wins, otherwise fall
+   back to the OS preference. */
+@custom-variant dark {
+  &:where([data-theme='dark'], [data-theme='dark'] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme='light']) *, :root:not([data-theme='light'])) {
+      @slot;
+    }
+  }
+}

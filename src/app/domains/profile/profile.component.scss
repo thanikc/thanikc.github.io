@@ -67,10 +67,20 @@
   background-clip: text;
   color: transparent;
   animation: shine 6s linear infinite;
+  // drop-shadow, not text-shadow: it haloes the gradient text's alpha shape
+  // instead of painting a solid glyph over its fill.
+  filter: drop-shadow(0 0 2px var(--mat-sys-surface-container-lowest))
+    drop-shadow(0 0 6px var(--mat-sys-surface-container-lowest));
 }
 
 .hero-subtitle {
   color: var(--mat-sys-on-surface-variant);
+}
+
+// Tailwind's `border-b` leaves the colour as `currentColor`, which draws the
+// rule at full heading strength. Divider borders use the outline token.
+.skills-header {
+  border-color: var(--mat-sys-outline-variant);
 }
 
 .card-avatar {
