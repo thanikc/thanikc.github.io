@@ -36,6 +36,16 @@
       href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem('theme-mode');
+          if (mode === 'light' || mode === 'dark') {
+            document.documentElement.setAttribute('data-theme', mode);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <!--
       Consent Mode v2 defaults must be queued before gtag.js/adsbygoogle load so
       those scripts see "denied" on first read. The cookie consent banner

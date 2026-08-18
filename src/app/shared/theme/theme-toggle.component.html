@@ -1,0 +1,16 @@
+<button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Choose color theme">
+  <mat-icon aria-hidden="true">{{ icon() }}</mat-icon>
+</button>
+
+<mat-menu #menu="matMenu">
+  @for (option of options; track option.mode) {
+    <button
+      mat-menu-item
+      (click)="selectMode(option.mode)"
+      [attr.aria-pressed]="mode() === option.mode"
+    >
+      <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
+      <span>{{ option.label }}</span>
+    </button>
+  }
+</mat-menu>

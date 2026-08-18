@@ -46,4 +46,10 @@ describe('HeaderComponent', () => {
     expect(navElement).not.toBeNull();
     expect(navElement?.getAttribute('aria-label')).toBeTruthy();
   });
+
+  it('should render the theme toggle', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('app-theme-toggle')).not.toBeNull();
+  });
 });
