@@ -2,16 +2,13 @@ import { TestBed } from '@angular/core/testing';
 import { DOCUMENT } from '@angular/common';
 import { vi } from 'vitest';
 import { AnalyticsService } from './analytics.service';
-import { GA_MEASUREMENT_ID } from './ga-measurement-id.token';
 
 describe('AnalyticsService', () => {
   let service: AnalyticsService;
   let document: Document;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [{ provide: GA_MEASUREMENT_ID, useValue: 'G-TEST' }],
-    });
+    TestBed.configureTestingModule({});
     service = TestBed.inject(AnalyticsService);
     document = TestBed.inject(DOCUMENT);
   });

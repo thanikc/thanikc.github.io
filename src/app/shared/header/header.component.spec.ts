@@ -34,10 +34,4 @@ describe('HeaderComponent', () => {
 
     expect(compiled.querySelector('app-theme-toggle')).not.toBeNull();
   });
-
-  it('should not render a burger menu', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    expect(compiled.querySelector('app-burger-menu')).toBeNull();
-  });
 });

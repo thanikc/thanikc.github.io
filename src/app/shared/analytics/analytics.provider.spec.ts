@@ -5,15 +5,14 @@ import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import { provideAnalytics } from './analytics.provider';
 import { AnalyticsService } from './analytics.service';
-import { GA_MEASUREMENT_ID } from './ga-measurement-id.token';
 
 describe('provideAnalytics()', () => {
   let events: Subject<NavigationEnd>;
 
-  function configure(measurementId: string): void {
+  function configure(): void {
     events = new Subject<NavigationEnd>();
     TestBed.configureTestingModule({
-      providers: [provideAnalytics(measurementId), { provide: Router, useValue: { events } }],
+      providers: [provideAnalytics(), { provide: Router, useValue: { events } }],
     });
   }
 
@@ -22,18 +21,12 @@ describe('provideAnalytics()', () => {
     delete (window as any).dataLayer;
   });
 
-  it('should provide the configured measurement id via GA_MEASUREMENT_ID', () => {
-    configure('G-TEST');
-
-    expect(TestBed.inject(GA_MEASUREMENT_ID)).toBe('G-TEST');
-  });
-
   it('should track a page_view with urlAfterRedirects on NavigationEnd', () => {
     const trackSpy = vi
       .spyOn(AnalyticsService.prototype, 'trackPageView')
       .mockImplementation(() => {});
 
-    configure('G-TEST');
+    configure();
     TestBed.inject(EnvironmentInjector);
 
     events.next(new NavigationEnd(1, '/first', '/retirement-calculator'));
