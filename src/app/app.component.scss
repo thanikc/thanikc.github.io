@@ -17,3 +17,20 @@
 main {
   animation: page-fade 0.35s ease;
 }
+
+@media print {
+  app-header,
+  app-ad-banner,
+  app-footer,
+  app-cookie-consent-banner {
+    display: none;
+  }
+
+  .app-shell {
+    background: none;
+  }
+
+  main {
+    animation: none;
+  }
+}

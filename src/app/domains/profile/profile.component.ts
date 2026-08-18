@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 export interface TechSkill {
@@ -57,7 +56,7 @@ const SIDE_PROJECTS: readonly SideProject[] = [
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, MatButtonModule, MatIconModule],
+  imports: [RouterLink, MatIconModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

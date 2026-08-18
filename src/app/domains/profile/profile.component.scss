@@ -46,17 +46,6 @@
   animation: shine 6s linear infinite;
 }
 
-.github-cta {
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px -6px color-mix(in srgb, var(--mat-sys-primary) 45%, transparent);
-  }
-}
-
 .hero-subtitle {
   color: var(--mat-sys-on-surface-variant);
 }
@@ -107,5 +96,58 @@
 
   &:hover {
     transform: translateY(-2px) scale(1.05);
+  }
+}
+
+/** Resume-style printout: flatten decoration, drop CTAs and animation. */
+@media print {
+  .hero-card,
+  .skill-card {
+    background: none;
+    border: 1px solid #000;
+    box-shadow: none;
+    color: #000;
+  }
+
+  .hero-glow {
+    display: none;
+  }
+
+  .hero-name {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: #000;
+    animation: none;
+  }
+
+  .hero-subtitle,
+  .hero-intro {
+    color: #000;
+  }
+
+  .skill-card {
+    opacity: 1;
+    animation: none;
+    transform: none;
+    break-inside: avoid;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  .project-card {
+    break-inside: avoid;
+  }
+
+  .skill-chip {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+  }
+
+  .external-icon {
+    display: none;
   }
 }
