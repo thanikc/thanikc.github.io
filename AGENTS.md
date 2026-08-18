@@ -40,3 +40,7 @@ Before executing a complex task, review the corresponding skill folder to unders
 ### Code & Development
 
 - **Angular:** Refer to `.agents/skills/angular-developer/SKILL.md` for specific component, signal, and dependency injection patterns.
+
+### Design & UX/UI
+
+- **UX/UI:** For any UX or UI task (layout, styling, theming, responsiveness, accessibility, interaction, or visual design), read `.agents/rules/UX-UI.md` first and follow its rules.
