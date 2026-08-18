@@ -32,25 +32,38 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
-// The photo only appears once the hero is wide enough for the text column
-// (capped at max-w-2xl) to clear it. Below 1024px the text spans the whole
-// card, so the photo would sit directly behind every line.
-//
 // The scrim stays near-opaque across the text column and only opens up on the
 // right: measured over the brightest part of the image, the intro paragraph
 // reads at 2.8:1 against the previous 75%-at-45% ramp.
+$hero-scrim: linear-gradient(
+  100deg,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 97%, transparent) 0%,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 92%, transparent) 62%,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 45%, transparent) 100%
+);
+
+// The photo only appears once the hero is wide enough for the text column
+// (capped at max-w-2xl) to clear it. Below 1024px the text spans the whole
+// card, so the photo would sit directly behind every line -- and because the
+// element is `display: none` there, no variant is fetched on small screens.
 .hero-photo {
   display: none;
   position: absolute;
   inset: 0;
+  // No `srcset`/width variants here, and none are useful: this is a background
+  // image, and `max-w-6xl` pins the card to 1120px, so the paint box is a fixed
+  // ~992-1120px at every viewport that renders it. Only the *format* varies, so
+  // `image-set()` is the right knob. The plain-url declaration below is the
+  // fallback for engines without `image-set()`/`type()`, which drop the whole
+  // declaration rather than the unsupported entry.
+  background-image: $hero-scrim, url('/hero-lagoon.jpg');
   background-image:
-    linear-gradient(
-      100deg,
-      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 97%, transparent) 0%,
-      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 92%, transparent) 62%,
-      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 45%, transparent) 100%
-    ),
-    url('/hero-lagoon.jpg');
+    $hero-scrim,
+    image-set(
+      url('/hero-lagoon.avif') type('image/avif'),
+      url('/hero-lagoon.webp') type('image/webp'),
+      url('/hero-lagoon.jpg') type('image/jpeg')
+    );
   background-size: cover, cover;
   background-position: center, center;
 
