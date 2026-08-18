@@ -48,6 +48,21 @@ describe('ProfileComponent', () => {
     expect(component.intro.length).toBeGreaterThan(0);
   });
 
+  it('pins the hero intro to the bottom of the hero card', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const heroCard = compiled.querySelector('.hero-card');
+    const intro = compiled.querySelector('.hero-intro');
+    const textBlock = intro?.parentElement;
+    const heroRow = textBlock?.parentElement;
+
+    // The hero has a fixed min-height, so the intro is pushed down by an auto
+    // top margin inside a column that stretches to the full card height.
+    expect(heroCard?.classList.contains('flex-col')).toBe(true);
+    expect(heroRow?.classList.contains('flex-1')).toBe(true);
+    expect(textBlock?.classList.contains('flex-1')).toBe(true);
+    expect(intro?.classList.contains('mt-auto')).toBe(true);
+  });
+
   it('should render one card per configured side project', () => {
     expect(projectLinks().length).toBe(component.sideProjects.length);
     expect(projectLinks().map(link => link.getAttribute('href'))).toEqual(

@@ -36,8 +36,8 @@
     linear-gradient(
       100deg,
       color-mix(in srgb, var(--mat-sys-surface-container-lowest) 94%, transparent) 0%,
-      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 55%, transparent) 45%,
-      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 20%, transparent) 100%
+      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 75%, transparent) 45%,
+      color-mix(in srgb, var(--mat-sys-surface-container-lowest) 50%, transparent) 100%
     ),
     url('/hero-lagoon.jpg');
   background-size: cover, cover;

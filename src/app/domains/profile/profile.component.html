@@ -1,11 +1,11 @@
 <div class="container mx-auto px-4 py-8 max-w-5xl flex flex-col flex-1">
-  <section class="hero-card rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden">
+  <section class="hero-card rounded-2xl p-8 mb-8 shadow-sm relative overflow-hidden flex flex-col">
     <div class="hero-photo" aria-hidden="true"></div>
     <div class="hero-glow" aria-hidden="true"></div>
     <div
-      class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
+      class="relative flex flex-1 flex-col md:flex-row items-start md:items-stretch justify-between gap-6"
     >
-      <div class="space-y-2">
+      <div class="flex flex-1 flex-col space-y-2">
         <span class="hero-badge flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
           {{ title }}
         </span>
@@ -15,7 +15,7 @@
         <p class="hero-subtitle text-lg font-medium max-w-2xl">
           {{ subtitle }}
         </p>
-        <p class="hero-intro text-base max-w-2xl leading-relaxed mt-8">
+        <p class="hero-intro text-base max-w-2xl leading-relaxed mt-auto pt-8">
           {{ intro }}
         </p>
       </div>
