@@ -11,12 +11,15 @@ describe('AppComponent', () => {
   let fixture: ComponentFixture<AppComponent>;
 
   const mockShowBanner = signal(true);
+  const mockRouteAllowsAds = signal(true);
   const mockAdBannerService = {
     showBanner: mockShowBanner,
+    routeAllowsAds: mockRouteAllowsAds,
   };
 
   beforeEach(async () => {
     mockShowBanner.set(true);
+    mockRouteAllowsAds.set(true);
 
     await TestBed.configureTestingModule({
       imports: [AppComponent],
@@ -52,6 +55,18 @@ describe('AppComponent', () => {
 
   it('should remove the ad banner from the DOM when showBanner signal becomes false', () => {
     mockShowBanner.set(false);
+
+    fixture.detectChanges();
+
+    const bannerComponent = fixture.debugElement.query(
+      By.directive(AdBannerComponent),
+    ).componentInstance;
+
+    expect(bannerComponent.visible()).toBe(false);
+  });
+
+  it('hides the ad banner on routes that disallow ads regardless of user preference', () => {
+    mockRouteAllowsAds.set(false);
 
     fixture.detectChanges();
 

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
@@ -22,5 +22,9 @@ import { CtaTrackingDirective } from './shared/analytics/cta-tracking.directive'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent {
-  readonly showBanner = inject(AdBannerService).showBanner.asReadonly();
+  private readonly adBanner = inject(AdBannerService);
+
+  readonly showBanner = computed(
+    () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),
+  );
 }
