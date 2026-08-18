@@ -27,19 +27,39 @@ body {
   font: var(--mat-sys-body-medium);
 }
 
+// The theme toggle sets [data-theme="light"|"dark"] on <html> to override the
+// OS preference; leaving the attribute off falls back to the system theme.
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 // The generated M3 neutral palette is fairly desaturated, which makes the
 // dark theme read as near-black. Override the dark-mode surfaces with a
 // fixed dark-navy scale (tinted towards the primary hue) so it feels like a
-// deep blue rather than plain black/grey.
+// deep blue rather than plain black/grey. Applies whenever dark actually
+// renders: OS preference (unless overridden to light) or an explicit
+// dark override.
+@mixin dark-surface-overrides {
+  --mat-sys-surface: #10182b;
+  --mat-sys-surface-dim: #10182b;
+  --mat-sys-surface-bright: #37415a;
+  --mat-sys-surface-container-lowest: #0b1120;
+  --mat-sys-surface-container-low: #182234;
+  --mat-sys-surface-container: #1e293f;
+  --mat-sys-surface-container-high: #29344a;
+  --mat-sys-surface-container-highest: #343f56;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
-    --mat-sys-surface: #10182b;
-    --mat-sys-surface-dim: #10182b;
-    --mat-sys-surface-bright: #37415a;
-    --mat-sys-surface-container-lowest: #0b1120;
-    --mat-sys-surface-container-low: #182234;
-    --mat-sys-surface-container: #1e293f;
-    --mat-sys-surface-container-high: #29344a;
-    --mat-sys-surface-container-highest: #343f56;
+  :root:not([data-theme='light']) {
+    @include dark-surface-overrides;
   }
+}
+
+:root[data-theme='dark'] {
+  @include dark-surface-overrides;
 }

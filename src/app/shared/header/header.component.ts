@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AdBannerToggleComponent } from '../../domains/ads/ad-banner-toggle.component';
 import { BurgerMenuComponent } from './burger-menu.component';
 import { NAV_LINKS } from './nav-links';
+import { ThemeToggleComponent } from '../theme/theme-toggle.component';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +18,7 @@ import { NAV_LINKS } from './nav-links';
     MatIconModule,
     AdBannerToggleComponent,
     BurgerMenuComponent,
+    ThemeToggleComponent,
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
