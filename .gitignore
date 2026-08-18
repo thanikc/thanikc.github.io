@@ -43,4 +43,4 @@ Thumbs.db
 
 # AI
 .kilo/
-.agents/.tmp
+.agents/tmp

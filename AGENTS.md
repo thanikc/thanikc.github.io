@@ -32,6 +32,11 @@ When generating plans, avoid generic summaries. Outputs **must** strictly includ
 2. **GREEN Phase**: Write minimal implementation code (`*.ts`, `*.html`) using Signals, `inject()`, control flow (`@if`, `@for`), Material, Tailwind. Run `ng test --watch=false` until green.
 3. **REFACTOR Phase**: Apply clean-code, DRY, or Signal optimizations without breaking behavior. Summarize in 1 sentence.
 
+## Missing Tooling & Efficiency Rule
+
+- **No Workarounds for Missing Tools:** If optimal tooling (e.g., standard image encoders, libraries) is missing, do not improvise multi-step workarounds, iterative trial-and-error scripts, or pull heavy files into context. Stop immediately and instruct the user to install the required dependency or tool.
+- **Token Economy:** Keep diagnostic scripts single-pass. Never read binary/image assets into conversation context when metrics or logs suffice.
+
 ## Available Skills & Capabilities
 
 You have access to specialized skills located in the `.agents/skills/` directory.
