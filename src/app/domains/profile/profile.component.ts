@@ -54,6 +54,14 @@ const SIDE_PROJECTS: readonly SideProject[] = [
     icon: 'trending_down',
     external: true,
   },
+  {
+    name: 'BJJ Quiz',
+    description:
+      'A fun quiz that guesses your Brazilian Jiu-Jitsu belt from your answers, then hits you with a lighthearted roast generated live by AI.',
+    url: 'https://bjj-quiz.thanikc.workers.dev/',
+    icon: 'sports_martial_arts',
+    external: true,
+  },
 ];
 
 @Component({
