@@ -92,6 +92,16 @@ describe('ProfileComponent', () => {
     }
   });
 
+  it('should link to the BJJ Quiz with its description', () => {
+    const bjjQuiz = projectLinks().find(
+      link => link.getAttribute('href') === 'https://bjj-quiz.thanikc.workers.dev/',
+    );
+
+    expect(bjjQuiz).toBeDefined();
+    expect(bjjQuiz!.textContent).toContain('BJJ Quiz');
+    expect(bjjQuiz!.textContent).toContain('belt');
+  });
+
   it('should link to the Retirement Calculator as an in-app route', () => {
     const calculatorLink = projectLinks().find(link => link.getAttribute('href') === '/calculator');
 
