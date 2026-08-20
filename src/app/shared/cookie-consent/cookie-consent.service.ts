@@ -28,6 +28,19 @@ export class CookieConsentService {
     this.setChoice('rejected');
   }
 
+  /** Lets the user withdraw consent as easily as it was given: clears the
+   * stored choice, denies all consent-gated storage, and re-shows the banner. */
+  resetChoice(): void {
+    this.choice.set(null);
+    localStorage.removeItem(STORAGE_KEY);
+    this.analytics.updateConsent({
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    });
+  }
+
   private setChoice(choice: ConsentChoice): void {
     this.choice.set(choice);
     localStorage.setItem(STORAGE_KEY, choice);

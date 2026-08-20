@@ -3,26 +3,35 @@
 >
   <app-ad-banner-toggle />
 
-  <div class="flex items-center gap-2">
-    @for (link of socialLinks; track link.label) {
-      <a
-        [href]="link.href"
-        [attr.target]="link.external ? '_blank' : null"
-        [attr.rel]="link.external ? 'noopener noreferrer' : null"
-        class="social-link inline-flex min-h-11 min-w-11 items-center justify-center rounded-full transition-transform duration-200 hover:-translate-y-0.5"
-        [attr.aria-label]="link.ariaLabel"
-        [attr.data-cta-tracking]="link.label"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          class="w-5 h-5"
-          aria-hidden="true"
+  <div class="flex flex-wrap items-center gap-4">
+    <a
+      routerLink="/privacy-policy"
+      class="footer-link inline-flex min-h-11 items-center text-sm font-medium hover:underline"
+    >
+      Privacy Policy
+    </a>
+
+    <div class="flex items-center gap-2">
+      @for (link of socialLinks; track link.label) {
+        <a
+          [href]="link.href"
+          [attr.target]="link.external ? '_blank' : null"
+          [attr.rel]="link.external ? 'noopener noreferrer' : null"
+          class="social-link inline-flex min-h-11 min-w-11 items-center justify-center rounded-full transition-transform duration-200 hover:-translate-y-0.5"
+          [attr.aria-label]="link.ariaLabel"
+          [attr.data-cta-tracking]="link.label"
         >
-          <path [attr.d]="link.iconPath" />
-        </svg>
-      </a>
-    }
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="w-5 h-5"
+            aria-hidden="true"
+          >
+            <path [attr.d]="link.iconPath" />
+          </svg>
+        </a>
+      }
+    </div>
   </div>
 </footer>

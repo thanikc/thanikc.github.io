@@ -17,7 +17,9 @@ describe('FooterComponent', () => {
   let fixture: ComponentFixture<FooterComponent>;
 
   const links = () => [
-    ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('footer a'),
+    ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>(
+      'footer a.social-link',
+    ),
   ];
   const linkFor = (label: string) =>
     links().find(link => link.getAttribute('data-cta-tracking') === label);
@@ -115,5 +117,25 @@ describe('FooterComponent', () => {
     for (const link of links()) {
       expect(paletteClassesIn(link)).toEqual([]);
     }
+  });
+
+  it('should link to the privacy policy as an in-app route', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const privacyLink = [...compiled.querySelectorAll<HTMLAnchorElement>('footer a')].find(
+      link => link.textContent?.trim() === 'Privacy Policy',
+    );
+
+    expect(privacyLink).toBeDefined();
+    expect(privacyLink?.getAttribute('href')).toBe('/privacy-policy');
+    expect(privacyLink?.getAttribute('target')).toBeNull();
+  });
+
+  it('should colour the privacy policy link from theme tokens, not the Tailwind palette', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const privacyLink = [...compiled.querySelectorAll<HTMLAnchorElement>('footer a')].find(
+      link => link.textContent?.trim() === 'Privacy Policy',
+    );
+
+    expect(paletteClassesIn(privacyLink!)).toEqual([]);
   });
 });
