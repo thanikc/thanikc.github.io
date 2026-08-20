@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { vi } from 'vitest';
 import { CookieConsentBannerComponent } from './cookie-consent-banner.component';
@@ -38,7 +39,10 @@ describe('CookieConsentBannerComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [CookieConsentBannerComponent],
-      providers: [{ provide: CookieConsentService, useValue: mockCookieConsentService }],
+      providers: [
+        provideRouter([]),
+        { provide: CookieConsentService, useValue: mockCookieConsentService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CookieConsentBannerComponent);
@@ -97,5 +101,12 @@ describe('CookieConsentBannerComponent', () => {
     buttons()[0].click();
 
     expect(mockCookieConsentService.reject).toHaveBeenCalled();
+  });
+
+  it('links to the privacy policy as an in-app route', () => {
+    const link = banner()?.querySelector<HTMLAnchorElement>('a');
+
+    expect(link?.textContent?.trim()).toBe('Privacy Policy');
+    expect(link?.getAttribute('href')).toBe('/privacy-policy');
   });
 });

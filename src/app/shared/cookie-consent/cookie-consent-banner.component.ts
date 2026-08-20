@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { CookieConsentService } from './cookie-consent.service';
 
 @Component({
   selector: 'app-cookie-consent-banner',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, RouterLink],
   templateUrl: './cookie-consent-banner.component.html',
   styleUrl: './cookie-consent-banner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

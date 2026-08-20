@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AdBannerToggleComponent } from '../../domains/ads/ad-banner-toggle.component';
 
 export interface SocialLink {
@@ -41,7 +42,7 @@ const SOCIAL_LINKS: readonly SocialLink[] = [
 
 @Component({
   selector: 'app-footer',
-  imports: [AdBannerToggleComponent],
+  imports: [RouterLink, AdBannerToggleComponent],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

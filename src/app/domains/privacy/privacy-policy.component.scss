@@ -1,0 +1,20 @@
+.policy-header,
+.policy-heading {
+  border-color: var(--mat-sys-outline-variant);
+}
+
+.policy-meta {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.policy-body {
+  color: var(--mat-sys-on-surface);
+}
+
+.policy-link {
+  color: var(--mat-sys-primary);
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}

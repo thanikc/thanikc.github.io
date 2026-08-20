@@ -62,4 +62,21 @@ describe('CookieConsentService', () => {
 
     expect(service.showBanner()).toBe(false);
   });
+
+  it('clears the stored choice, denies consent, and shows the banner again on resetChoice()', () => {
+    const service = TestBed.inject(CookieConsentService);
+    service.accept();
+    updateConsent.mockClear();
+
+    service.resetChoice();
+
+    expect(service.showBanner()).toBe(true);
+    expect(localStorage.getItem('cookie-consent')).toBeNull();
+    expect(updateConsent).toHaveBeenCalledWith({
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    });
+  });
 });

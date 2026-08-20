@@ -1,3 +1,11 @@
+.footer-link {
+  color: var(--mat-sys-on-surface-variant);
+
+  &:hover {
+    color: var(--mat-sys-primary);
+  }
+}
+
 .social-link {
   color: var(--mat-sys-on-surface-variant);
   transition:
