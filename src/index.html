@@ -9,7 +9,12 @@
       name="description"
       content="Thanik's profile and tech hub: modern Angular (Signals, Standalone), Java/Spring Boot microservices, Kubernetes/OpenShift deployments"
     />
-    <meta name="google-adsense-account" content="ca-pub-7075497553401538" />
+    <!--
+      AdSense is currently deactivated site-wide (see ADS_ENABLED in
+      ad-banner.service.ts). Restore this tag and the adsbygoogle.js <script>
+      further down, and flip ADS_ENABLED back to true, to bring ads back.
+      <meta name="google-adsense-account" content="ca-pub-7075497553401538" />
+    -->
     <meta property="og:title" content="Thanik Cheowtirakul - Profile" />
     <meta
       property="og:description"
@@ -66,11 +71,15 @@
       gtag('js', new Date());
       gtag('config', 'G-HSC8QB0EQL');
     </script>
+    <!--
+      AdSense deactivated site-wide (see ADS_ENABLED in ad-banner.service.ts).
+      Restore this tag and flip ADS_ENABLED back to true to bring ads back.
     <script
       async
       src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7075497553401538"
       crossorigin="anonymous"
     ></script>
+    -->
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSC8QB0EQL"></script>
   </head>

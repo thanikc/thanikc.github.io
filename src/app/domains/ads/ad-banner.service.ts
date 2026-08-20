@@ -3,6 +3,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
 
+/** Site-wide ads master switch. Currently off: the AdSense script tags in
+ * `index.html` are commented out (not removed) to match. To bring ads back,
+ * flip this to `true` and restore those tags. */
+export const ADS_ENABLED = false;
+
 /** Route data flag: set `data: { ads: false }` on routes with no substantial publisher content
  * (e.g. interactive tools), so AdSense never serves ads on a screen it would flag as low-value. */
 function deepestRouteAllowsAds(route: ActivatedRoute): boolean {
@@ -17,7 +22,8 @@ function deepestRouteAllowsAds(route: ActivatedRoute): boolean {
   providedIn: 'root',
 })
 export class AdBannerService {
-  readonly showBanner = signal<boolean>(true);
+  readonly adsEnabled = ADS_ENABLED;
+  readonly showBanner = signal<boolean>(ADS_ENABLED);
 
   private readonly router = inject(Router);
   private readonly rootRoute = inject(ActivatedRoute);

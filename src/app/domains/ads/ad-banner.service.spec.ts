@@ -48,10 +48,17 @@ describe('AdBannerService', () => {
     expect(service.routeAllowsAds()).toBe(true);
   });
 
-  it('defaults showBanner to true', () => {
+  it('defaults showBanner to false while ads are globally disabled', () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
     const service = TestBed.inject(AdBannerService);
 
-    expect(service.showBanner()).toBe(true);
+    expect(service.showBanner()).toBe(false);
+  });
+
+  it('exposes the ads master switch as adsEnabled', () => {
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+    const service = TestBed.inject(AdBannerService);
+
+    expect(service.adsEnabled).toBe(false);
   });
 });
