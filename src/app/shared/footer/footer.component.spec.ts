@@ -54,18 +54,23 @@ describe('FooterComponent', () => {
     expect(footer?.classList.contains('max-w-6xl')).toBe(true);
   });
 
-  it('should space the ad toggle and the links apart', () => {
+  // `ml-auto` on the content group (not `justify-between` on the footer) pushes
+  // it to the right, so it stays right-aligned even with the ad toggle hidden.
+  it('should keep the content group right-aligned regardless of whether the ad toggle renders', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('footer')?.classList.contains('justify-between')).toBe(true);
+    const contentGroup = compiled.querySelector(
+      'footer a[routerLink="/privacy-policy"]',
+    )?.parentElement;
+
+    expect(contentGroup?.classList.contains('ml-auto')).toBe(true);
   });
 
-  it('should render the ad banner toggle aligned to the left', () => {
+  // Ads are currently deactivated site-wide (AdBannerService.adsEnabled); a
+  // toggle for a feature that's globally off would just confuse visitors.
+  it('should not render the ad banner toggle while ads are globally disabled', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    const footer = compiled.querySelector('footer');
-    const toggle = footer?.querySelector('app-ad-banner-toggle');
 
-    expect(toggle).not.toBeNull();
-    expect(footer?.firstElementChild).toBe(toggle);
+    expect(compiled.querySelector('footer app-ad-banner-toggle')).toBeNull();
   });
 
   it('should render exactly one tracked, icon-only link each for Email, GitHub, and LinkedIn', () => {
