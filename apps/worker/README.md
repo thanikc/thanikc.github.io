@@ -8,11 +8,11 @@ an OpenAI-compatible provider chain: **Groq** primary, **Google AI** and
 
 ## Endpoints
 
-| Method | Path           | Purpose                                                            |
-| ------ | -------------- | ----------------------------------------------------------------- |
-| GET    | `/api/health`  | Liveness check → `{ "status": "ok" }`                              |
-| POST   | `/api/chat`    | `{ message, history? }` → `{ answer, provider, sources }` (RAG)    |
-| POST   | `/api/ingest`  | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks  |
+| Method | Path          | Purpose                                                           |
+| ------ | ------------- | ----------------------------------------------------------------- |
+| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                             |
+| POST   | `/api/chat`   | `{ message, history? }` → `{ answer, provider, sources }` (RAG)   |
+| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks |
 
 CORS allows `https://thanikc.github.io` and `http://localhost:4200`.
 
@@ -34,6 +34,19 @@ Set them locally with `pnpm exec wrangler secret put <NAME>`, or in CI via the
 ```bash
 pnpm exec wrangler vectorize create resume-rag --dimensions=768 --metric=cosine
 ```
+
+## Knowledge base
+
+`content/*.md` holds the résumé content the chatbot answers from — one file per
+document. Edit those, then re-ingest:
+
+```bash
+pnpm --filter @thanikc/worker dev          # in one terminal
+pnpm --filter @thanikc/worker ingest       # → localhost:8787, reads INGEST_TOKEN from .env
+pnpm --filter @thanikc/worker ingest -- --url https://thanikc-worker.<sub>.workers.dev
+```
+
+See `content/README.md` for the file format.
 
 ## Commands (run from repo root or this directory)
 
