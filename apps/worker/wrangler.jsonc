@@ -5,29 +5,29 @@
   "compatibility_date": "2025-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   // AI and Vectorize have no local emulator; `wrangler dev` talks to the real
   // resources. The Vitest plugin sets `remoteBindings: false` and every test stubs
   // these bindings through an explicit `env`.
   "ai": {
     "binding": "AI",
-    "remote": true
+    "remote": true,
   },
   "vectorize": [
     {
       "binding": "VECTORIZE",
       "index_name": "resume-rag",
-      "remote": true
-    }
+      "remote": true,
+    },
   ],
   "vars": {
     "ALLOWED_ORIGIN": "https://thanikc.github.io",
     "EMBEDDING_MODEL": "@cf/baai/bge-base-en-v1.5",
-    "GROQ_MODEL": "llama-3.3-70b-versatile",
-    "GOOGLE_MODEL": "gemini-2.0-flash",
-    "OPENROUTER_MODEL": "meta-llama/llama-3.3-70b-instruct"
-  }
+    "GROQ_MODEL": "openai/gpt-oss-20b",
+    "GOOGLE_MODEL": "gemini-flash-latest",
+    "OPENROUTER_MODEL": "openrouter/free",
+  },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
   //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN
 }
