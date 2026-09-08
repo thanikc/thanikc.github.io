@@ -1,4 +1,4 @@
-# Thanikc
+# thanikc
 
 pnpm monorepo for [thanikc.github.io](https://thanikc.github.io):
 
