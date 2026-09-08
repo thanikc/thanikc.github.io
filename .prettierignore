@@ -1,5 +1,8 @@
 node_modules
 dist
 .angular
+.wrangler
 coverage
+pnpm-lock.yaml
 package-lock.json
+apps/worker/worker-configuration.d.ts

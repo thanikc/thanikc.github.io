@@ -1,7 +1,22 @@
 # Rule: Angular TDD & Clean Code Workflow
 
+## Monorepo layout
+
+pnpm workspace (`pnpm-workspace.yaml` → `apps/*`). Root holds only shared dev
+tooling (prettier, husky, lint-staged).
+
+- `apps/ui` — the Angular site (`@thanikc/ui`). All rules in this doc apply here.
+  Run commands with `pnpm --filter @thanikc/ui <script>` (e.g. `… test`, `… build`,
+  `… start`).
+- `apps/worker` — Cloudflare Worker API (`@thanikc/worker`) for the resume chatbot
+  (Hono + Vectorize RAG + Groq/Google/OpenRouter). TDD still applies: write
+  `test/*.spec.ts` first with `vitest` under `@cloudflare/vitest-plugin`, stub the
+  `AI` / `VECTORIZE` bindings and global `fetch` per-test, and drive endpoints via
+  `app.request(url, init, env)`. Run `pnpm --filter @thanikc/worker test`.
+  See `apps/worker/README.md`.
+
 Follow strict TDD with modern Angular (v22+, Standalone, Signals, inject(), Material, Tailwind).
-Run the tests yourself (`ng test --watch=false`) at every RED and GREEN step — do not stop to ask. Report failures with the actual output.
+Run the tests yourself (`pnpm --filter @thanikc/ui test`) at every RED and GREEN step — do not stop to ask. Report failures with the actual output.
 
 ## Output Constraints
 
@@ -28,8 +43,8 @@ When generating plans, avoid generic summaries. Outputs **must** strictly includ
 
 ## TDD Workflow
 
-1. **RED Phase**: Write ONLY the spec file (`*.spec.ts`). Run `ng test --watch=false` and confirm it fails for the expected reason.
-2. **GREEN Phase**: Write minimal implementation code (`*.ts`, `*.html`) using Signals, `inject()`, control flow (`@if`, `@for`), Material, Tailwind. Run `ng test --watch=false` until green.
+1. **RED Phase**: Write ONLY the spec file (`*.spec.ts`). Run `pnpm --filter @thanikc/ui test` (or `@thanikc/worker`) and confirm it fails for the expected reason.
+2. **GREEN Phase**: Write minimal implementation code (`*.ts`, `*.html`) using Signals, `inject()`, control flow (`@if`, `@for`), Material, Tailwind. Run the same command until green.
 3. **REFACTOR Phase**: Apply clean-code, DRY, or Signal optimizations without breaking behavior. Summarize in 1 sentence.
 
 ## Missing Tooling & Efficiency Rule
