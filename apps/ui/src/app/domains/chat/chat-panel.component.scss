@@ -30,6 +30,15 @@
   color: var(--mat-sys-on-surface);
 }
 
+// Mirrors the launcher FAB: portrait source cropped to a circle with the same
+// hairline the cards carry. Both dimensions are explicit so the Tailwind
+// preflight `height: auto` can't stretch it back to the source aspect ratio.
+.chat-avatar {
+  object-fit: cover;
+  object-position: top center;
+  border: 1px solid var(--mat-sys-outline-variant);
+}
+
 .chat-dot {
   background-color: var(--mat-sys-on-surface-variant);
 }
