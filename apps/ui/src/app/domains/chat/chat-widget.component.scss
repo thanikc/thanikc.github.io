@@ -48,6 +48,41 @@ button.chat-fab {
   object-position: top center;
 }
 
+// AI star badge overlaid on the launcher: signals a generative assistant sits
+// behind the portrait. Pinned to the FAB's lower-right corner (the launcher is
+// the positioned ancestor) on a `primary` chip — the one accent on the widget —
+// with a surface-coloured ring so it reads clear of the avatar behind it.
+.chat-fab-badge {
+  --chat-fab-badge-size: 1.5rem;
+  position: absolute;
+  right: -0.125rem;
+  bottom: -0.125rem;
+  z-index: 1; // above the FAB's own positioned internals (ripple, label wrapper)
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--chat-fab-badge-size);
+  height: var(--chat-fab-badge-size);
+  border-radius: 50%;
+  background-color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  border: 2px solid var(--mat-sys-surface);
+  box-shadow: var(--mat-sys-level1);
+  overflow: visible;
+  font-size: calc(var(--chat-fab-badge-size) * 0.7);
+  line-height: 1;
+}
+
+// Bigger launcher at the `sm` breakpoint gets a proportionally bigger badge,
+// tucked in far enough to overlap the avatar circle rather than float past it.
+@media (min-width: 640px) {
+  .chat-fab-badge {
+    --chat-fab-badge-size: 2rem;
+    right: 0.25rem;
+    bottom: 0.5rem;
+  }
+}
+
 // Lightweight hover/focus hint — a full CDK overlay tooltip isn't worth pulling
 // into this lazy chunk for one string. Styled like the Material tooltip.
 .chat-fab-tip {
