@@ -56,13 +56,13 @@ $hero-scrim: linear-gradient(
   // `image-set()` is the right knob. The plain-url declaration below is the
   // fallback for engines without `image-set()`/`type()`, which drop the whole
   // declaration rather than the unsupported entry.
-  background-image: $hero-scrim, url('/hero-lagoon.jpg');
+  background-image: $hero-scrim, url('/img/hero-lagoon.jpg');
   background-image:
     $hero-scrim,
     image-set(
-      url('/hero-lagoon.avif') type('image/avif'),
-      url('/hero-lagoon.webp') type('image/webp'),
-      url('/hero-lagoon.jpg') type('image/jpeg')
+      url('/img/hero-lagoon.avif') type('image/avif'),
+      url('/img/hero-lagoon.webp') type('image/webp'),
+      url('/img/hero-lagoon.jpg') type('image/jpeg')
     );
   background-size: cover, cover;
   background-position: center, center;
