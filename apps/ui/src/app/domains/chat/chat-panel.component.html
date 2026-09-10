@@ -21,6 +21,17 @@
     </button>
   </header>
 
+  <ng-template #avatar>
+    <img
+      class="chat-avatar size-8 shrink-0 rounded-full"
+      src="img/chat_avatar_352x432.png"
+      alt=""
+      aria-hidden="true"
+      width="32"
+      height="32"
+    />
+  </ng-template>
+
   <div #transcript class="flex-1 overflow-y-auto px-5 py-4">
     @if (turns().length === 0) {
       <div class="chat-empty flex flex-col gap-3">
@@ -40,8 +51,11 @@
 
     <ol class="flex flex-col gap-3" aria-live="polite">
       @for (turn of turns(); track $index) {
-        <li class="chat-turn flex" [attr.data-role]="turn.role">
+        <li class="chat-turn flex items-end gap-2" [attr.data-role]="turn.role">
           <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'Assistant said:' }}</span>
+          @if (turn.role === 'assistant') {
+            <ng-container [ngTemplateOutlet]="avatar" />
+          }
           <p class="chat-bubble max-w-[85%] rounded-2xl px-4 py-2 whitespace-pre-line">
             {{ turn.content }}
           </p>
@@ -50,18 +64,21 @@
     </ol>
 
     @if (pending()) {
-      <p class="chat-typing mt-3 flex items-center gap-1 py-2" role="status">
+      <div class="chat-typing mt-3 flex items-end gap-2" role="status">
         <span class="sr-only">Assistant is typing…</span>
-        <span class="chat-dot size-2 animate-pulse rounded-full" aria-hidden="true"></span>
-        <span
-          class="chat-dot size-2 animate-pulse rounded-full [animation-delay:150ms]"
-          aria-hidden="true"
-        ></span>
-        <span
-          class="chat-dot size-2 animate-pulse rounded-full [animation-delay:300ms]"
-          aria-hidden="true"
-        ></span>
-      </p>
+        <ng-container [ngTemplateOutlet]="avatar" />
+        <span class="flex items-center gap-1 px-4 py-3">
+          <span class="chat-dot size-2 animate-pulse rounded-full" aria-hidden="true"></span>
+          <span
+            class="chat-dot size-2 animate-pulse rounded-full [animation-delay:150ms]"
+            aria-hidden="true"
+          ></span>
+          <span
+            class="chat-dot size-2 animate-pulse rounded-full [animation-delay:300ms]"
+            aria-hidden="true"
+          ></span>
+        </span>
+      </div>
     }
 
     @if (error(); as message) {

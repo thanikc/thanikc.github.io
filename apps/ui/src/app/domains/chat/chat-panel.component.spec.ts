@@ -130,6 +130,31 @@ describe('ChatPanelComponent', () => {
       setInputs({ pending: true });
       expect(el().querySelector('.chat-typing')).not.toBeNull();
     });
+
+    // The avatar identifies who is speaking at a glance, mirroring the launcher FAB.
+    it('leads each assistant turn with a decorative round avatar, and no user turn', () => {
+      setInputs({ turns: TURNS });
+      const [userItem, assistantItem] = transcriptItems();
+
+      const avatar = assistantItem.querySelector<HTMLImageElement>('img.chat-avatar');
+      expect(avatar).not.toBeNull();
+      expect(avatar!.getAttribute('src')).toContain('chat_avatar');
+      expect(avatar!.getAttribute('alt')).toBe('');
+      expect(avatar!.getAttribute('width')).toBeTruthy();
+      expect(avatar!.getAttribute('height')).toBeTruthy();
+      // Avatar precedes the bubble in the DOM so it reads as "leading" the answer.
+      expect(assistantItem.querySelector('.chat-avatar ~ .chat-bubble')).not.toBeNull();
+
+      expect(userItem.querySelector('img.chat-avatar')).toBeNull();
+    });
+
+    it('leads the typing indicator with the same avatar', () => {
+      setInputs({ turns: TURNS, pending: true });
+      const avatar = el().querySelector<HTMLImageElement>('.chat-typing img.chat-avatar');
+
+      expect(avatar).not.toBeNull();
+      expect(avatar!.getAttribute('src')).toContain('chat_avatar');
+    });
   });
 
   describe('errors', () => {

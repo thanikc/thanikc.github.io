@@ -8,6 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,7 +22,14 @@ let nextId = 0;
 /** Presentational chat transcript + composer. State lives in `ChatService`, wired by the widget. */
 @Component({
   selector: 'app-chat-panel',
-  imports: [MatButtonModule, MatFormFieldModule, MatIconModule, MatInputModule, TextFieldModule],
+  imports: [
+    NgTemplateOutlet,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    TextFieldModule,
+  ],
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
