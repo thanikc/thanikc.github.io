@@ -48,6 +48,7 @@ Thumbs.db
 # AI
 .kilo/
 .agents/tmp
+.claude/settings.local.json
 
 # secrets
 .env
