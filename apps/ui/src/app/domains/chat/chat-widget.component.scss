@@ -1,0 +1,75 @@
+// Transparent to layout: the launcher positions against the sticky
+// `app-chat-shell` host, the scrim and sheet against the viewport.
+:host {
+  display: contents;
+}
+
+.chat-scrim {
+  background-color: color-mix(in srgb, var(--mat-sys-scrim) 32%, transparent);
+}
+
+.chat-sheet {
+  border-color: var(--mat-sys-outline-variant);
+  box-shadow: var(--mat-sys-level3);
+  animation: card-rise 250ms ease-out;
+}
+
+// Angular Material's FAB base is a 16px rounded square fixed at 56px. Size it up
+// (`--chat-fab-size` inherits into the avatar), force it back to a circle, and
+// give it the same hairline boundary the cards carry.
+button.chat-fab {
+  --chat-fab-size: 4rem;
+  width: var(--chat-fab-size);
+  height: var(--chat-fab-size);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--mat-sys-outline);
+  transition: border-color 0.25s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, var(--mat-sys-outline));
+  }
+}
+
+// Bigger launcher once there's room for it (mirrors Tailwind's `sm` breakpoint).
+@media (min-width: 640px) {
+  button.chat-fab {
+    --chat-fab-size: 6rem;
+  }
+}
+
+// Match the button box so `cover` crops the portrait source to the circle. Both
+// dimensions are explicit so the global `img { height: auto }` reset can't
+// stretch it back to the source aspect ratio.
+.chat-fab-avatar {
+  width: var(--chat-fab-size);
+  height: var(--chat-fab-size);
+  object-fit: cover;
+  object-position: top center;
+}
+
+// Lightweight hover/focus hint — a full CDK overlay tooltip isn't worth pulling
+// into this lazy chunk for one string. Styled like the Material tooltip.
+.chat-fab-tip {
+  position: absolute;
+  right: calc(100% + 0.5rem);
+  top: 50%;
+  width: max-content;
+  max-width: 15rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.5rem;
+  background-color: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%);
+  transition: opacity 0.15s ease;
+}
+
+.chat-launcher:hover .chat-fab-tip,
+.chat-fab:focus-visible ~ .chat-fab-tip {
+  opacity: 1;
+}

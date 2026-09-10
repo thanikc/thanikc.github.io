@@ -1,0 +1,44 @@
+@if (open()) {
+  <div class="chat-scrim fixed inset-0 z-40" aria-hidden="true" (click)="close()"></div>
+  <div
+    [id]="panelId"
+    class="chat-sheet fixed inset-0 z-50 overflow-hidden sm:inset-auto sm:right-4 sm:bottom-4 sm:h-[min(40rem,calc(100dvh-6rem))] sm:w-md sm:rounded-2xl sm:border"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+  >
+    <app-chat-panel
+      [turns]="chat.turns()"
+      [pending]="chat.pending()"
+      [error]="chat.error()"
+      (send)="chat.send($event)"
+      (retry)="chat.retry()"
+      (close)="close()"
+    />
+  </div>
+} @else {
+  <div class="chat-launcher absolute right-4 bottom-4">
+    <button
+      #fab
+      matFab
+      type="button"
+      class="chat-fab"
+      aria-label="Open the résumé assistant"
+      aria-haspopup="dialog"
+      aria-describedby="chat-fab-tip"
+      (click)="launch()"
+    >
+      <img
+        class="chat-fab-avatar"
+        src="img/chat_avatar_352x432.png"
+        alt=""
+        aria-hidden="true"
+        width="64"
+        height="64"
+      />
+    </button>
+
+    <span id="chat-fab-tip" role="tooltip" class="chat-fab-tip">
+      Chat with a bot that answers questions about Thanik's experience
+    </span>
+  </div>
+}
