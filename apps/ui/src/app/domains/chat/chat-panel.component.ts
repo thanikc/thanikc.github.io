@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { CHAT_SUGGESTIONS } from './chat.constants';
 import { ChatTurn } from './chat.models';
+import { MarkdownPipe } from './markdown.pipe';
 
 let nextId = 0;
 
@@ -29,6 +30,7 @@ let nextId = 0;
     MatIconModule,
     MatInputModule,
     TextFieldModule,
+    MarkdownPipe,
   ],
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',

@@ -157,6 +157,43 @@ describe('ChatPanelComponent', () => {
     });
   });
 
+  describe('markdown rendering', () => {
+    it('renders assistant Markdown as formatted HTML', () => {
+      setInputs({
+        turns: [
+          { role: 'assistant', content: 'Thanik knows **Angular** and:\n\n- RxJS\n- Signals' },
+        ],
+      });
+      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+
+      expect(bubble.querySelector('strong')?.textContent).toBe('Angular');
+      expect(bubble.querySelectorAll('li')).toHaveLength(2);
+    });
+
+    it('shows user Markdown verbatim rather than as HTML', () => {
+      setInputs({ turns: [{ role: 'user', content: 'what about **bold**?' }] });
+      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+
+      expect(bubble.querySelector('strong')).toBeNull();
+      expect(bubble.textContent).toContain('**bold**');
+    });
+
+    it('strips unsafe markup from assistant content', () => {
+      setInputs({
+        turns: [
+          {
+            role: 'assistant',
+            content: 'hi <script>alert(1)</script> <img src="x" onerror="alert(1)">',
+          },
+        ],
+      });
+      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+
+      expect(bubble.querySelector('script')).toBeNull();
+      expect(bubble.querySelector('img')?.hasAttribute('onerror')).not.toBe(true);
+    });
+  });
+
   describe('errors', () => {
     it('shows the error as an alert with a retry button', () => {
       setInputs({ turns: TURNS, error: 'Something went wrong' });
