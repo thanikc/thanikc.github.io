@@ -19,6 +19,15 @@ describe('buildMessages', () => {
     expect(messages.at(-1)).toEqual({ role: 'user', content: 'What did Thanik build?' });
   });
 
+  it('tells the model to invite the visitor to contact Thanik when the answer is missing', () => {
+    const system = buildMessages('what is his favourite colour?', [])[0]?.content ?? '';
+
+    expect(system).not.toContain("say you don't have that information");
+    expect(system.toLowerCase()).toContain('contact');
+    expect(system.toLowerCase()).toContain('in person');
+    expect(system.toLowerCase()).toContain('playful');
+  });
+
   it('keeps prior history between the system prompt and the new question', () => {
     const history = [
       { role: 'user' as const, content: 'hi' },
