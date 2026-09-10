@@ -6,6 +6,10 @@ Cloudflare Worker API backing the resume chatbot. It runs RAG over a
 an OpenAI-compatible provider chain: **Groq** primary, **Google AI** and
 **OpenRouter** as fallbacks.
 
+Live at **https://thanikc-worker.thanikc.workers.dev** (`/api/health` → `{ "status": "ok" }`).
+The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from the
+`CHAT_API_URL` token in `app.config.ts`, and `http://localhost:8787` in dev mode.
+
 ## Endpoints
 
 | Method | Path          | Purpose                                                           |
@@ -38,13 +42,19 @@ pnpm exec wrangler vectorize create resume-rag --dimensions=768 --metric=cosine
 ## Knowledge base
 
 `content/*.md` holds the résumé content the chatbot answers from — one file per
-document. Edit those, then re-ingest:
+document. Pushing content does **not** re-ingest it; after editing, re-ingest by hand:
 
 ```bash
+# try it locally first
 pnpm --filter @thanikc/worker dev          # in one terminal
 pnpm --filter @thanikc/worker ingest       # → localhost:8787, reads INGEST_TOKEN from .env
-pnpm --filter @thanikc/worker ingest -- --url https://thanikc-worker.<sub>.workers.dev
+
+# then production
+pnpm --filter @thanikc/worker ingest -- --url https://thanikc-worker.thanikc.workers.dev
 ```
+
+Upserts reach the index asynchronously: `sources` can stay stale for 1–3 minutes
+after `/api/ingest` returns 200.
 
 See `content/README.md` for the file format.
 
