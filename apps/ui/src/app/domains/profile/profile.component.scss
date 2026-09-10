@@ -211,7 +211,8 @@ $hero-scrim: linear-gradient(
     }
   }
 
-  .project-card {
+  .project-card,
+  .interest-card {
     break-inside: avoid;
   }
 
