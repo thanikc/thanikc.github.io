@@ -24,8 +24,9 @@ with id `<filename>:<n>`.
 
 ## Re-ingesting
 
-Run `pnpm --filter @thanikc/worker ingest` after any edit. Add `--url <worker-url>`
-to target the deployed worker instead of `wrangler dev` on localhost.
+Run `pnpm --filter @thanikc/worker ingest` after any edit (targets `wrangler dev`
+on localhost). Use `pnpm --filter @thanikc/worker ingest:deployed` to hit the
+deployed worker, or pass your own `--url <worker-url>`.
 
 Vectorize applies upserts asynchronously — `wrangler vectorize info resume-rag`
 lags the ingest by a minute or two before `vectorCount` catches up and the new

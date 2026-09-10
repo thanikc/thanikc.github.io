@@ -8,6 +8,7 @@
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
     "ingest": "node scripts/ingest.mjs",
+    "ingest:deployed": "node scripts/ingest.mjs --url https://thanikc-worker.thanikc.workers.dev",
     "start": "wrangler dev",
     "test": "vitest run",
     "test:watch": "vitest",

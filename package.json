@@ -12,6 +12,8 @@
     "test": "pnpm -r test",
     "test:ui": "pnpm --filter @thanikc/ui test",
     "test:worker": "pnpm --filter @thanikc/worker test",
+    "ingest": "pnpm --filter @thanikc/worker ingest",
+    "ingest:deployed": "pnpm --filter @thanikc/worker ingest:deployed",
     "format": "prettier --write \"apps/**/*.{ts,html,scss,json}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,html,scss,json}\"",
     "prepare": "husky"

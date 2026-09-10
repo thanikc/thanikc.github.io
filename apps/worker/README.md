@@ -50,7 +50,7 @@ pnpm --filter @thanikc/worker dev          # in one terminal
 pnpm --filter @thanikc/worker ingest       # → localhost:8787, reads INGEST_TOKEN from .env
 
 # then production
-pnpm --filter @thanikc/worker ingest -- --url https://thanikc-worker.thanikc.workers.dev
+pnpm --filter @thanikc/worker ingest:deployed
 ```
 
 Upserts reach the index asynchronously: `sources` can stay stale for 1–3 minutes
