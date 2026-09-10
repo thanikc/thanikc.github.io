@@ -28,6 +28,14 @@ describe('buildMessages', () => {
     expect(system.toLowerCase()).toContain('playful');
   });
 
+  it('tells the model to be a hype man that frames answers in a positive light', () => {
+    const system = buildMessages('what are his hobbies?', [])[0]?.content ?? '';
+
+    expect(system.toLowerCase()).toContain('hype man');
+    expect(system.toLowerCase()).toContain('positive');
+    expect(system.toLowerCase()).toContain('strength');
+  });
+
   it('keeps prior history between the system prompt and the new question', () => {
     const history = [
       { role: 'user' as const, content: 'hi' },
