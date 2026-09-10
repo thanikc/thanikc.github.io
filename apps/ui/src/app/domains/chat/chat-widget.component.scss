@@ -58,6 +58,7 @@ button.chat-fab {
   right: -0.125rem;
   bottom: -0.125rem;
   z-index: 1; // above the FAB's own positioned internals (ripple, label wrapper)
+  pointer-events: none; // decorative — clicks and hover pass through to the FAB
   display: flex;
   align-items: center;
   justify-content: center;
