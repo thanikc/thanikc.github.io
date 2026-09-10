@@ -102,6 +102,44 @@ describe('ProfileComponent', () => {
     expect(bjjQuiz!.textContent).toContain('belt');
   });
 
+  it('renders a "Beyond the Code" section with one card per interest', () => {
+    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
+    const interestsSection = sections.find(section =>
+      section.querySelector('h2')?.textContent?.includes('Beyond the Code'),
+    );
+
+    expect(interestsSection).toBeDefined();
+    expect(component.interests.length).toBeGreaterThan(0);
+    expect(interestsSection!.querySelectorAll('.interest-card').length).toBe(
+      component.interests.length,
+    );
+  });
+
+  it('covers swimming, bouldering, chess and Mandarin in the interests', () => {
+    const text = component.interests
+      .map(interest => `${interest.name} ${interest.description}`)
+      .join(' ')
+      .toLowerCase();
+
+    expect(text).toContain('swim');
+    expect(text).toContain('boulder');
+    expect(text).toContain('chess');
+    expect(text).toContain('mandarin');
+  });
+
+  it('places the interests section before the side projects section', () => {
+    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
+    const interestsIdx = sections.findIndex(section =>
+      section.textContent?.includes('Beyond the Code'),
+    );
+    const sideProjectsIdx = sections.findIndex(section =>
+      section.textContent?.includes('Side Projects'),
+    );
+
+    expect(interestsIdx).toBeGreaterThanOrEqual(0);
+    expect(interestsIdx).toBeLessThan(sideProjectsIdx);
+  });
+
   it('should link to the Retirement Calculator as an in-app route', () => {
     const calculatorLink = projectLinks().find(link => link.getAttribute('href') === '/calculator');
 

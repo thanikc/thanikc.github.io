@@ -19,6 +19,12 @@ export interface SideProject {
   external: boolean;
 }
 
+export interface Interest {
+  name: string;
+  description: string;
+  icon: string;
+}
+
 const SKILL_CATEGORIES: readonly TechSkill[] = [
   {
     category: 'Frontend Excellence',
@@ -64,6 +70,31 @@ const SIDE_PROJECTS: readonly SideProject[] = [
   },
 ];
 
+const INTERESTS: readonly Interest[] = [
+  {
+    name: 'Swimming',
+    description:
+      'Swim regularly for endurance, not speed — always chasing a cleaner stroke and a longer set.',
+    icon: 'pool',
+  },
+  {
+    name: 'Bouldering',
+    description:
+      'Picked it up after a recurring spinal injury ended my BJJ training — still physical, still problem-solving, and it keeps the core strong.',
+    icon: 'terrain',
+  },
+  {
+    name: 'Chess',
+    description: 'The occasional game when I want a slower kind of puzzle.',
+    icon: 'extension',
+  },
+  {
+    name: 'Learning Mandarin',
+    description: 'Recently started on Mandarin Chinese, on top of German, English and Thai.',
+    icon: 'translate',
+  },
+];
+
 @Component({
   selector: 'app-profile',
   imports: [RouterLink, MatIconModule, AdBannerComponent],
@@ -81,6 +112,7 @@ export class ProfileComponent {
     'I build enterprise web applications end to end: Angular front ends with Signals and standalone components, backed by Spring Boot microservices running on Kubernetes and OpenShift. AI assistants are part of my day-to-day workflow, from scaffolding tests to reviewing architecture decisions. This site is also my sandbox for trying out new patterns in production.';
   readonly skillCategories = SKILL_CATEGORIES;
   readonly sideProjects = SIDE_PROJECTS;
+  readonly interests = INTERESTS;
   readonly showBanner = computed(
     () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),
   );
