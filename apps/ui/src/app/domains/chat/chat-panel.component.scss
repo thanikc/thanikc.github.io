@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.chat-panel {
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+}
+
+.chat-divider {
+  border-color: var(--mat-sys-outline-variant);
+}
+
+.chat-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.chat-turn[data-role='user'] {
+  justify-content: flex-end;
+
+  .chat-bubble {
+    background-color: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+}
+
+.chat-turn[data-role='assistant'] .chat-bubble {
+  background-color: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+}
+
+.chat-dot {
+  background-color: var(--mat-sys-on-surface-variant);
+}
+
+.chat-error {
+  background-color: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+}
