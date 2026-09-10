@@ -70,6 +70,14 @@ describe('ChatWidgetComponent', () => {
       expect(img.getAttribute('height')).toBeTruthy();
     });
 
+    it('overlays the FAB with a decorative AI star badge', () => {
+      const badge = el().querySelector('.chat-launcher .chat-fab-badge');
+
+      expect(badge).not.toBeNull();
+      expect(badge?.textContent?.trim()).toBe('auto_awesome');
+      expect(badge?.getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('explains the assistant in a hover tooltip', () => {
       const tip = el().querySelector('#chat-fab-tip');
 

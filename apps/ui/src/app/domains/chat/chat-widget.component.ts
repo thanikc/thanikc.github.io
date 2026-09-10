@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { ChatPanelComponent } from './chat-panel.component';
 import { ChatService } from './chat.service';
 
@@ -20,7 +21,7 @@ import { ChatService } from './chat.service';
  */
 @Component({
   selector: 'app-chat-widget',
-  imports: [ChatPanelComponent, CdkTrapFocus, MatButtonModule],
+  imports: [ChatPanelComponent, CdkTrapFocus, MatButtonModule, MatIconModule],
   templateUrl: './chat-widget.component.html',
   styleUrl: './chat-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
