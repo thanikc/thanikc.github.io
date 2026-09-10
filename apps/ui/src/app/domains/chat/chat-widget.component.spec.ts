@@ -57,34 +57,41 @@ describe('ChatWidgetComponent', () => {
   });
 
   describe('launcher', () => {
-    it('renders a labelled FAB and no panel initially', () => {
+    it('renders an avatar FAB and no panel initially', () => {
       expect(fab().type).toBe('button');
       expect(fab().getAttribute('aria-label')).toBeTruthy();
+      expect(fab().getAttribute('aria-haspopup')).toBe('dialog');
       expect(panel()).toBeNull();
+
+      const img = fab().querySelector('img')!;
+      expect(img).not.toBeNull();
+      expect(img.getAttribute('src')).toContain('chat_avatar_352x432.png');
+      expect(img.getAttribute('width')).toBeTruthy();
+      expect(img.getAttribute('height')).toBeTruthy();
     });
 
-    it('toggles the panel open and closed', () => {
+    it('explains the assistant in a hover tooltip', () => {
+      const tip = el().querySelector('#chat-fab-tip');
+
+      expect(tip?.getAttribute('role')).toBe('tooltip');
+      expect(tip?.textContent).toMatch(/questions about Thanik/i);
+      expect(fab().getAttribute('aria-describedby')).toBe('chat-fab-tip');
+    });
+
+    it('opens the panel and removes the launcher when clicked', () => {
       openPanel();
+
       expect(panel()).not.toBeNull();
+      expect(el().querySelector('button.chat-fab')).toBeNull();
+    });
 
-      fab().click();
+    it('restores the launcher after the panel closes', () => {
+      openPanel();
+      panelInstance().close.emit();
       fixture.detectChanges();
+
       expect(panel()).toBeNull();
-    });
-
-    it('tracks the open state with aria-expanded', () => {
-      expect(fab().getAttribute('aria-expanded')).toBe('false');
-
-      openPanel();
-      expect(fab().getAttribute('aria-expanded')).toBe('true');
-    });
-
-    it('points aria-controls at the panel while it is open', () => {
-      openPanel();
-      const id = fab().getAttribute('aria-controls');
-
-      expect(id).toBeTruthy();
-      expect(el().querySelector(`#${id}`)?.contains(panel().nativeElement)).toBe(true);
+      expect(el().querySelector('button.chat-fab')).not.toBeNull();
     });
 
     it('colours the widget from theme tokens, not the Tailwind palette', () => {
@@ -128,17 +135,18 @@ describe('ChatWidgetComponent', () => {
       expect(trap.nativeElement.contains(panel().nativeElement)).toBe(true);
     });
 
-    it('closes on the panel close event and returns focus to the FAB', () => {
+    it('closes on the panel close event and returns focus to the FAB', async () => {
       panelInstance().close.emit();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(panel()).toBeNull();
-      expect(fab().getAttribute('aria-expanded')).toBe('false');
       expect(document.activeElement).toBe(fab());
     });
 
-    it('closes when the backdrop is clicked', () => {
+    it('closes when the backdrop is clicked', async () => {
       el().querySelector<HTMLElement>('.chat-scrim')!.click();
+      await fixture.whenStable();
       fixture.detectChanges();
 
       expect(panel()).toBeNull();
