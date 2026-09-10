@@ -3,8 +3,9 @@
 pnpm monorepo for [thanikc.github.io](https://thanikc.github.io):
 
 - **`apps/ui`** — personal portfolio site built with Angular (Standalone, Signals,
-  Angular Material, Tailwind CSS). Full-Stack Engineer profile plus an interactive
-  retirement calculator that uses live World Bank API data for nest-egg projections.
+  Angular Material, Tailwind CSS). Full-Stack Engineer profile, an interactive
+  retirement calculator that uses live World Bank API data for nest-egg projections,
+  and a résumé chatbot (floating widget on every page) that asks `apps/worker`.
   Deploys to GitHub Pages.
 - **`apps/worker`** — Cloudflare Worker API backing the resume chatbot: RAG over a
   Vectorize index (Workers AI embeddings) with a Groq → Google AI → OpenRouter
@@ -18,6 +19,7 @@ apps/
 │   ├── src/app/
 │   │   ├── domains/                 # Domain-driven feature modules
 │   │   │   ├── ads/                 # Ads domain (Google AdSense)
+│   │   │   ├── chat/                # Résumé chatbot widget (calls apps/worker)
 │   │   │   ├── profile/             # Portfolio / profile domain
 │   │   │   ├── privacy/             # Privacy policy
 │   │   │   └── retirement-calculator/
