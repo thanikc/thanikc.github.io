@@ -57,7 +57,7 @@ body {
   --app-surface-base: light-dark(var(--mat-sys-surface-dim), var(--mat-sys-surface));
   --app-surface-raised: light-dark(
     var(--mat-sys-surface-container-lowest),
-    var(--mat-sys-surface-container-highest)
+    var(--mat-sys-surface-container-low)
   );
 }
 
