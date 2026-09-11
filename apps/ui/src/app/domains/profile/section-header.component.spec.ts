@@ -23,6 +23,11 @@ describe('SectionHeaderComponent', () => {
     expect(h2?.id).toBe('work-heading');
   });
 
+  // Header nav links jump here; the margin keeps the heading clear of the sticky header.
+  it('keeps the heading clear of the sticky header when scrolled to', () => {
+    expect(el().querySelector('h2')?.classList.contains('scroll-mt-24')).toBe(true);
+  });
+
   it('renders the subtitle as muted text', () => {
     const subtitle = el().querySelector('p');
 

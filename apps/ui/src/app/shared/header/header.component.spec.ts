@@ -21,12 +21,45 @@ describe('HeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the brand link to the home route', () => {
+  // The page is about a person: the header names him, not a generic "Dev Info".
+  it('should render the brand link to the home route with the name', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const brandLink = compiled.querySelector('.brand-link');
 
     expect(brandLink?.getAttribute('href')).toBe('/');
-    expect(brandLink?.textContent).toContain('Dev Info');
+    expect(brandLink?.textContent).toContain('Thanik Cheowtirakul');
+    expect(brandLink?.textContent).not.toContain('Dev Info');
+  });
+
+  describe('primary navigation', () => {
+    const nav = () => (fixture.nativeElement as HTMLElement).querySelector('nav');
+    const links = () => [...(nav()?.querySelectorAll<HTMLAnchorElement>('a') ?? [])];
+
+    it('is a labelled nav landmark', () => {
+      expect(nav()?.getAttribute('aria-label')).toBe('Primary');
+    });
+
+    // Fragment links on the home route, so they also work from the calculator page.
+    it('links Work, Projects and Contact to their sections on the home page', () => {
+      expect(links().map(a => a.textContent?.trim())).toEqual(['Work', 'Projects', 'Contact']);
+      expect(links().map(a => a.getAttribute('href'))).toEqual([
+        '/#work-heading',
+        '/#projects-heading',
+        '/#contact',
+      ]);
+    });
+
+    it('gives every link a 44px hit area', () => {
+      for (const link of links()) {
+        expect(link.classList.contains('min-h-11')).toBe(true);
+      }
+    });
+
+    // Name, three links and the theme toggle don't fit 360px; phones scroll instead.
+    it('hides below the sm breakpoint', () => {
+      expect(nav()?.classList.contains('hidden')).toBe(true);
+      expect(nav()?.classList.contains('sm:flex')).toBe(true);
+    });
   });
 
   it('should render the theme toggle', () => {
