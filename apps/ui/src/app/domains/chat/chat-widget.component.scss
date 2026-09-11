@@ -109,3 +109,10 @@ button.chat-fab {
 .chat-fab:focus-visible ~ .chat-fab-tip {
   opacity: 1;
 }
+
+// Runs once per arrival, with no fill-mode so the hover rule above governs again
+// as soon as it finishes. Reduced motion collapses it to nothing, leaving the
+// `aria-describedby` association as the description of record.
+.chat-fab-tip-peek {
+  animation: hint-peek 6s ease-out 1.2s;
+}

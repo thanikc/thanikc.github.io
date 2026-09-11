@@ -5,15 +5,25 @@
   [attr.aria-labelledby]="headingId"
   (keydown.escape)="close.emit()"
 >
-  <header class="chat-divider flex items-start justify-between gap-4 border-b py-3 pr-2 pl-5">
-    <div class="pt-2">
-      <h2 [id]="headingId" class="text-lg font-semibold tracking-tight">Résumé assistant</h2>
-      <p class="chat-muted text-sm">Ask away — I've read Thanik's résumé so you don't have to.</p>
+  <header class="chat-divider flex items-center justify-between gap-3 border-b py-3 pr-2 pl-4">
+    <div class="flex min-w-0 items-center gap-3">
+      <img
+        class="chat-avatar size-10 shrink-0 rounded-full"
+        src="img/chat_avatar_352x432.png"
+        alt=""
+        aria-hidden="true"
+        width="40"
+        height="40"
+      />
+      <div class="min-w-0">
+        <h2 [id]="headingId" class="text-base font-semibold tracking-tight">Résumé assistant</h2>
+        <p class="chat-muted text-sm">Ask away — I've read Thanik's résumé so you don't have to.</p>
+      </div>
     </div>
     <button
       mat-icon-button
       type="button"
-      class="min-h-11 min-w-11"
+      class="min-h-11 min-w-11 shrink-0"
       aria-label="Close chat"
       (click)="close.emit()"
     >
@@ -21,46 +31,42 @@
     </button>
   </header>
 
-  <ng-template #avatar>
-    <img
-      class="chat-avatar size-8 shrink-0 rounded-full"
-      src="img/chat_avatar_352x432.png"
-      alt=""
-      aria-hidden="true"
-      width="32"
-      height="32"
-    />
-  </ng-template>
-
-  <div #transcript class="flex-1 overflow-y-auto px-5 py-4">
+  <div
+    #transcript
+    class="chat-transcript scroll-smooth flex-1 overflow-y-auto px-4 py-4"
+    (scroll)="trackScrollPosition()"
+  >
     @if (turns().length === 0) {
       <div class="chat-empty flex flex-col gap-3">
         <p class="chat-muted text-sm">Ask anything about Thanik's experience, or start with:</p>
-        @for (suggestion of suggestions; track suggestion) {
-          <button
-            matButton="outlined"
-            type="button"
-            class="min-h-11 self-start"
-            (click)="send.emit(suggestion)"
-          >
-            {{ suggestion }}
-          </button>
-        }
+        <div class="flex flex-wrap gap-2">
+          @for (suggestion of suggestions; track suggestion) {
+            <button
+              matButton="outlined"
+              type="button"
+              class="min-h-11"
+              (click)="send.emit(suggestion)"
+            >
+              {{ suggestion }}
+            </button>
+          }
+        </div>
       </div>
     }
 
-    <ol class="flex flex-col gap-3" aria-live="polite">
+    <ol class="flex flex-col gap-4" aria-live="polite">
       @for (turn of turns(); track $index) {
-        <li class="chat-turn flex items-end gap-2" [attr.data-role]="turn.role">
+        <li class="chat-turn flex" [attr.data-role]="turn.role">
           <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'Assistant said:' }}</span>
           @if (turn.role === 'assistant') {
-            <ng-container [ngTemplateOutlet]="avatar" />
             <div
-              class="chat-bubble chat-markdown max-w-[85%] rounded-2xl px-4 py-2"
+              class="chat-message chat-markdown min-w-0 flex-1"
               [innerHTML]="turn.content | markdown"
             ></div>
           } @else {
-            <p class="chat-bubble max-w-[85%] rounded-2xl px-4 py-2 whitespace-pre-line">
+            <p
+              class="chat-message chat-bubble max-w-[85%] rounded-2xl px-4 py-2 break-words whitespace-pre-line"
+            >
               {{ turn.content }}
             </p>
           }
@@ -69,35 +75,30 @@
     </ol>
 
     @if (pending()) {
-      <div class="chat-typing mt-3 flex items-end gap-2" role="status">
+      <div class="chat-typing mt-4 flex items-center gap-1.5 py-2" role="status">
         <span class="sr-only">Assistant is typing…</span>
-        <ng-container [ngTemplateOutlet]="avatar" />
-        <span class="flex items-center gap-1 px-4 py-3">
-          <span class="chat-dot size-2 animate-pulse rounded-full" aria-hidden="true"></span>
-          <span
-            class="chat-dot size-2 animate-pulse rounded-full [animation-delay:150ms]"
-            aria-hidden="true"
-          ></span>
-          <span
-            class="chat-dot size-2 animate-pulse rounded-full [animation-delay:300ms]"
-            aria-hidden="true"
-          ></span>
-        </span>
+        <span class="chat-dot size-2 rounded-full" aria-hidden="true"></span>
+        <span class="chat-dot size-2 rounded-full [animation-delay:0.4s]" aria-hidden="true"></span>
+        <span class="chat-dot size-2 rounded-full [animation-delay:0.8s]" aria-hidden="true"></span>
       </div>
     }
 
     @if (error(); as message) {
       <div
-        class="chat-error mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl py-2 pr-2 pl-4"
+        class="chat-error mt-4 flex flex-wrap items-center gap-2 rounded-xl border py-2 pr-2 pl-3"
         role="alert"
       >
-        <p class="text-sm">{{ message }}</p>
+        <mat-icon class="chat-error-icon shrink-0" aria-hidden="true">error_outline</mat-icon>
+        <p class="min-w-0 flex-1 text-sm">{{ message }}</p>
         <button matButton type="button" class="min-h-11" (click)="retry.emit()">Try again</button>
       </div>
     }
   </div>
 
-  <form class="chat-divider flex items-center gap-2 border-t px-4 py-3" (submit)="submit($event)">
+  <form
+    class="chat-composer chat-divider flex items-end gap-2 border-t px-4 pt-3"
+    (submit)="submit($event)"
+  >
     <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
       <mat-label>Ask a question</mat-label>
       <textarea
@@ -112,7 +113,13 @@
         (keydown.enter)="onEnter($event)"
       ></textarea>
     </mat-form-field>
-    <button mat-icon-button type="submit" class="min-h-11 min-w-11" aria-label="Send">
+    <button
+      matMiniFab
+      type="submit"
+      class="min-h-11 min-w-11 shrink-0"
+      [disabled]="!canSend()"
+      aria-label="Send"
+    >
       <mat-icon aria-hidden="true">send</mat-icon>
     </button>
   </form>

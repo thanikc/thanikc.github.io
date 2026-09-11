@@ -45,6 +45,37 @@
   }
 }
 
+// Chat typing indicator. Dots rest dim and lift as the wave passes; the collapsed
+// duration under reduced motion leaves them legible and still.
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+// One-shot reveal for the chat launcher's tip: hover is not available on touch,
+// so the hint shows itself once on arrival and then gets out of the way. No
+// fill-mode, so the resting style (and its hover rule) takes over afterwards.
+@keyframes hint-peek {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 // Honour the OS-level motion preference app-wide. Durations are collapsed
 // rather than disabled so animations that set a final state (the card reveal,
 // which starts at `opacity: 0`) still land on it.
