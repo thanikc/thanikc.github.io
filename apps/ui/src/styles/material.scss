@@ -44,12 +44,20 @@ body {
 // themes: in light the lightest container is white, in dark the lowest container is
 // the darkest. So the page sits on `base` and cards on `raised`, and raised is always
 // the lighter of the two — white cards on a tinted page in light, lighter navy cards
-// on the navy page in dark. The Playwright design check measures the separation.
+// on the navy page in dark.
+//
+// The gap is deliberately wider than a bare contrast-ratio minimum would require:
+// `surface-container` in light and `surface-container` in dark both measured as
+// visibly "no card at all" in review (fill contrast ~1.2, distinguishable only by
+// the 1px border, if you looked for it). `surface-dim` / `surface-container-highest`
+// give fill contrast ~1.4-1.7, so the card reads as a surface at a glance, not just
+// on close inspection. The Playwright design check's surfaceSeparation() enforces a
+// floor above the old numbers so this can't quietly regress.
 :root {
-  --app-surface-base: light-dark(var(--mat-sys-surface-container), var(--mat-sys-surface));
+  --app-surface-base: light-dark(var(--mat-sys-surface-dim), var(--mat-sys-surface));
   --app-surface-raised: light-dark(
     var(--mat-sys-surface-container-lowest),
-    var(--mat-sys-surface-container)
+    var(--mat-sys-surface-container-highest)
   );
 }
 
