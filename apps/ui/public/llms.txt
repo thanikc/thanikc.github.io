@@ -1,13 +1,18 @@
 # Thanik Cheowtirakul
 
-> Profile and tech hub for Thanik Cheowtirakul: modern Angular (Signals, Standalone), Java/Spring Boot microservices, and Kubernetes/OpenShift deployments.
+> Full-stack engineer who builds large Angular and Spring Boot applications for German online banking, and uses AI to move faster without lowering the bar.
 
-An AI chat assistant is available on every page (bottom-right button) and answers
-questions about Thanik's professional experience, projects, and skills using a
-retrieval-augmented pipeline over his resume and portfolio content.
+The profile page is deliberately short. AI Ling, the AI assistant on every page
+(bottom-right button, or any "Ask AI Ling" link), holds the detail: it answers
+questions about Thanik's experience, projects, working principles, and AI practice
+using retrieval-augmented generation over a knowledge base he wrote.
 
 ## Pages
 
-- [Profile](https://thanikc.github.io/): Summary of experience, skills, and background.
-- [Retirement Calculator](https://thanikc.github.io/calculator): Interactive Angular tool, not related to Thanik's professional profile.
+- [Profile](https://thanikc.github.io/): Positioning, the kinds of problems he works on, projects (CrashDash, AI Ling, BJJ Quiz, Retirement Calculator), how he works, toolbox, and interests.
+- [Retirement Calculator](https://thanikc.github.io/calculator): Small interactive Angular side project with live World Bank data.
 - [Privacy Policy](https://thanikc.github.io/privacy-policy): Data handling, including for the chat assistant.
+
+## Source
+
+- [GitHub repository](https://github.com/thanikc/thanikc.github.io): The Angular site and the AI Ling worker, built test-first.
