@@ -1,6 +1,8 @@
 export interface SocialLink {
   /** Doubles as the analytics CTA label. */
   readonly label: string;
+  /** Visible link text; `ariaLabel` must contain it (WCAG 2.5.3 Label in Name). */
+  readonly shortLabel: string;
   readonly href: string;
   readonly ariaLabel: string;
   /** External links open in a new tab; mailto: and in-app links do not. */
@@ -13,6 +15,7 @@ export interface SocialLink {
 export const SOCIAL_LINKS: readonly SocialLink[] = [
   {
     label: 'Email',
+    shortLabel: 'Email',
     href: 'mailto:thanikc@gmail.com',
     ariaLabel: 'Email Thanik Cheowtirakul',
     external: false,
@@ -21,6 +24,7 @@ export const SOCIAL_LINKS: readonly SocialLink[] = [
   },
   {
     label: 'GitHub Repository',
+    shortLabel: 'GitHub',
     href: 'https://github.com/thanikc/thanikc.github.io',
     ariaLabel: 'GitHub repository of Thanik Cheowtirakul',
     external: true,
@@ -29,6 +33,7 @@ export const SOCIAL_LINKS: readonly SocialLink[] = [
   },
   {
     label: 'LinkedIn',
+    shortLabel: 'LinkedIn',
     href: 'https://de.linkedin.com/in/thanik-cheowtirakul-7a259526',
     ariaLabel: 'LinkedIn profile of Thanik Cheowtirakul',
     external: true,

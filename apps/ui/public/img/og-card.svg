@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Source for og-card.png (the Open Graph / Twitter preview). Regenerate with:
+       convert -background none apps/ui/public/img/og-card.svg apps/ui/public/img/og-card.png
+       Solid fills only: ImageMagick's built-in SVG renderer drops gradients. -->
+  <rect width="1200" height="630" fill="#0f1d33" />
+  <rect x="0" y="0" width="12" height="630" fill="#1976d2" />
+
+  <!-- Logo mark, from img/logo.svg, scaled 1.5× -->
+  <g transform="translate(96 88) scale(1.5)">
+    <rect x="2" y="2" width="60" height="60" rx="14" fill="#1976d2" />
+    <path d="M22 22 L12 32 L22 42" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M42 22 L52 32 L42 42" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+    <circle cx="32" cy="46" r="2.6" fill="#ffffff" />
+    <path d="M32 18 v20" fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" />
+  </g>
+
+  <g font-family="DejaVu Sans, Roboto, Arial, sans-serif">
+    <text x="96" y="276" font-size="30" font-weight="bold" fill="#8ec5ff">FULL-STACK ENGINEER</text>
+    <text x="96" y="356" font-size="72" font-weight="bold" fill="#ffffff">Thanik Cheowtirakul</text>
+    <text x="96" y="428" font-size="32" fill="#d3e3f6">Large Angular and Spring Boot applications</text>
+    <text x="96" y="472" font-size="32" fill="#d3e3f6">for German online banking.</text>
+    <text x="96" y="560" font-size="26" fill="#8ec5ff">thanikc.github.io · Ask AI Ling for the long version</text>
+  </g>
+</svg>
