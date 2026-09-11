@@ -1,0 +1,33 @@
+<section class="space-y-6" [attr.aria-labelledby]="headingId">
+  <app-section-header
+    heading="What I work on"
+    [headingId]="headingId"
+    subtitle="The kinds of problems I spend my days on"
+  />
+
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    @for (theme of themes(); track theme.title; let i = $index) {
+      <article
+        class="theme-card surface-card surface-card-enter flex flex-col gap-3 rounded-xl p-6 shadow-sm"
+        [style.animation-delay.ms]="i * 80"
+      >
+        <h3 class="text-lg font-bold">{{ theme.title }}</h3>
+        <p class="surface-muted text-sm leading-relaxed">{{ theme.summary }}</p>
+        <ul class="flex flex-wrap gap-2" aria-label="Technologies">
+          @for (chip of theme.chips; track chip) {
+            <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ chip }}</li>
+          }
+        </ul>
+        <!-- -ml-3 cancels the text button's inner padding so its label lines up
+             with the card copy; mt-auto keeps hooks aligned across a row. -->
+        <app-ask-ling-link
+          class="mt-auto -ml-3 self-start"
+          [question]="theme.question"
+          [label]="theme.hookLabel"
+        />
+      </article>
+    } @empty {
+      <p class="surface-muted text-sm">Nothing to show yet.</p>
+    }
+  </div>
+</section>

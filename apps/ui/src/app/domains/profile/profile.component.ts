@@ -4,12 +4,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { ProfileHeroComponent } from './profile-hero.component';
-
-export interface TechSkill {
-  category: string;
-  skills: string[];
-  icon: string;
-}
+import { ProfileThemesComponent } from './profile-themes.component';
+import { WORK_THEMES } from './profile.content';
 
 export interface SideProject {
   name: string;
@@ -27,24 +23,6 @@ export interface Interest {
   description: string;
   icon: string;
 }
-
-const SKILL_CATEGORIES: readonly TechSkill[] = [
-  {
-    category: 'Frontend Excellence',
-    skills: ['Angular', 'TypeScript', 'RxJS', 'Signals', 'Tailwind CSS', 'Angular Material'],
-    icon: 'code',
-  },
-  {
-    category: 'Backend & Microservices',
-    skills: ['Spring Boot', 'Java', 'REST APIs', 'Spring Security', 'Hibernate/JPA'],
-    icon: 'dns',
-  },
-  {
-    category: 'Cloud & DevOps',
-    skills: ['OpenShift', 'Kubernetes', 'Docker', 'CI/CD Pipelines', 'Helm'],
-    icon: 'cloud_queue',
-  },
-];
 
 const SIDE_PROJECTS: readonly SideProject[] = [
   {
@@ -101,7 +79,13 @@ const INTERESTS: readonly Interest[] = [
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, MatIconModule, AdBannerComponent, ProfileHeroComponent],
+  imports: [
+    RouterLink,
+    MatIconModule,
+    AdBannerComponent,
+    ProfileHeroComponent,
+    ProfileThemesComponent,
+  ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -110,7 +94,7 @@ export class ProfileComponent {
   private readonly adBanner = inject(AdBannerService);
 
   // Static presentation content: no reactivity needed.
-  readonly skillCategories = SKILL_CATEGORIES;
+  readonly workThemes = WORK_THEMES;
   readonly sideProjects = SIDE_PROJECTS;
   readonly interests = INTERESTS;
   readonly showBanner = computed(

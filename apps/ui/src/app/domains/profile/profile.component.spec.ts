@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
+import { WORK_THEMES } from './profile.content';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 
@@ -49,6 +50,30 @@ describe('ProfileComponent', () => {
     const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
 
     expect(page?.firstElementChild?.tagName).toBe('APP-PROFILE-HERO');
+  });
+
+  it('follows the hero with the "What I work on" themes', () => {
+    const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
+
+    expect(page?.children[1]?.tagName).toBe('APP-PROFILE-THEMES');
+  });
+
+  // The stack now lives inside the themes, in context; it no longer leads the page.
+  it('no longer leads with a technology list', () => {
+    const headings = [...(fixture.nativeElement as HTMLElement).querySelectorAll('h2')].map(h =>
+      h.textContent?.trim(),
+    );
+
+    expect(headings).not.toContain('Technical Expertise');
+  });
+
+  // Owner's decision: the static page names the industry, never the companies.
+  it('names no companies in its work themes', () => {
+    const text = JSON.stringify(WORK_THEMES);
+
+    expect(WORK_THEMES.length).toBeGreaterThanOrEqual(3);
+    expect(WORK_THEMES.length).toBeLessThanOrEqual(4);
+    expect(text).not.toMatch(/attempto|Atruvia|Fiducia|Genossenschaft/i);
   });
 
   it('should render one card per configured side project', () => {
