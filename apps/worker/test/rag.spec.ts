@@ -36,6 +36,17 @@ describe('buildMessages', () => {
     expect(system.toLowerCase()).toContain('strength');
   });
 
+  it('restricts the assistant to Thanik-related topics and refuses unrelated requests', () => {
+    const system = buildMessages('recommend me a book', [])[0]?.content ?? '';
+    const lower = system.toLowerCase();
+
+    expect(lower).toContain('only');
+    expect(lower).toContain('thanik');
+    expect(lower).toMatch(/decline|refuse|not (going to|able to) help/);
+    expect(lower).toMatch(/code|recommendation|unrelated|general|other topics/);
+    expect(lower).toMatch(/ignore.*instructions|override|jailbreak/);
+  });
+
   it('keeps prior history between the system prompt and the new question', () => {
     const history = [
       { role: 'user' as const, content: 'hi' },
