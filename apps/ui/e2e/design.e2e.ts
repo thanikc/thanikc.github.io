@@ -233,8 +233,17 @@ async function structure(page: Page, width: number) {
       })
       .map(el => `${el.tagName.toLowerCase()} "${el.textContent?.trim().slice(0, 40)}"`);
 
+    // Section rhythm: a header's divider must not run into the content below it.
+    const rhythm = [...document.querySelectorAll('app-section-header')].flatMap(header => {
+      const next = header.nextElementSibling;
+      if (!next || !visible(next)) return [];
+      const gap = next.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+      return gap < 16 ? [`"${header.textContent?.trim().slice(0, 30)}": ${Math.round(gap)}px`] : [];
+    });
+
     return {
       h1: headings.filter(h => h.tagName === 'H1').length,
+      rhythm,
       skips,
       landmarks,
       images,
@@ -246,6 +255,67 @@ async function structure(page: Page, width: number) {
         .slice(0, 3),
     };
   }, width);
+}
+
+/**
+ * Non-text contrast, which axe does not check: a card must stand apart from the page.
+ * Its border needs 3:1 against the page (UX-UI.md), its fill must visibly differ from
+ * the page, and in dark mode a raised surface must be lighter than the page, not a hole.
+ */
+async function surfaceSeparation(page: Page) {
+  return page.evaluate(() => {
+    const rgb = (color: string): number[] | null => {
+      const legacy = color.match(/^rgba?\(([^)]+)\)$/);
+      if (legacy) {
+        const [r, g, b, a = 1] = legacy[1]
+          .split(/[\s,/]+/)
+          .filter(Boolean)
+          .map(Number);
+        return a < 1 ? null : [r, g, b];
+      }
+      const srgb = color.match(/^color\(srgb ([^)]+)\)$/);
+      if (srgb) {
+        const [r, g, b, a = 1] = srgb[1]
+          .split(/[\s/]+/)
+          .filter(Boolean)
+          .map(Number);
+        return a < 1 ? null : [r * 255, g * 255, b * 255];
+      }
+      return null;
+    };
+    const luminance = ([r, g, b]: number[]) => {
+      const channel = (v: number) => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+      };
+      return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+    };
+    const ratio = (a: number[], b: number[]) => {
+      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+
+    const shell = document.querySelector('.app-shell');
+    const pageColor = shell ? rgb(getComputedStyle(shell).backgroundColor) : null;
+    return ['.hero-card', '.surface-card', '.card', '.info-card'].flatMap(sel => {
+      const el = document.querySelector(sel);
+      if (!el) return [];
+      const s = getComputedStyle(el);
+      const fill = rgb(s.backgroundColor);
+      const border = rgb(s.borderTopColor);
+      if (!pageColor || !fill || !border) {
+        return [{ sel, error: `unmeasurable: ${s.backgroundColor} / ${s.borderTopColor}` }];
+      }
+      return [
+        {
+          sel,
+          borderRatio: Number(ratio(border, pageColor).toFixed(2)),
+          fillRatio: Number(ratio(fill, pageColor).toFixed(2)),
+          raisedIsLighter: luminance(fill) > luminance(pageColor),
+        },
+      ];
+    });
+  });
 }
 
 for (const route of ROUTES) {
@@ -277,6 +347,17 @@ for (const route of ROUTES) {
 
         const targets = await targetViolations(page);
         const shape = await structure(page, width);
+        const surfaces = await surfaceSeparation(page);
+        const dark = theme === 'dark' || theme === 'system-dark';
+        const weakSurfaces = surfaces
+          .filter(
+            s =>
+              'error' in s ||
+              s.borderRatio < 3 ||
+              s.fillRatio < 1.1 ||
+              (dark && !s.raisedIsLighter),
+          )
+          .map(s => JSON.stringify(s));
 
         mkdirSync(join(OUT, 'screens'), { recursive: true });
         await page.screenshot({ path: join(OUT, 'screens', `${name}.png`), fullPage: true });
@@ -289,6 +370,7 @@ for (const route of ROUTES) {
           contrastUnverifiableSample,
           serious,
           targets,
+          surfaces,
           ...shape,
         });
 
@@ -308,6 +390,8 @@ for (const route of ROUTES) {
         expect.soft(shape.horizontalScroll, 'horizontal page scroll (px)').toBeLessThanOrEqual(0);
         expect.soft(shape.clipped, 'clipped text').toEqual([]);
         expect.soft(shape.cls, 'cumulative layout shift').toBeLessThan(0.1);
+        expect.soft(weakSurfaces, 'cards stand apart from the page').toEqual([]);
+        expect.soft(shape.rhythm, 'section header → content gap ≥ 16px').toEqual([]);
 
         await page.context().close();
       });

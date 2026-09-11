@@ -106,13 +106,26 @@ Each maps to a UX-UI.md Non-Negotiable. A failure in any cell of the matrix is a
 9. **Theme tokens.** In dark mode, no text or surface renders in a colour that stays
    identical to light mode when it should follow the theme — compare computed `color` and
    `background-color` of the checked elements across the two themes.
+10. **Surface separation (non-text contrast).** Axe only checks *text*: it passes a page
+    whose cards vanish into the background. For every card surface (`.surface-card`,
+    `.hero-card`, calculator `.card` / `.info-card`) measure against the page base: the
+    border at least 3:1, the fill visibly different (contrast ratio ≥ 1.1), and in dark
+    mode the raised fill lighter than the page — a darker card reads as a hole. Cards use
+    `--app-surface-raised` on `--app-surface-base` (material.scss); never
+    `surface-container-lowest` directly, which is the *darkest* container in dark mode.
+11. **Section rhythm.** The gap between each section header and its content is at least
+    16 px. A custom element is `display: inline` by default, and a parent's `space-y-*`
+    margin has no effect on an inline box — give such hosts `block`.
 
 ## Visual Review
 
-Take one full-page screenshot per theme × width into `tmp/design-check/`. Only read a
-screenshot into the conversation when a check needs visual judgement (text over images,
-alignment, hierarchy) or a check has failed; metrics and axe reports come first
-(Token Economy, AGENTS.md).
+Take one full-page screenshot per theme × width into `tmp/design-check/`. Metrics and
+axe reports come first (Token Economy, AGENTS.md), but they are not a visual review:
+passing numbers once hid cards that blended into the page and headers glued to their
+content. Before reporting done, look at a crop of **every section** of each changed route
+in light and dark (at least at 1440 px, plus 360 px for layout changes) — the hero alone
+is not a visual review. Name anything seen there that no check measures, and add a check
+for it when it can be measured.
 
 ## Reporting
 
