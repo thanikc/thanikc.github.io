@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Profile Summary',
+    title: 'Thanik Cheowtirakul — Full-stack engineer',
     loadComponent: () =>
       import('./domains/profile/profile.component').then(m => m.ProfileComponent),
   },
