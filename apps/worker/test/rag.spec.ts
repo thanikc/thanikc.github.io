@@ -34,12 +34,17 @@ describe('buildMessages', () => {
     expect(system.toLowerCase()).toContain('playful');
   });
 
-  it('tells the model to be a hype man that frames answers in a positive light', () => {
-    const system = buildMessages('what are his hobbies?', [])[0]?.content ?? '';
+  // Hiring managers discount spin: the voice stays playful, the content stays
+  // specific and factual, and the facts make the case on their own.
+  it('keeps a playful voice without spinning the facts', () => {
+    const lower = (buildMessages('what are his weaknesses?', [])[0]?.content ?? '').toLowerCase();
 
-    expect(system.toLowerCase()).toContain('hype man');
-    expect(system.toLowerCase()).toContain('positive');
-    expect(system.toLowerCase()).toContain('strength');
+    expect(lower).toContain('playful');
+    expect(lower).toContain('specific');
+    expect(lower).toContain('let the facts make the case');
+    expect(lower).not.toContain('hype man');
+    expect(lower).not.toContain('positive spin');
+    expect(lower).not.toContain('flattering');
   });
 
   it('restricts the assistant to Thanik-related topics and refuses unrelated requests', () => {
