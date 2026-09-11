@@ -27,12 +27,19 @@ describe('CtaTrackingDirective', () => {
     trackEventSpy.mockRestore();
   });
 
+  // jsdom has no real navigation; without preventDefault it logs a "Not
+  // implemented" error to stderr for every one of these real <a href> clicks.
+  const click = (el: Element) => {
+    el.addEventListener('click', e => e.preventDefault());
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+  };
+
   it('reports a cta event when a tracked link is clicked', () => {
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
     const link: HTMLAnchorElement = fixture.nativeElement.querySelector('[data-cta-tracking]');
 
-    link.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    click(link);
 
     expect(trackEventSpy).toHaveBeenCalledWith('cta', {
       label: 'Test CTA',
@@ -45,7 +52,7 @@ describe('CtaTrackingDirective', () => {
     fixture.detectChanges();
     const nested: HTMLElement = fixture.nativeElement.querySelector('span');
 
-    nested.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    click(nested);
 
     expect(trackEventSpy).toHaveBeenCalledWith('cta', {
       label: 'Test CTA',
@@ -60,7 +67,7 @@ describe('CtaTrackingDirective', () => {
       'a:not([data-cta-tracking])',
     );
 
-    untracked.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    click(untracked);
 
     expect(trackEventSpy).not.toHaveBeenCalled();
   });
