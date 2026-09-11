@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
-import { PRINCIPLES, PROJECTS, WORK_THEMES } from './profile.content';
+import { PRINCIPLES, PROJECTS, TOOLBOX, WORK_THEMES } from './profile.content';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 
@@ -198,6 +198,40 @@ describe('ProfileComponent', () => {
 
     it('names no companies', () => {
       expect(JSON.stringify(PRINCIPLES)).not.toMatch(COMPANIES);
+    });
+  });
+
+  describe('toolbox', () => {
+    it('follows the principles with the toolbox', () => {
+      const principles = el().querySelector('app-profile-principles')!;
+      const toolbox = el().querySelector('app-profile-toolbox');
+
+      expect(toolbox).not.toBeNull();
+      expect(
+        principles.compareDocumentPosition(toolbox!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    const toolsIn = (group: string) => TOOLBOX.find(g => g.name === group)?.tools ?? [];
+    const dailyTools = () =>
+      TOOLBOX.filter(g => g.name !== 'Also worked with').flatMap(g => g.tools);
+
+    // Q11: Nx, NestJS and Helm are daily; plain Kubernetes is familiar, not daily.
+    it('lists the daily tools in their groups and Kubernetes only as also-worked-with', () => {
+      expect(dailyTools()).toEqual(expect.arrayContaining(['Nx', 'NestJS', 'Helm', 'OpenShift']));
+      expect(dailyTools()).not.toContain('Kubernetes');
+      expect(toolsIn('Also worked with')).toContain('Kubernetes');
+    });
+
+    it('covers frontend, backend, platform, quality and AI-assisted engineering', () => {
+      expect(TOOLBOX.map(g => g.name)).toEqual([
+        'Frontend',
+        'Backend',
+        'Platform & delivery',
+        'Quality',
+        'AI-assisted engineering',
+        'Also worked with',
+      ]);
     });
   });
 

@@ -196,3 +196,40 @@ export const PRINCIPLES: readonly Principle[] = [
     },
   },
 ];
+
+/** A scannable line of the toolbox: a group name and its tools. */
+export interface ToolGroup {
+  name: string;
+  tools: readonly string[];
+}
+
+/** Day-to-day tools by group; earlier or familiar-only tools go in the last group. */
+export const TOOLBOX: readonly ToolGroup[] = [
+  {
+    name: 'Frontend',
+    tools: [
+      'Angular',
+      'TypeScript',
+      'RxJS',
+      'Signals',
+      'Web Components',
+      'Nx',
+      'Angular Material',
+      'Tailwind CSS',
+    ],
+  },
+  {
+    name: 'Backend',
+    tools: ['Java', 'Spring Boot', 'Spring Security', 'Hibernate/JPA', 'REST', 'NestJS', 'Oracle'],
+  },
+  {
+    name: 'Platform & delivery',
+    tools: ['OpenShift', 'Helm', 'Docker', 'Jenkins', 'CI/CD', 'Cloudflare Workers'],
+  },
+  { name: 'Quality', tools: ['TDD', 'Playwright', 'Cypress', 'Jest', 'Vitest'] },
+  { name: 'AI-assisted engineering', tools: ['Claude Code', 'Kilo Code', 'OpenRouter', 'RAG'] },
+  {
+    name: 'Also worked with',
+    tools: ['Kubernetes', 'React', 'Vue', 'Swift', 'Android', 'Node.js', 'Ruby on Rails'],
+  },
+];
