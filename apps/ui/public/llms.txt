@@ -1,0 +1,13 @@
+# Thanik Cheowtirakul
+
+> Profile and tech hub for Thanik Cheowtirakul: modern Angular (Signals, Standalone), Java/Spring Boot microservices, and Kubernetes/OpenShift deployments.
+
+An AI chat assistant is available on every page (bottom-right button) and answers
+questions about Thanik's professional experience, projects, and skills using a
+retrieval-augmented pipeline over his resume and portfolio content.
+
+## Pages
+
+- [Profile](https://thanikc.github.io/): Summary of experience, skills, and background.
+- [Retirement Calculator](https://thanikc.github.io/calculator): Interactive Angular tool, not related to Thanik's professional profile.
+- [Privacy Policy](https://thanikc.github.io/privacy-policy): Data handling, including for the chat assistant.

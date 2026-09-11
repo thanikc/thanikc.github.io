@@ -30,10 +30,14 @@ describe('ChatShellComponent', () => {
     fixture.detectChanges();
   });
 
-  // The prerendered HTML is the placeholder state: no widget, nothing to hydrate.
-  it('renders nothing before the defer block completes', () => {
+  // The prerendered HTML is the placeholder state: no widget yet, but a static,
+  // always-rendered sr-only blurb so crawlers that never run JS (AEO bots) still
+  // learn the assistant exists.
+  it('renders a static sr-only blurb but not the widget before the defer block completes', () => {
     expect(fixture.nativeElement.querySelector('app-chat-widget')).toBeNull();
-    expect((fixture.nativeElement as HTMLElement).textContent?.trim()).toBe('');
+    const blurb = fixture.nativeElement.querySelector('.sr-only');
+    expect(blurb).not.toBeNull();
+    expect(blurb.textContent).toContain("Thanik's professional experience");
   });
 
   it('renders the chat widget once the defer block completes', async () => {
