@@ -62,7 +62,7 @@ describe('ChatPanelComponent', () => {
       const labelId = dialog?.getAttribute('aria-labelledby');
 
       expect(labelId).toBeTruthy();
-      expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).not.toBe('');
+      expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe('AI Ling');
     });
 
     it('announces new transcript entries politely', () => {
@@ -120,7 +120,7 @@ describe('ChatPanelComponent', () => {
       const labels = transcriptItems().map(li => li.querySelector('.sr-only')?.textContent?.trim());
 
       expect(labels[0]).toMatch(/you/i);
-      expect(labels[1]).toMatch(/assistant/i);
+      expect(labels[1]).toBe('AI Ling said:');
     });
 
     it('shows a typing indicator only while pending', () => {
@@ -129,6 +129,7 @@ describe('ChatPanelComponent', () => {
 
       setInputs({ pending: true });
       expect(el().querySelector('.chat-typing')).not.toBeNull();
+      expect(el().querySelector('.chat-typing .sr-only')?.textContent).toContain('AI Ling');
     });
 
     // One avatar in the header says who is speaking. Repeating it per turn spends

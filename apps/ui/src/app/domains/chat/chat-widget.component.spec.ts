@@ -59,7 +59,7 @@ describe('ChatWidgetComponent', () => {
   describe('launcher', () => {
     it('renders an avatar FAB and no panel initially', () => {
       expect(fab().type).toBe('button');
-      expect(fab().getAttribute('aria-label')).toBeTruthy();
+      expect(fab().getAttribute('aria-label')).toContain('AI Ling');
       expect(fab().getAttribute('aria-haspopup')).toBe('dialog');
       expect(panel()).toBeNull();
 
@@ -83,6 +83,8 @@ describe('ChatWidgetComponent', () => {
 
       expect(tip?.getAttribute('role')).toBe('tooltip');
       expect(tip?.textContent).toMatch(/questions about Thanik/i);
+      expect(tip?.textContent).toContain('AI Ling');
+      expect(tip?.textContent).not.toMatch(/\bbot\b/i);
       expect(fab().getAttribute('aria-describedby')).toBe('chat-fab-tip');
     });
 

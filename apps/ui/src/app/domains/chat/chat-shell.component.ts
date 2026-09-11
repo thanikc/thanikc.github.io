@@ -22,8 +22,8 @@ import { ChatWidgetComponent } from './chat-widget.component';
   imports: [ChatWidgetComponent],
   template: `
     <p class="sr-only">
-      An AI assistant that answers questions about Thanik's professional experience is available via
-      the chat button on this page.
+      AI Ling, an AI assistant that answers questions about Thanik's professional experience, is
+      available via the chat button on this page.
     </p>
     @defer (on idle) {
       <app-chat-widget />
