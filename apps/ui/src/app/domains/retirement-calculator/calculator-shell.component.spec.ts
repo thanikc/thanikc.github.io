@@ -72,12 +72,23 @@ describe('CalculatorShellComponent', () => {
   });
 
   // The placeholder is swapped for a much taller calculator; without a reserved
-  // box the footer jumps down the moment the defer block resolves.
-  it('reserves the calculator height in the placeholder', () => {
+  // box the footer jumps down the moment the defer block resolves. One 640px box
+  // only fitted desktop: the Playwright design check measured the calculator at
+  // 1388px (360), 988px (640), 784px (768) and 658px (1024). The host reserves the
+  // measured height per breakpoint, in both states, so neither swap shifts layout.
+  it('reserves the calculator’s measured height per breakpoint on the host', () => {
     fixture = TestBed.createComponent(CalculatorShellComponent);
     fixture.detectChanges();
-    const section = (fixture.nativeElement as HTMLElement).querySelector('section');
+    const host = fixture.nativeElement as HTMLElement;
 
-    expect(section?.classList.contains('min-h-160')).toBe(true);
+    for (const cls of [
+      'block',
+      'min-h-[1390px]',
+      'sm:min-h-[990px]',
+      'md:min-h-[785px]',
+      'lg:min-h-[660px]',
+    ]) {
+      expect(host.classList.contains(cls), cls).toBe(true);
+    }
   });
 });
