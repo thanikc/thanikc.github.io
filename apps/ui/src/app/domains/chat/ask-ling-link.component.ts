@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { ChatService } from './chat.service';
 
-export type AskLingAppearance = 'text' | 'filled';
+export type AskLingAppearance = 'text' | 'filled' | 'outlined';
 
 /**
  * Contextual entry point into AI Ling: opens the chat with `question` already asked,
  * or — without one — just opens it, where the starter questions take over. The static
  * page states the narrative; these links hand the visitor over to the chat for the
- * depth. Carries the launcher's portrait so it visibly belongs to it.
+ * depth.
  */
 @Component({
   selector: 'app-ask-ling-link',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, MatIconModule],
   template: `
     <button
       [matButton]="appearance()"
@@ -23,25 +24,11 @@ export type AskLingAppearance = 'text' | 'filled';
       (click)="ask()"
     >
       <span class="flex items-center gap-2">
-        <img
-          class="ask-ling-avatar size-6 shrink-0 rounded-full"
-          src="img/chat_avatar_352x432.png"
-          alt=""
-          aria-hidden="true"
-          width="24"
-          height="24"
-        />
+        <mat-icon class="ask-ling-icon" aria-hidden="true">auto_awesome</mat-icon>
         <span class="ask-ling-label">{{ label() }}</span>
         <span class="sr-only">{{ screenReaderHint() }}</span>
       </span>
     </button>
-  `,
-  styles: `
-    .ask-ling-avatar {
-      object-fit: cover;
-      object-position: top center;
-      border: 1px solid var(--mat-sys-outline-variant);
-    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -17,10 +17,11 @@ export interface WorkTheme {
 
 export const WORK_THEMES: readonly WorkTheme[] = [
   {
-    title: 'Large Angular front ends for banking',
-    summary: 'Portals and micro-frontends that many teams, and many banks, build on.',
+    title: 'A shared platform, not one app',
+    summary:
+      'One of five on the Angular core of a homepage platform used across German cooperative banks — each bank configures and customises its own.',
     chips: ['Angular', 'TypeScript', 'RxJS', 'Web Components', 'Micro-frontends'],
-    hookLabel: 'Ask what “large” means here',
+    hookLabel: 'Ask what makes it complex',
     question: 'What is the most complex front end Thanik has worked on?',
   },
   {
@@ -147,7 +148,7 @@ export const PROJECTS: readonly Project[] = [
     icon: 'calculate',
     tagline: 'Projects the nest egg and monthly savings needed for a target retirement income.',
     decision:
-      'Default assumptions load live from the World Bank API and fall back to fixed values when it has no data.',
+      'Default assumptions load live from the World Bank API and fall back to fixed values when it has no data; the page prerenders as an empty shell so the static HTML never bakes in stale numbers.',
     stack: ['Angular Signals', 'World Bank API'],
     status: { label: 'Live', icon: 'public' },
     featured: false,
@@ -191,7 +192,7 @@ export const PRINCIPLES: readonly Principle[] = [
   {
     title: 'Give the AI rules, not just prompts',
     detail:
-      "Written rules for architecture, coding standards and testing make AI output meet the team's bar.",
+      'Not "let AI write everything" — written rules for architecture, coding standards and testing hold AI output to the same bar as a new hire\'s.',
     evidence: {
       kind: 'ask',
       label: 'Ask about the team rules',
@@ -207,6 +208,44 @@ export const PRINCIPLES: readonly Principle[] = [
       label: 'Read why it doesn’t stream',
       url: `${REPO_URL}/blob/main/apps/worker/README.md`,
     },
+  },
+];
+
+/** A concrete seniority/scale fact, backed by an Ask AI Ling hook instead of an adjective. */
+export interface ExperienceStat {
+  headline: string;
+  detail: string;
+  hookLabel: string;
+  question: string;
+}
+
+export const EXPERIENCE_STATS: readonly ExperienceStat[] = [
+  {
+    headline: '25+ years',
+    detail: 'In software since 1999; in banking and finance since 2010.',
+    hookLabel: 'Ask about the roles',
+    question: 'What roles has Thanik had over his career?',
+  },
+  {
+    headline: '10 years, one employer',
+    detail:
+      'Lead Programmer since 2016 — technical decisions and implementation on finance-sector client work.',
+    hookLabel: 'Ask what that role involves',
+    question: 'What does Thanik do as Lead Programmer?',
+  },
+  {
+    headline: 'Reviews, mentors, onboards',
+    detail:
+      'Runs code reviews, mentors junior developers, and onboards new teammates to the codebase and architecture.',
+    hookLabel: 'Ask how he leads',
+    question: 'How does Thanik mentor and lead within his team?',
+  },
+  {
+    headline: "Co-wrote the team's AI rules",
+    detail:
+      'With the tech lead, introduced a binding set of AI rules — architecture, coding standards, tests — as the team’s minimum bar.',
+    hookLabel: 'Ask about the team rules',
+    question: 'What are the AI rules Thanik wrote for his team?',
   },
 ];
 

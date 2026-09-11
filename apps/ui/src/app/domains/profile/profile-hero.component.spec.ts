@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { vi } from 'vitest';
 import { ProfileHeroComponent } from './profile-hero.component';
-import { AskLingLinkComponent } from '../chat/ask-ling-link.component';
 import { ChatService } from '../chat/chat.service';
 import { paletteClassesIn } from '../../shared/testing/palette-classes';
 
@@ -25,7 +23,9 @@ describe('ProfileHeroComponent', () => {
   });
 
   it('names the role and the person, with the name as the only h1', () => {
-    expect(el().querySelector('.hero-badge')?.textContent?.trim()).toBe('Full-stack engineer');
+    expect(el().querySelector('.hero-badge')?.textContent?.trim()).toBe(
+      'Senior Full-Stack Engineer',
+    );
     expect(el().querySelectorAll('h1')).toHaveLength(1);
     expect(el().querySelector('h1')?.textContent?.trim()).toBe('Thanik Cheowtirakul');
   });
@@ -37,6 +37,7 @@ describe('ProfileHeroComponent', () => {
     expect(positioning).toContain('Angular and Spring Boot');
     expect(positioning).toContain('German online banking');
     expect(positioning).toContain('AI');
+    expect(positioning).toContain('reshaping');
   });
 
   // Owner's decisions: industry only, no company names, no credential line.
@@ -49,22 +50,14 @@ describe('ProfileHeroComponent', () => {
     expect(text()).not.toContain('OpenShift Solutions');
   });
 
-  it('invites the visitor to AI Ling for the long version', () => {
-    expect(el().querySelector('.hero-invitation')?.textContent?.trim()).toBe(
-      'This page is the short version. AI Ling has the long one.',
-    );
+  // The Ask AI Ling pitch now lives in its own section right below the hero
+  // (app-profile-ask-ling); repeating it here read as saying the same thing twice.
+  it('carries no separate AI Ling invitation or button of its own', () => {
+    expect(el().querySelector('.hero-invitation')).toBeNull();
+    expect(el().querySelector('app-ask-ling-link')).toBeNull();
   });
 
-  // One primary action: AI Ling, filled; the chat's starters take over from there.
-  it('offers Ask AI Ling as the filled primary action, without a preset question', () => {
-    const askLing = fixture.debugElement.query(By.directive(AskLingLinkComponent));
-    const instance = askLing.componentInstance as AskLingLinkComponent;
-
-    expect(instance.appearance()).toBe('filled');
-    expect(instance.question()).toBeUndefined();
-  });
-
-  it('offers Email and LinkedIn as secondary, tracked actions', () => {
+  it('offers Email and LinkedIn as its actions', () => {
     const email = linkTo('mailto:thanikc@gmail.com');
     const linkedIn = linkTo('https://de.linkedin.com/in/thanik-cheowtirakul-7a259526');
 
@@ -80,16 +73,18 @@ describe('ProfileHeroComponent', () => {
     for (const link of [email!, linkedIn!]) {
       expect(link.classList.contains('mat-mdc-outlined-button')).toBe(true);
       expect(link.classList.contains('min-h-11')).toBe(true);
+      const icon = link.querySelector('svg');
+      expect(icon?.getAttribute('aria-hidden')).toBe('true');
+      expect(icon?.querySelector('path')?.getAttribute('d')?.length).toBeGreaterThan(0);
     }
   });
 
-  it('pins the invitation and actions to the bottom of the hero card', () => {
+  it('pins the actions to the bottom of the hero card', () => {
     const next = el().querySelector('.hero-next');
 
     expect(el().querySelector('.hero-card')?.classList.contains('flex-col')).toBe(true);
     expect(next?.classList.contains('mt-auto')).toBe(true);
-    expect(next?.querySelector('.hero-invitation')).not.toBeNull();
-    expect(next?.querySelector('app-ask-ling-link')).not.toBeNull();
+    expect(next?.querySelector('a')).not.toBeNull();
   });
 
   it('colours itself from theme tokens, not the Tailwind palette', () => {

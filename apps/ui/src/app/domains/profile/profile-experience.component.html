@@ -1,0 +1,30 @@
+<section class="space-y-6" [attr.aria-labelledby]="headingId">
+  <app-section-header
+    heading="Experience"
+    [headingId]="headingId"
+    subtitle="Scale and responsibility, in specifics"
+  />
+
+  @if (stats().length > 0) {
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      @for (stat of stats(); track stat.headline; let i = $index) {
+        <article
+          class="experience-card surface-card surface-card-enter flex flex-col gap-3 rounded-xl p-6 shadow-sm"
+          [style.animation-delay.ms]="i * 80"
+        >
+          <h3 class="text-lg font-bold">{{ stat.headline }}</h3>
+          <p class="surface-muted text-sm leading-relaxed">{{ stat.detail }}</p>
+          <!-- -ml-3 cancels the text button's inner padding so its label lines up
+               with the card copy; mt-auto keeps hooks aligned across a row. -->
+          <app-ask-ling-link
+            class="mt-auto -ml-3 self-start"
+            [question]="stat.question"
+            [label]="stat.hookLabel"
+          />
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="surface-muted text-sm">Nothing to show yet.</p>
+  }
+</section>

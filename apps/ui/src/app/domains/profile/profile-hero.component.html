@@ -15,9 +15,7 @@
     </p>
 
     <div class="hero-next mt-auto flex flex-col gap-3 pt-8">
-      <p class="hero-invitation max-w-2xl text-base">{{ invitation }}</p>
       <div class="flex flex-wrap items-center gap-2">
-        <app-ask-ling-link appearance="filled" />
         <a
           matButton="outlined"
           class="min-h-11"
@@ -25,7 +23,18 @@
           [attr.aria-label]="email.ariaLabel"
           data-cta-tracking="Hero: Email"
         >
-          Email
+          <span class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-4"
+              aria-hidden="true"
+            >
+              <path [attr.d]="email.iconPath" />
+            </svg>
+            Email
+          </span>
         </a>
         <a
           matButton="outlined"
@@ -36,7 +45,18 @@
           [attr.aria-label]="linkedIn.ariaLabel"
           data-cta-tracking="Hero: LinkedIn"
         >
-          LinkedIn
+          <span class="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-4"
+              aria-hidden="true"
+            >
+              <path [attr.d]="linkedIn.iconPath" />
+            </svg>
+            LinkedIn
+          </span>
         </a>
       </div>
     </div>

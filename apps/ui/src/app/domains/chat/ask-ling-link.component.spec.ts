@@ -56,15 +56,12 @@ describe('AskLingLinkComponent', () => {
     expect(button().getAttribute('aria-haspopup')).toBe('dialog');
   });
 
-  // Same portrait as the floating launcher: the link visibly belongs to the chat.
-  it('shows the AI Ling portrait as decoration', () => {
-    const img = button().querySelector('img')!;
+  // A decorative icon, not the launcher's portrait: the label already says "AI Ling".
+  it('shows the auto_awesome icon as decoration', () => {
+    const icon = button().querySelector('mat-icon')!;
 
-    expect(img.getAttribute('src')).toContain('chat_avatar_352x432.png');
-    expect(img.getAttribute('alt')).toBe('');
-    expect(img.getAttribute('aria-hidden')).toBe('true');
-    expect(img.getAttribute('width')).toBeTruthy();
-    expect(img.getAttribute('height')).toBeTruthy();
+    expect(icon.textContent?.trim()).toBe('auto_awesome');
+    expect(icon.getAttribute('aria-hidden')).toBe('true');
   });
 
   // Without a question it just opens the chat, where the starters take over.
@@ -92,6 +89,13 @@ describe('AskLingLinkComponent', () => {
     fixture.detectChanges();
 
     expect(button().classList.contains('mat-mdc-unelevated-button')).toBe(true);
+  });
+
+  it('renders outlined on request', () => {
+    fixture.componentRef.setInput('appearance', 'outlined');
+    fixture.detectChanges();
+
+    expect(button().classList.contains('mat-mdc-outlined-button')).toBe(true);
   });
 
   it('meets the 44px touch target', () => {
