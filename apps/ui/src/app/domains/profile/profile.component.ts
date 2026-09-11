@@ -17,6 +17,8 @@ export interface SideProject {
   icon: string;
   /** External projects open in a new tab; in-app routes navigate via the router. */
   external: boolean;
+  /** Shown on the card when the project is not openly usable, e.g. behind a sign-in. */
+  access?: string;
 }
 
 export interface Interest {
@@ -59,6 +61,7 @@ const SIDE_PROJECTS: readonly SideProject[] = [
     url: 'https://crashdash.singdee.de/',
     icon: 'trending_down',
     external: true,
+    access: 'Private — sign-in required',
   },
   {
     name: 'BJJ Quiz',

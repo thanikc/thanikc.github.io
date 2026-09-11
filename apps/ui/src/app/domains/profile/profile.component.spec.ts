@@ -80,6 +80,40 @@ describe('ProfileComponent', () => {
     expect(crashDash!.textContent).toContain('market crash');
   });
 
+  // CrashDash is access-restricted: the link lands on a sign-in wall, so the
+  // card must say so before the visitor clicks.
+  it('marks CrashDash as private and sign-in required', () => {
+    const crashDash = projectLinks().find(
+      link => link.getAttribute('href') === 'https://crashdash.singdee.de/',
+    );
+    const badge = crashDash?.querySelector('.project-access');
+
+    expect(badge?.textContent?.trim()).toBe('Private — sign-in required');
+  });
+
+  it('shows no access badge on publicly usable projects', () => {
+    const publicCards = projectLinks().filter(
+      link => link.getAttribute('href') !== 'https://crashdash.singdee.de/',
+    );
+
+    expect(publicCards.length).toBeGreaterThan(0);
+    for (const card of publicCards) {
+      expect(card.querySelector('.project-access')).toBeNull();
+    }
+  });
+
+  // Hover lift signals "clickable": only links may carry it, so static skill and
+  // interest cards don't read as controls.
+  it('gives the hover affordance to project links only', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const interactive = [...compiled.querySelectorAll('.card-interactive')];
+
+    expect(interactive.length).toBe(component.sideProjects.length);
+    for (const card of interactive) {
+      expect(card.tagName).toBe('A');
+    }
+  });
+
   it('should open external project links safely in a new tab', () => {
     const externalLinks = projectLinks().filter(link =>
       link.getAttribute('href')?.startsWith('http'),
