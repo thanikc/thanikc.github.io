@@ -1,0 +1,61 @@
+<article
+  class="surface-card surface-card-enter flex h-full flex-col gap-4 rounded-xl p-6 shadow-sm"
+>
+  <div class="flex items-center gap-4">
+    <div class="surface-avatar flex items-center justify-center rounded-lg p-3">
+      <mat-icon aria-hidden="true">{{ project().icon }}</mat-icon>
+    </div>
+    <div class="min-w-0">
+      <h3 class="text-lg font-bold">{{ project().name }}</h3>
+      <p class="project-status surface-muted flex items-center gap-1 text-xs font-semibold">
+        <mat-icon class="project-status-icon" aria-hidden="true">{{
+          project().status.icon
+        }}</mat-icon>
+        {{ project().status.label }}
+      </p>
+    </div>
+  </div>
+
+  <p class="project-tagline text-sm leading-relaxed">{{ project().tagline }}</p>
+  @if (project().why; as why) {
+    <p class="project-why surface-muted text-sm leading-relaxed">{{ why }}</p>
+  }
+  <p class="project-decision surface-muted text-sm leading-relaxed">
+    <span class="font-semibold">Decision:</span> {{ project().decision }}
+  </p>
+
+  <ul class="flex flex-wrap gap-2" aria-label="Stack">
+    @for (tech of project().stack; track tech) {
+      <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ tech }}</li>
+    }
+  </ul>
+
+  <div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
+    @for (link of links(); track link.url) {
+      @if (link.external) {
+        <a
+          [matButton]="link.appearance"
+          class="min-h-11"
+          [href]="link.url"
+          target="_blank"
+          rel="noopener noreferrer"
+          [attr.data-cta-tracking]="project().name + ': ' + link.label"
+        >
+          {{ link.label }}
+          <mat-icon iconPositionEnd aria-hidden="true">open_in_new</mat-icon>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      } @else {
+        <a
+          [matButton]="link.appearance"
+          class="min-h-11"
+          [routerLink]="link.url"
+          [attr.data-cta-tracking]="project().name + ': ' + link.label"
+        >
+          {{ link.label }}
+        </a>
+      }
+    }
+    <app-ask-ling-link [question]="project().question" [label]="project().hookLabel" />
+  </div>
+</article>

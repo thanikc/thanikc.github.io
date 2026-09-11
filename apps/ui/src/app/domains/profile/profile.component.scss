@@ -30,52 +30,6 @@
   color: var(--mat-sys-on-primary-container);
 }
 
-// Lift on hover says "clickable", so only links get it — static skill and
-// interest cards must not read as controls.
-.card-interactive {
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    border-color 0.25s ease;
-
-  .card-avatar {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, var(--mat-sys-outline));
-    box-shadow: 0 12px 28px -10px color-mix(in srgb, var(--mat-sys-primary) 25%, transparent);
-
-    .card-avatar {
-      transform: scale(1.1) rotate(-4deg);
-    }
-  }
-}
-
-.project-card {
-  text-decoration: none;
-}
-
-.project-access-row {
-  color: var(--mat-sys-on-surface-variant);
-}
-
-.project-access-icon {
-  width: 16px;
-  height: 16px;
-  font-size: 16px;
-}
-
-.external-icon {
-  color: var(--mat-sys-on-surface-variant);
-  transition: transform 0.25s ease;
-
-  .project-card:hover & {
-    transform: translate(2px, -2px);
-  }
-}
-
 .ad-slot {
   border: 1px dashed var(--mat-sys-outline-variant);
 }
@@ -93,13 +47,7 @@
     color: #000;
     opacity: 1;
     animation: none;
-    transform: none;
     break-inside: avoid;
-
-    &:hover {
-      transform: none;
-      box-shadow: none;
-    }
   }
 
   .ad-slot {
@@ -108,14 +56,5 @@
 
   .hero-subtitle {
     color: #000;
-  }
-
-  .project-card,
-  .interest-card {
-    break-inside: avoid;
-  }
-
-  .external-icon {
-    display: none;
   }
 }

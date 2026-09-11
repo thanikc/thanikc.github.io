@@ -1,0 +1,27 @@
+<section class="space-y-6" [attr.aria-labelledby]="headingId">
+  <app-section-header
+    heading="Things I’ve built"
+    [headingId]="headingId"
+    subtitle="Complete small products I build on my own, from data model to deployment"
+  />
+
+  @if (featured().length > 0) {
+    <div class="projects-featured grid grid-cols-1 gap-6 md:grid-cols-2">
+      @for (project of featured(); track project.name) {
+        <app-project-card [project]="project" />
+      }
+    </div>
+  }
+
+  @if (more().length > 0) {
+    <div class="projects-more grid grid-cols-1 gap-6 md:grid-cols-2">
+      @for (project of more(); track project.name) {
+        <app-project-card [project]="project" />
+      }
+    </div>
+  }
+
+  @if (projects().length === 0) {
+    <p class="surface-muted text-sm">Nothing to show yet.</p>
+  }
+</section>
