@@ -22,7 +22,7 @@ body {
 }
 
 body {
-  background-color: var(--mat-sys-surface);
+  background-color: var(--app-surface-base);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
 }
@@ -40,6 +40,19 @@ body {
 // M3 has no success/warning role. These are app-specific semantic tokens for
 // data-provenance chips (e.g. "live" vs "baseline" data); centralised here,
 // following `light-dark()`, so no component hard-codes its own hex pair.
+// Page vs. card surfaces. M3 has no single token that reads as "raised" in both
+// themes: in light the lightest container is white, in dark the lowest container is
+// the darkest. So the page sits on `base` and cards on `raised`, and raised is always
+// the lighter of the two — white cards on a tinted page in light, lighter navy cards
+// on the navy page in dark. The Playwright design check measures the separation.
+:root {
+  --app-surface-base: light-dark(var(--mat-sys-surface-container), var(--mat-sys-surface));
+  --app-surface-raised: light-dark(
+    var(--mat-sys-surface-container-lowest),
+    var(--mat-sys-surface-container)
+  );
+}
+
 :root {
   --app-sys-success-container: light-dark(#d1fae5, #05271c);
   --app-sys-on-success-container: light-dark(#04543c, #6ee7b7);
