@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.hero-card {
+  min-height: 320px;
+  color: var(--mat-sys-on-surface);
+  // `outline`, not `outline-variant`: the card surface is all but identical to
+  // the page surface, so the border carries the whole boundary and needs 3:1.
+  border: 1px solid var(--mat-sys-outline);
+  background:
+    radial-gradient(
+      120% 140% at 100% 0%,
+      color-mix(in srgb, var(--mat-sys-primary) 10%, transparent) 0%,
+      transparent 60%
+    ),
+    var(--mat-sys-surface-container-lowest);
+
+  @media (min-width: 1024px) {
+    min-height: 420px;
+  }
+}
+
+.hero-badge,
+.hero-invitation {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// The scrim stays near-opaque across the text column and only opens up on the
+// right: measured over the brightest part of the image, the intro paragraph
+// reads at 2.8:1 against the previous 75%-at-45% ramp.
+$hero-scrim: linear-gradient(
+  100deg,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 97%, transparent) 0%,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 92%, transparent) 62%,
+  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 45%, transparent) 100%
+);
+
+// The photo only appears once the hero is wide enough for the text column
+// (capped at max-w-2xl) to clear it. Below 1024px the text spans the whole
+// card, so the photo would sit directly behind every line -- and because the
+// element is `display: none` there, no variant is fetched on small screens.
+.hero-photo {
+  display: none;
+  position: absolute;
+  inset: 0;
+  // No `srcset`/width variants here, and none are useful: this is a background
+  // image, and `max-w-6xl` pins the card to 1120px, so the paint box is a fixed
+  // ~992-1120px at every viewport that renders it. Only the *format* varies, so
+  // `image-set()` is the right knob. The plain-url declaration below is the
+  // fallback for engines without `image-set()`/`type()`, which drop the whole
+  // declaration rather than the unsupported entry.
+  background-image: $hero-scrim, url('/img/hero-lagoon.jpg');
+  background-image:
+    $hero-scrim,
+    image-set(
+      url('/img/hero-lagoon.avif') type('image/avif'),
+      url('/img/hero-lagoon.webp') type('image/webp'),
+      url('/img/hero-lagoon.jpg') type('image/jpeg')
+    );
+  background-size: cover, cover;
+  background-position: center, center;
+
+  @media (min-width: 1024px) {
+    display: block;
+  }
+}
+
+.hero-glow {
+  position: absolute;
+  inset: -40% -20% auto auto;
+  width: 60%;
+  height: 220%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--mat-sys-tertiary) 22%, transparent) 0%,
+    transparent 70%
+  );
+  filter: blur(10px);
+  pointer-events: none;
+  animation: hero-drift 0.9s ease-out forwards;
+}
+
+.hero-name {
+  background: linear-gradient(
+    100deg,
+    var(--mat-sys-on-surface) 20%,
+    var(--mat-sys-primary) 50%,
+    var(--mat-sys-tertiary) 80%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  color: transparent;
+  animation: shine 1.4s ease-out forwards;
+  // drop-shadow, not text-shadow: it haloes the gradient text's alpha shape
+  // instead of painting a solid glyph over its fill.
+  filter: drop-shadow(0 0 2px var(--mat-sys-surface-container-lowest))
+    drop-shadow(0 0 6px var(--mat-sys-surface-container-lowest));
+}
+
+/** Resume-style printout: flatten decoration, drop CTAs and animation. */
+@media print {
+  .hero-card {
+    background: none;
+    border: 1px solid #000;
+    box-shadow: none;
+    color: #000;
+  }
+
+  .hero-photo,
+  .hero-glow,
+  .hero-next {
+    display: none;
+  }
+
+  .hero-name {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: #000;
+    animation: none;
+  }
+
+  .hero-badge {
+    color: #000;
+  }
+}

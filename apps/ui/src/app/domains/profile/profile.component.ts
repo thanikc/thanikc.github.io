@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 import { AdBannerService } from '../ads/ad-banner.service';
+import { ProfileHeroComponent } from './profile-hero.component';
 
 export interface TechSkill {
   category: string;
@@ -100,7 +101,7 @@ const INTERESTS: readonly Interest[] = [
 
 @Component({
   selector: 'app-profile',
-  imports: [RouterLink, MatIconModule, AdBannerComponent],
+  imports: [RouterLink, MatIconModule, AdBannerComponent, ProfileHeroComponent],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,10 +110,6 @@ export class ProfileComponent {
   private readonly adBanner = inject(AdBannerService);
 
   // Static presentation content: no reactivity needed.
-  readonly title = 'Full-Stack Engineer';
-  readonly subtitle = 'Enterprise Angular • Spring Boot • OpenShift Solutions';
-  readonly intro =
-    'I build enterprise web applications end to end: Angular front ends with Signals and standalone components, backed by Spring Boot microservices running on Kubernetes and OpenShift. AI assistants are part of my day-to-day workflow, from scaffolding tests to reviewing architecture decisions. This site is also my sandbox for trying out new patterns in production.';
   readonly skillCategories = SKILL_CATEGORIES;
   readonly sideProjects = SIDE_PROJECTS;
   readonly interests = INTERESTS;
