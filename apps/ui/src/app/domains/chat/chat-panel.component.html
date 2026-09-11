@@ -33,7 +33,7 @@
 
   <div
     #transcript
-    class="chat-transcript scroll-smooth flex-1 overflow-y-auto px-4 py-4"
+    class="chat-transcript scroll-smooth flex flex-1 flex-col overflow-y-auto px-4 py-4"
     (scroll)="trackScrollPosition()"
   >
     @if (turns().length === 0) {
@@ -93,35 +93,38 @@
         <button matButton type="button" class="min-h-11" (click)="retry.emit()">Try again</button>
       </div>
     }
+
+    <p class="chat-disclaimer chat-muted mt-auto pt-6 text-center text-xs italic">
+      I'm an AI, so check anything that matters.
+    </p>
   </div>
 
-  <div class="chat-composer chat-divider border-t px-4 pt-3">
-    <form class="flex items-end gap-2" (submit)="submit($event)">
-      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
-        <mat-label>Ask a question</mat-label>
-        <textarea
-          matInput
-          cdkTextareaAutosize
-          cdkAutosizeMinRows="1"
-          cdkAutosizeMaxRows="4"
-          cdkFocusInitial
-          [id]="inputId"
-          [value]="draft()"
-          (input)="updateDraft($event)"
-          (keydown.enter)="onEnter($event)"
-        ></textarea>
-      </mat-form-field>
-      <button
-        matMiniFab
-        type="submit"
-        class="min-h-11 min-w-11 shrink-0"
-        [disabled]="!canSend()"
-        aria-label="Send"
-      >
-        <mat-icon aria-hidden="true">send</mat-icon>
-      </button>
-    </form>
-
-    <p class="chat-muted mt-1.5 text-center text-xs">I'm an AI, so check anything that matters.</p>
-  </div>
+  <form
+    class="chat-composer chat-divider flex items-end gap-2 border-t px-4 pt-3"
+    (submit)="submit($event)"
+  >
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
+      <mat-label>Ask a question</mat-label>
+      <textarea
+        matInput
+        cdkTextareaAutosize
+        cdkAutosizeMinRows="1"
+        cdkAutosizeMaxRows="4"
+        cdkFocusInitial
+        [id]="inputId"
+        [value]="draft()"
+        (input)="updateDraft($event)"
+        (keydown.enter)="onEnter($event)"
+      ></textarea>
+    </mat-form-field>
+    <button
+      matMiniFab
+      type="submit"
+      class="min-h-11 min-w-11 shrink-0"
+      [disabled]="!canSend()"
+      aria-label="Send"
+    >
+      <mat-icon aria-hidden="true">send</mat-icon>
+    </button>
+  </form>
 </section>
