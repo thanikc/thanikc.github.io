@@ -1,10 +1,15 @@
 <footer
   id="contact"
-  class="container mx-auto px-4 py-8 max-w-6xl flex w-full items-center gap-4 scroll-mt-24"
+  class="container mx-auto px-4 py-8 max-w-6xl flex w-full flex-wrap items-center gap-4 scroll-mt-24"
 >
   @if (adsEnabled) {
     <app-ad-banner-toggle />
   }
+
+  <p class="footer-note surface-muted max-w-md text-sm">
+    I use this site to try new Angular and AI patterns on something real but low-stakes. It's built
+    test-first, and the source is public.
+  </p>
 
   <div class="flex flex-wrap items-center gap-4 ml-auto">
     <a
@@ -14,13 +19,13 @@
       Privacy Policy
     </a>
 
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       @for (link of socialLinks; track link.label) {
         <a
           [href]="link.href"
           [attr.target]="link.external ? '_blank' : null"
           [attr.rel]="link.external ? 'noopener noreferrer' : null"
-          class="social-link inline-flex min-h-11 min-w-11 items-center justify-center rounded-full transition-transform duration-200 hover:-translate-y-0.5"
+          class="social-link inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-transform duration-200 hover:-translate-y-0.5"
           [attr.aria-label]="link.ariaLabel"
           [attr.data-cta-tracking]="link.label"
         >
@@ -33,6 +38,7 @@
           >
             <path [attr.d]="link.iconPath" />
           </svg>
+          <span>{{ link.shortLabel }}</span>
         </a>
       }
     </div>

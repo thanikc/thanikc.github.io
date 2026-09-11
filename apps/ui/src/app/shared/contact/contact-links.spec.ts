@@ -9,6 +9,10 @@ describe('contact links', () => {
     ]);
   });
 
+  it('gives each link a short visible label', () => {
+    expect(SOCIAL_LINKS.map(link => link.shortLabel)).toEqual(['Email', 'GitHub', 'LinkedIn']);
+  });
+
   it('looks a link up by its label', () => {
     expect(contactLink('Email').href).toBe('mailto:thanikc@gmail.com');
     expect(contactLink('LinkedIn').external).toBe(true);

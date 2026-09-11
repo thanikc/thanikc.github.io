@@ -81,15 +81,36 @@ describe('FooterComponent', () => {
     expect(compiled.querySelector('footer app-ad-banner-toggle')).toBeNull();
   });
 
-  it('should render exactly one tracked, icon-only link each for Email, GitHub, and LinkedIn', () => {
+  // Icons alone made visitors guess; each link now says where it goes.
+  it('should render exactly one tracked, labelled link each for Email, GitHub, and LinkedIn', () => {
     expect(links().length).toBe(3);
 
-    for (const label of ['Email', 'GitHub Repository', 'LinkedIn']) {
+    for (const [label, text] of [
+      ['Email', 'Email'],
+      ['GitHub Repository', 'GitHub'],
+      ['LinkedIn', 'LinkedIn'],
+    ]) {
       const link = linkFor(label);
       expect(link, `expected a link tracked as "${label}"`).toBeDefined();
-      expect(link!.textContent?.trim()).toBe('');
-      expect(link!.querySelector('svg')).not.toBeNull();
+      expect(link!.textContent?.trim()).toBe(text);
+      expect(link!.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
     }
+  });
+
+  // WCAG 2.5.3 Label in Name: the accessible name must contain the visible text.
+  it('should keep each visible label inside the link’s accessible name', () => {
+    for (const link of links()) {
+      expect(link.getAttribute('aria-label')).toContain(link.textContent!.trim());
+    }
+  });
+
+  // Replaces the old "sandbox … in production" line: experimentation, stated safely.
+  it('should say in one line how the site is built', () => {
+    const note = (fixture.nativeElement as HTMLElement).querySelector('footer .footer-note');
+
+    expect(note?.textContent).toContain('real but low-stakes');
+    expect(note?.textContent).toContain('test-first');
+    expect(note?.textContent).not.toMatch(/in production/i);
   });
 
   it('should link Email to a mailto address with no target attribute', () => {
