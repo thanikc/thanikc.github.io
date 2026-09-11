@@ -131,6 +131,30 @@ describe('ProjectCardComponent', () => {
     expect(hook.label()).toBe('Ask how the risk score works');
   });
 
+  // A diagram as an ordered list: real text, theme tokens, readable at 360px.
+  it('shows how it works as an ordered flow when the project has one', () => {
+    render({
+      ...EXTERNAL,
+      flow: [
+        { label: 'Question', detail: 'from the chat' },
+        { label: 'Retrieve', detail: 'top 5 chunks' },
+      ],
+    });
+    const flow = card().querySelector('ol.project-flow');
+    const steps = [...(flow?.querySelectorAll(':scope > li') ?? [])];
+
+    expect(flow?.getAttribute('aria-label')).toBe('How CrashDash works');
+    expect(steps.map(step => step.querySelector('.flow-label')?.textContent?.trim())).toEqual([
+      'Question',
+      'Retrieve',
+    ]);
+    expect(steps[1].textContent).toContain('top 5 chunks');
+  });
+
+  it('shows no flow when the project has none', () => {
+    expect(card().querySelector('.project-flow')).toBeNull();
+  });
+
   it('gives every link a 44px hit area', () => {
     for (const anchor of el().querySelectorAll('a')) {
       expect(anchor.classList.contains('min-h-11')).toBe(true);
