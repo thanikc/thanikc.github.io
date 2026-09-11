@@ -121,6 +121,16 @@
   border: 1px solid var(--mat-sys-outline-variant);
 }
 
+// Starters are whole questions, longer than one line of a 360px sheet. The
+// outlined button's fixed container height would clip a second line, so the
+// height token yields to the content and the label wraps.
+.chat-suggestion {
+  --mat-button-outlined-container-height: auto;
+  padding-block: 0.5rem;
+  white-space: normal;
+  text-align: start;
+}
+
 .chat-dot {
   background-color: var(--mat-sys-on-surface-variant);
   animation: typing-dot 1.2s ease-in-out infinite;

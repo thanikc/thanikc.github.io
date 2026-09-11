@@ -17,7 +17,10 @@
       />
       <div class="min-w-0">
         <h2 [id]="headingId" class="text-base font-semibold tracking-tight">AI Ling</h2>
-        <p class="chat-muted text-sm">Ask away — I've read Thanik's résumé so you don't have to.</p>
+        <p class="chat-muted text-sm">
+          I've read Thanik's résumé so you don't have to, including the parts that aren't on this
+          page.
+        </p>
       </div>
     </div>
     <button
@@ -44,7 +47,7 @@
             <button
               matButton="outlined"
               type="button"
-              class="min-h-11"
+              class="chat-suggestion min-h-11"
               (click)="send.emit(suggestion)"
             >
               {{ suggestion }}

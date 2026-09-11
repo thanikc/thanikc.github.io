@@ -96,6 +96,37 @@ describe('ChatPanelComponent', () => {
       expect(el().querySelectorAll('.chat-empty button').length).toBeGreaterThan(0);
     });
 
+    // Starters beat the blank-chat problem and should lead into the depth the static
+    // page leaves out — not repeat what it already says (role, stack) or trivia.
+    it('offers four starter questions that go beyond the static page', () => {
+      const starters = [...el().querySelectorAll('.chat-empty button')].map(b =>
+        b.textContent!.trim(),
+      );
+
+      expect(starters).toEqual([
+        "What's the most complex system Thanik has worked on?",
+        'What has Thanik built from scratch?',
+        'How does Thanik use AI in a team?',
+        'How does AI Ling work?',
+      ]);
+    });
+
+    // A full question doesn't fit one line of a 360px sheet; a fixed-height
+    // Material button would clip it, so starters get a wrapping style.
+    it('lets long starter questions wrap', () => {
+      const starters = [...el().querySelectorAll('.chat-empty button')];
+
+      for (const starter of starters) {
+        expect(starter.classList.contains('chat-suggestion')).toBe(true);
+      }
+    });
+
+    it('promises more than the page in its subtitle', () => {
+      expect(el().querySelector('header p')?.textContent).toContain(
+        "including the parts that aren't on this page",
+      );
+    });
+
     it('emits a suggested question as a send', () => {
       const suggestion = el().querySelector<HTMLButtonElement>('.chat-empty button')!;
       suggestion.click();
