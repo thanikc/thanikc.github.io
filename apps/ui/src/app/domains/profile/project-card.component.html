@@ -24,6 +24,26 @@
     <span class="font-semibold">Decision:</span> {{ project().decision }}
   </p>
 
+  @if (project().flow; as flow) {
+    <!-- The diagram is an ordered list: real text, theme tokens, and it reflows
+         to a 2×2 grid instead of shrinking. The list conveys the order, so the
+         visible step numbers are decorative. -->
+    <ol
+      class="project-flow grid grid-cols-2 gap-2"
+      [attr.aria-label]="'How ' + project().name + ' works'"
+    >
+      @for (step of flow; track step.label; let i = $index) {
+        <li class="surface-rule flex flex-col rounded-lg border p-3">
+          <span class="text-sm font-semibold">
+            <span class="surface-muted" aria-hidden="true">{{ i + 1 }}.</span>
+            <span class="flow-label">{{ step.label }}</span>
+          </span>
+          <span class="surface-muted text-xs">{{ step.detail }}</span>
+        </li>
+      }
+    </ol>
+  }
+
   <ul class="flex flex-wrap gap-2" aria-label="Stack">
     @for (tech of project().stack; track tech) {
       <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ tech }}</li>

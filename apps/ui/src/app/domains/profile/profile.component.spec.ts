@@ -120,6 +120,16 @@ describe('ProfileComponent', () => {
       expect(project('BJJ Quiz').source).toBeUndefined();
     });
 
+    // AI Ling is part of the portfolio story: its card shows the mechanism.
+    it('shows how AI Ling works as a four-step flow through retrieval and the providers', () => {
+      const flow = project('AI Ling').flow ?? [];
+
+      expect(flow).toHaveLength(4);
+      expect(JSON.stringify(flow)).toContain('Vectorize');
+      expect(JSON.stringify(flow)).toContain('Groq');
+      expect(PROJECTS.filter(p => p.flow).map(p => p.name)).toEqual(['AI Ling']);
+    });
+
     it('gives every project a hook question and names no companies', () => {
       for (const p of PROJECTS) {
         expect(p.question.length).toBeGreaterThan(0);

@@ -77,6 +77,13 @@ export interface Project {
   source?: ProjectLink;
   hookLabel: string;
   question: string;
+  /** How it works, step by step; shown as a small flow diagram on the card. */
+  flow?: readonly FlowStep[];
+}
+
+export interface FlowStep {
+  label: string;
+  detail: string;
 }
 
 const REPO_URL = 'https://github.com/thanikc/thanikc.github.io';
@@ -110,6 +117,12 @@ export const PROJECTS: readonly Project[] = [
     source: { label: 'Source', url: `${REPO_URL}/tree/main/apps/worker`, external: true },
     hookLabel: 'Ask how it works',
     question: 'How does AI Ling work?',
+    flow: [
+      { label: 'Question', detail: 'from this page' },
+      { label: 'Embed', detail: 'Workers AI' },
+      { label: 'Retrieve', detail: 'Vectorize, top 5 chunks' },
+      { label: 'Answer', detail: 'Groq → Google AI → OpenRouter' },
+    ],
   },
   {
     name: 'BJJ Quiz',
