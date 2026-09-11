@@ -3,6 +3,8 @@ import type { ChatMessage } from './chat/client';
 export interface RetrievedChunk {
   text: string;
   score: number;
+  /** Title of the source document, from its content file's frontmatter. */
+  title?: string;
 }
 
 type EmbeddingResponse = { data: number[][] };
@@ -42,9 +44,14 @@ export async function retrieve(query: string, env: Env, topK = 5): Promise<Retri
   const { matches } = await vectorize(env).query(vector, { topK, returnMetadata: 'all' });
 
   return matches
-    .map(match => {
+    .map((match): RetrievedChunk => {
       const text = match.metadata?.['text'];
-      return { text: typeof text === 'string' ? text : '', score: match.score };
+      const title = match.metadata?.['title'];
+      return {
+        text: typeof text === 'string' ? text : '',
+        score: match.score,
+        ...(typeof title === 'string' && { title }),
+      };
     })
     .filter(chunk => chunk.text !== '');
 }

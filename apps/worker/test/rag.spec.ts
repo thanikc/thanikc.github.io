@@ -91,4 +91,25 @@ describe('retrieve', () => {
       { text: 'chunk two', score: 0.2 },
     ]);
   });
+
+  // The document title (from the content file's frontmatter) lets the widget show
+  // which parts of the knowledge base an answer drew on.
+  it('carries the source document title when the chunk has one', async () => {
+    const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+    const query = vi.fn().mockResolvedValue({
+      matches: [
+        { score: 0.9, metadata: { text: 'chunk one', title: 'Projects' } },
+        { score: 0.5, metadata: { text: 'chunk two', title: 42 } },
+      ],
+    });
+    const env = fakeEnv({ AI: { run }, VECTORIZE: { query } } as unknown as Partial<Env>);
+
+    const chunks = await retrieve('question', env);
+
+    expect(chunks).toEqual([
+      { text: 'chunk one', score: 0.9, title: 'Projects' },
+      { text: 'chunk two', score: 0.5 },
+    ]);
+    expect(chunks[1]).not.toHaveProperty('title');
+  });
 });

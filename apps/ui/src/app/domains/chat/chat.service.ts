@@ -3,10 +3,19 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CHAT_API_URL } from './chat.config';
 import { CHAT_ERROR_MESSAGE, CHAT_HISTORY_LIMIT } from './chat.constants';
-import { ChatRequest, ChatResponse, ChatTurn } from './chat.models';
+import { ChatRequest, ChatResponse, ChatSource, ChatTurn } from './chat.models';
 
-/** The last `CHAT_HISTORY_LIMIT` turns, which is all the worker needs for follow-ups. */
-const recent = (turns: ChatTurn[]): ChatTurn[] => turns.slice(-CHAT_HISTORY_LIMIT);
+/**
+ * The last `CHAT_HISTORY_LIMIT` turns, which is all the worker needs for follow-ups —
+ * as plain role/content pairs: source titles are for display, not for the model.
+ */
+const recent = (turns: ChatTurn[]): ChatTurn[] =>
+  turns.slice(-CHAT_HISTORY_LIMIT).map(({ role, content }) => ({ role, content }));
+
+/** Distinct source titles in retrieval order; chunks without a title are skipped. */
+const titlesOf = (sources: ChatSource[] = []): string[] => [
+  ...new Set(sources.flatMap(source => (source.title ? [source.title] : []))),
+];
 
 /** Conversation state for the résumé chatbot, backed by the worker's `/api/chat`. */
 @Injectable({
@@ -67,8 +76,14 @@ export class ChatService {
     this.error.set(null);
 
     try {
-      const { answer } = await firstValueFrom(this.http.post<ChatResponse>(this.endpoint, request));
-      this.turns.update(turns => [...turns, { role: 'assistant', content: answer }]);
+      const { answer, sources } = await firstValueFrom(
+        this.http.post<ChatResponse>(this.endpoint, request),
+      );
+      const titles = titlesOf(sources);
+      this.turns.update(turns => [
+        ...turns,
+        { role: 'assistant', content: answer, ...(titles.length > 0 && { sources: titles }) },
+      ]);
     } catch {
       this.error.set(CHAT_ERROR_MESSAGE);
     } finally {
