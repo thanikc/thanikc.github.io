@@ -35,8 +35,34 @@ Run it after the change is green in `pnpm --filter @thanikc/ui test`, before rep
 - **Settle the page first:** dismiss the cookie-consent banner, wait for the idle-deferred
   chat launcher, and let entrance animations finish (or emulate reduced motion) before
   measuring. The banner and mid-animation cards skew every layout check.
-- Spec files live next to the app under `apps/ui/e2e/`; artefacts (screenshots, axe
-  reports) go to `tmp/design-check/`, which is git-ignored. Never commit screenshots.
+- **Run it:** `pnpm --filter @thanikc/ui e2e:design` builds, serves the build on
+  `127.0.0.1:4300` (`python3 -m http.server`) and runs `apps/ui/e2e/design.e2e.ts`
+  (config: `apps/ui/playwright.config.ts`). Files are `*.e2e.ts`, never `*.spec.ts` —
+  those belong to the Vitest unit suite. Extend that suite rather than writing a new one.
+- Artefacts go to `tmp/design-check/` (git-ignored): `measure/*.json` per check,
+  `screens/*.png` per theme × width × route. Never commit screenshots. Delete
+  `measure/` before a run — a test that fails a hard assertion writes no record, and a
+  stale file from an earlier run will be misread as the current result.
+
+## Harness Pitfalls (learned the hard way)
+
+- **Cross-origin stubs need CORS.** The chat API and the World Bank API are other
+  origins: a stub must send `access-control-allow-origin` and answer the `OPTIONS`
+  preflight, or the browser discards it and the UI shows its error state.
+- **Settle before measuring.** Wait for finite animations to end, then `finish()` them;
+  ignore the launcher's deliberate one-time `hint-peek`. Axe measures a fading element at
+  its blended colour and reports false contrast failures.
+- **Read focus styles a frame later.** Material's focus state layer arrives through a
+  (collapsed) transition; read computed styles two animation frames after `Tab`.
+- **Focus needs a focused document.** With parallel contexts, `bringToFront()` and assert
+  `document.hasFocus()` first — `:focus-visible` never matches in an unfocused page, and
+  every stop then looks "invisible".
+- **Visually hidden is not clipped.** Skip `.sr-only` descendants in clipping checks.
+- **Gradient text** (`color: transparent` + `background-clip: text`) only changes with the
+  theme in `background-image` — compare that too.
+- **Layout shift has causes outside the component.** Record the shifted nodes and their
+  timing. Text nodes shifting as `document.fonts` finishes loading means a web-font swap,
+  not a layout bug; confirm by re-running with `fonts.googleapis.com` blocked.
 
 ## The Matrix
 
