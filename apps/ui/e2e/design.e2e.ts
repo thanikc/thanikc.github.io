@@ -261,6 +261,12 @@ async function structure(page: Page, width: number) {
  * Non-text contrast, which axe does not check: a card must stand apart from the page.
  * Its border needs 3:1 against the page (UX-UI.md), its fill must visibly differ from
  * the page, and in dark mode a raised surface must be lighter than the page, not a hole.
+ *
+ * The fill floor (1.3) is set above the ratio a hairline border alone can compensate
+ * for: at 1.1-1.22 (measured on this app before the fix) a card was only findable by
+ * looking for its 1px outline — reported by the owner as "barely see the card borders
+ * ... looks like there's no cards at all". 1.3 is not a WCAG number; it is this app's
+ * own bar for "reads as a surface at a glance", calibrated against that failure.
  */
 async function surfaceSeparation(page: Page) {
   return page.evaluate(() => {
@@ -354,7 +360,7 @@ for (const route of ROUTES) {
             s =>
               'error' in s ||
               s.borderRatio < 3 ||
-              s.fillRatio < 1.1 ||
+              s.fillRatio < 1.3 ||
               (dark && !s.raisedIsLighter),
           )
           .map(s => JSON.stringify(s));

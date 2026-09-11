@@ -107,12 +107,19 @@ Each maps to a UX-UI.md Non-Negotiable. A failure in any cell of the matrix is a
    identical to light mode when it should follow the theme — compare computed `color` and
    `background-color` of the checked elements across the two themes.
 10. **Surface separation (non-text contrast).** Axe only checks *text*: it passes a page
-    whose cards vanish into the background. For every card surface (`.surface-card`,
-    `.hero-card`, calculator `.card` / `.info-card`) measure against the page base: the
-    border at least 3:1, the fill visibly different (contrast ratio ≥ 1.1), and in dark
-    mode the raised fill lighter than the page — a darker card reads as a hole. Cards use
+    whose cards vanish into the background, and a bare 3:1 border alone is not enough —
+    a 1px hairline plus a barely-different fill still read to a human eye as "no card
+    here" even though both numbers technically pass (found in owner review: fill 1.22,
+    border 5.56:1, "barely see the card borders ... looks like there's no cards at all").
+    For every card surface (`.surface-card`, `.hero-card`, calculator `.card` /
+    `.info-card`) measure against the page base: the border at least 3:1, the fill
+    contrast ratio at least **1.3** (this app's own bar for "reads as a surface at a
+    glance," calibrated against that failure — not a WCAG number), and in dark mode the
+    raised fill lighter than the page, since a darker card reads as a hole. Cards use
     `--app-surface-raised` on `--app-surface-base` (material.scss); never
     `surface-container-lowest` directly, which is the *darkest* container in dark mode.
+    If this check ever needs loosening, look at screenshots first — don't just raise the
+    number to make it pass.
 11. **Section rhythm.** The gap between each section header and its content is at least
     16 px. A custom element is `display: inline` by default, and a parent's `space-y-*`
     margin has no effect on an inline box — give such hosts `block`.
