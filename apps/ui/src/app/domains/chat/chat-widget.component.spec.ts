@@ -15,14 +15,18 @@ describe('ChatWidgetComponent', () => {
   const turns = signal<ChatTurn[]>([]);
   const pending = signal(false);
   const error = signal<string | null>(null);
+  const isOpen = signal(false);
   const mockChatService = {
     turns,
     pending,
     error,
+    isOpen,
     hasConversation: signal(false),
     send: vi.fn(async (_message: string) => undefined),
     retry: vi.fn(async () => undefined),
     reset: vi.fn(),
+    open: vi.fn((_question?: string) => isOpen.set(true)),
+    close: vi.fn(() => isOpen.set(false)),
   };
 
   const el = () => fixture.nativeElement as HTMLElement;
@@ -39,8 +43,11 @@ describe('ChatWidgetComponent', () => {
     turns.set([]);
     pending.set(false);
     error.set(null);
+    isOpen.set(false);
     mockChatService.send.mockClear();
     mockChatService.retry.mockClear();
+    mockChatService.open.mockClear();
+    mockChatService.close.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [ChatWidgetComponent],
@@ -115,6 +122,49 @@ describe('ChatWidgetComponent', () => {
 
       expect(panel()).toBeNull();
       expect(el().querySelector('button.chat-fab')).not.toBeNull();
+    });
+
+    it('opens through ChatService without asking anything', () => {
+      openPanel();
+
+      expect(mockChatService.open).toHaveBeenCalledWith();
+    });
+
+    // Contextual "Ask AI Ling" links elsewhere on the page open the chat through
+    // the service; the widget must follow, even though it never saw the click.
+    it('shows the panel when the chat is opened from elsewhere', () => {
+      isOpen.set(true);
+      fixture.detectChanges();
+
+      expect(panel()).not.toBeNull();
+      expect(el().querySelector('button.chat-fab')).toBeNull();
+    });
+
+    it('retires the tooltip peek when the chat is opened from elsewhere', () => {
+      isOpen.set(true);
+      fixture.detectChanges();
+      isOpen.set(false);
+      fixture.detectChanges();
+
+      expect(el().querySelector('#chat-fab-tip')!.classList.contains('chat-fab-tip-peek')).toBe(
+        false,
+      );
+    });
+
+    it('returns focus to the link that opened the chat', async () => {
+      const opener = document.createElement('button');
+      document.body.appendChild(opener);
+      opener.focus();
+
+      isOpen.set(true);
+      fixture.detectChanges();
+      panelInstance().close.emit();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(mockChatService.close).toHaveBeenCalled();
+      expect(document.activeElement).toBe(opener);
+      opener.remove();
     });
 
     it('colours the widget from theme tokens, not the Tailwind palette', () => {

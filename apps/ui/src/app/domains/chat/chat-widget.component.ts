@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DOCUMENT,
   ElementRef,
   Injector,
   afterNextRender,
+  effect,
   inject,
   signal,
   viewChild,
@@ -36,7 +38,6 @@ import { ChatService } from './chat.service';
 })
 export class ChatWidgetComponent {
   protected readonly chat = inject(ChatService);
-  protected readonly open = signal(false);
   protected readonly panelId = 'chat-dialog';
 
   /**
@@ -47,15 +48,38 @@ export class ChatWidgetComponent {
   protected readonly showHint = signal(true);
 
   private readonly injector = inject(Injector);
+  private readonly document = inject(DOCUMENT);
   private readonly fab = viewChild('fab', { read: ElementRef<HTMLButtonElement> });
 
+  /** Whatever had focus when the chat opened; focus goes back there on close. */
+  private returnFocusTo: HTMLElement | null = null;
+
+  constructor() {
+    // The chat can be opened from anywhere on the page, not just the FAB. The effect
+    // runs before the panel renders and captures focus, so the opener is still active.
+    effect(() => {
+      if (!this.chat.isOpen()) return;
+
+      this.showHint.set(false);
+      // <body> means nothing had focus (e.g. a mouse click on a non-focusing browser).
+      const active = this.document.activeElement;
+      this.returnFocusTo =
+        active instanceof HTMLElement && active !== this.document.body ? active : null;
+    });
+  }
+
   protected launch(): void {
-    this.showHint.set(false);
-    this.open.set(true);
+    this.chat.open();
   }
 
   protected close(): void {
-    this.open.set(false);
-    afterNextRender(() => this.fab()?.nativeElement.focus(), { injector: this.injector });
+    this.chat.close();
+    const opener = this.returnFocusTo;
+    this.returnFocusTo = null;
+
+    // A FAB opener was swapped out for the panel, so fall back to the fresh FAB.
+    afterNextRender(() => (opener?.isConnected ? opener : this.fab()?.nativeElement)?.focus(), {
+      injector: this.injector,
+    });
   }
 }

@@ -232,6 +232,42 @@ describe('ChatService', () => {
     httpMock.expectNone(CHAT_ENDPOINT);
   });
 
+  describe('panel visibility', () => {
+    it('starts closed', () => {
+      expect(service.isOpen()).toBe(false);
+    });
+
+    it('opens without asking anything', () => {
+      service.open();
+
+      expect(service.isOpen()).toBe(true);
+      httpMock.expectNone(CHAT_ENDPOINT);
+      expect(service.turns()).toEqual([]);
+    });
+
+    // Contextual "Ask AI Ling" links open the panel with their question already asked.
+    it('opens and asks the given question', async () => {
+      service.open('What has Thanik built from scratch?');
+
+      expect(service.isOpen()).toBe(true);
+      const req = httpMock.expectOne(CHAT_ENDPOINT);
+      expect(req.request.body.message).toBe('What has Thanik built from scratch?');
+
+      req.flush(answer('Two banking products.'));
+      await Promise.resolve();
+    });
+
+    it('closes and keeps the conversation', async () => {
+      await exchange('Hello', 'Hi there');
+      service.open();
+
+      service.close();
+
+      expect(service.isOpen()).toBe(false);
+      expect(service.turns()).toHaveLength(2);
+    });
+  });
+
   it('resets the conversation', async () => {
     const failed = service.send('Hello');
     httpMock
