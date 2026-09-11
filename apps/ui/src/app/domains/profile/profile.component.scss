@@ -84,11 +84,6 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
-.skill-chip {
-  background-color: var(--mat-sys-secondary-container);
-  color: var(--mat-sys-on-secondary-container);
-}
-
 /** Resume-style printout: flatten decoration, drop CTAs and animation. */
 @media print {
   .skill-card {
@@ -118,12 +113,6 @@
   .project-card,
   .interest-card {
     break-inside: avoid;
-  }
-
-  .skill-chip {
-    background: none;
-    border: 1px solid #000;
-    color: #000;
   }
 
   .external-icon {

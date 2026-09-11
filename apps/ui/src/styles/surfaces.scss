@@ -1,0 +1,58 @@
+// Token-driven surfaces shared by the profile's section components. Global rather
+// than per component so every section's cards, chips and captions read the same,
+// follow the theme toggle, and don't each carry a copy against the style budget.
+
+.surface-card {
+  color: var(--mat-sys-on-surface);
+  // `outline`, not `outline-variant`: the card surface is all but identical to
+  // the page surface, so the border carries the whole boundary and needs 3:1.
+  border: 1px solid var(--mat-sys-outline);
+  background-color: var(--mat-sys-surface-container-lowest);
+}
+
+// Staggered entrance; pair with an inline `animation-delay`. The reduced-motion
+// policy in motion.scss collapses the animation to its end state.
+.surface-card-enter {
+  opacity: 0;
+  animation: card-rise 0.5s ease forwards;
+}
+
+.surface-chip {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+.surface-muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Tailwind's `border-b` leaves the colour as `currentColor`, which draws the rule
+// at full heading strength. Divider borders use the outline-variant token.
+.surface-rule {
+  border-color: var(--mat-sys-outline-variant);
+}
+
+/** Resume-style printout: flatten surfaces to black on white. */
+@media print {
+  .surface-card {
+    background: none;
+    border-color: #000;
+    color: #000;
+    break-inside: avoid;
+  }
+
+  .surface-card-enter {
+    opacity: 1;
+    animation: none;
+  }
+
+  .surface-chip {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+  }
+
+  .surface-muted {
+    color: #000;
+  }
+}
