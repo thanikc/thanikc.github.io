@@ -16,6 +16,12 @@ describe('SectionHeaderComponent', () => {
     fixture.detectChanges();
   });
 
+  // A custom element is inline by default, and a parent's `space-y-*` margin does
+  // nothing on an inline box: the divider ran straight into the cards below (0px).
+  it('renders as a block, so the section spacing below it applies', () => {
+    expect((fixture.nativeElement as HTMLElement).classList.contains('block')).toBe(true);
+  });
+
   it('renders an h2 with the given id, for the section to be labelled by', () => {
     const h2 = el().querySelector('h2');
 
