@@ -20,6 +20,12 @@ The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from th
 
 CORS allows `https://thanikc.github.io` and `http://localhost:4200`.
 
+`/api/chat` returns the full answer in one response rather than streaming tokens.
+This is deliberate: the provider chain in `chat/client.ts` fails over from Groq to
+Google AI to OpenRouter on error, and that only works cleanly while the response is
+still buffered — once tokens are streaming to the browser, a mid-stream provider
+failure can't be retried without producing a garbled, truncated answer.
+
 ## Configuration
 
 `wrangler.jsonc` declares the bindings (`AI`, `VECTORIZE`) and non-secret `vars`
