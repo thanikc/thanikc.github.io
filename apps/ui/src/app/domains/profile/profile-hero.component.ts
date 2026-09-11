@@ -1,24 +1,22 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { AskLingLinkComponent } from '../chat/ask-ling-link.component';
 import { contactLink } from '../../shared/contact/contact-links';
 
 /**
- * Who Thanik is and what he builds, in one sentence — then the hand-off: the page is
- * the short version, AI Ling the long one. Static presentation, no inputs.
+ * Who Thanik is and what he builds, in one sentence. The Ask AI Ling pitch lives in
+ * its own section right below (app-profile-ask-ling), not repeated here.
  */
 @Component({
   selector: 'app-profile-hero',
-  imports: [MatButtonModule, AskLingLinkComponent],
+  imports: [MatButtonModule],
   templateUrl: './profile-hero.component.html',
   styleUrl: './profile-hero.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileHeroComponent {
-  protected readonly title = 'Full-stack engineer';
+  protected readonly title = 'Senior Full-Stack Engineer';
   protected readonly positioning =
-    'I build large Angular and Spring Boot applications for German online banking, and use AI to move faster without lowering the bar.';
-  protected readonly invitation = 'This page is the short version. AI Ling has the long one.';
+    "I build Angular and Spring Boot systems for German online banking — a shared platform across many banks, not one app — and lean on AI heavily without lowering the bar. I'm as curious about how AI is reshaping serious engineering as about what I build with it.";
   protected readonly email = contactLink('Email');
   protected readonly linkedIn = contactLink('LinkedIn');
 }

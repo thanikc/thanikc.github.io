@@ -1,11 +1,15 @@
 <div class="profile-page flex flex-col flex-1">
   <app-profile-hero />
 
-  <app-profile-themes [themes]="workThemes" />
-
-  <app-profile-projects class="mt-10 block" [projects]="projects" />
+  <app-profile-ask-ling class="mt-8 block" [prompts]="askLingPrompts" />
 
   <app-profile-principles class="mt-10 block" [principles]="principles" />
+
+  <app-profile-experience class="mt-10 block" [stats]="experienceStats" />
+
+  <app-profile-themes class="mt-10 block" [themes]="workThemes" />
+
+  <app-profile-projects class="mt-10 block" [projects]="projects" />
 
   <app-profile-toolbox class="mt-10 block" [groups]="toolbox" />
 

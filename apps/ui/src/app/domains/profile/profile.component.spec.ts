@@ -5,7 +5,8 @@ import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
-import { PRINCIPLES, PROJECTS, TOOLBOX, WORK_THEMES } from './profile.content';
+import { EXPERIENCE_STATS, PRINCIPLES, PROJECTS, TOOLBOX, WORK_THEMES } from './profile.content';
+import { CHAT_SUGGESTIONS } from '../chat/chat.constants';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 
@@ -54,10 +55,28 @@ describe('ProfileComponent', () => {
     expect(page?.firstElementChild?.tagName).toBe('APP-PROFILE-HERO');
   });
 
-  it('follows the hero with the "What I work on" themes', () => {
+  it('follows the hero with the Ask AI Ling invitation', () => {
     const page = el().querySelector('.profile-page');
 
-    expect(page?.children[1]?.tagName).toBe('APP-PROFILE-THEMES');
+    expect(page?.children[1]?.tagName).toBe('APP-PROFILE-ASK-LING');
+  });
+
+  // Judgment, then experience, then evidence, then the tech list: the brief's hierarchy.
+  it('orders the rest of the page: principles, experience, themes, projects, toolbox', () => {
+    const following = (a: Element, b: Element | null) =>
+      Boolean(b && a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+
+    const askLing = el().querySelector('app-profile-ask-ling')!;
+    const principles = el().querySelector('app-profile-principles')!;
+    const experience = el().querySelector('app-profile-experience')!;
+    const themes = el().querySelector('app-profile-themes')!;
+    const toolbox = el().querySelector('app-profile-toolbox')!;
+
+    expect(following(askLing, principles)).toBe(true);
+    expect(following(principles, experience)).toBe(true);
+    expect(following(experience, themes)).toBe(true);
+    expect(following(themes, projectsHost())).toBe(true);
+    expect(following(projectsHost()!, toolbox)).toBe(true);
   });
 
   // The stack now lives inside the themes, in context; it no longer leads the page.
@@ -182,12 +201,18 @@ describe('ProfileComponent', () => {
   });
 
   describe('how I work', () => {
-    it('follows the projects with the principles', () => {
-      const principles = el().querySelector('app-profile-principles');
+    // Judgment leads the page now: principles come before the evidence, not after it.
+    it('precedes the themes and projects', () => {
+      const principles = el().querySelector('app-profile-principles')!;
+      const themes = el().querySelector('app-profile-themes');
 
       expect(principles).not.toBeNull();
+      expect(themes).not.toBeNull();
       expect(
-        projectsHost()!.compareDocumentPosition(principles!) & Node.DOCUMENT_POSITION_FOLLOWING,
+        principles.compareDocumentPosition(themes!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(
+        principles.compareDocumentPosition(projectsHost()!) & Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
     });
 
@@ -216,6 +241,28 @@ describe('ProfileComponent', () => {
 
     it('names no companies', () => {
       expect(JSON.stringify(PRINCIPLES)).not.toMatch(COMPANIES);
+    });
+  });
+
+  describe('ask AI Ling', () => {
+    it('renders the invitation with an example question per chat starter', () => {
+      const section = el().querySelector('app-profile-ask-ling');
+
+      expect(section).not.toBeNull();
+      expect(section?.querySelectorAll('app-ask-ling-link')).toHaveLength(CHAT_SUGGESTIONS.length);
+    });
+  });
+
+  describe('experience', () => {
+    it('gives four concrete, checkable seniority facts', () => {
+      expect(EXPERIENCE_STATS).toHaveLength(4);
+      for (const stat of EXPERIENCE_STATS) {
+        expect(stat.question.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('names no companies', () => {
+      expect(JSON.stringify(EXPERIENCE_STATS)).not.toMatch(COMPANIES);
     });
   });
 

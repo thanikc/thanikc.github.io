@@ -1,0 +1,22 @@
+<section
+  class="ask-ling-card surface-card space-y-4 rounded-2xl p-6 shadow-sm"
+  [attr.aria-labelledby]="headingId"
+>
+  <div>
+    <h2 [id]="headingId" class="scroll-mt-24 text-2xl font-bold tracking-tight">
+      Want the details? Ask AI Ling.
+    </h2>
+    <p class="surface-muted mt-1 text-sm leading-relaxed">
+      It's the fastest way through the rest of this page: ask about a project, a technology choice,
+      or an engineering decision, and it answers from what I've actually written and built.
+    </p>
+  </div>
+
+  @if (prompts().length > 0) {
+    <div class="flex flex-wrap gap-2">
+      @for (prompt of prompts(); track prompt) {
+        <app-ask-ling-link appearance="outlined" [question]="prompt" [label]="prompt" />
+      }
+    </div>
+  }
+</section>
