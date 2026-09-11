@@ -233,3 +233,34 @@ export const TOOLBOX: readonly ToolGroup[] = [
     tools: ['Kubernetes', 'React', 'Vue', 'Swift', 'Android', 'Node.js', 'Ruby on Rails'],
   },
 ];
+
+/** Something Thanik does away from the keyboard; one short line in his own voice. */
+export interface Interest {
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export const INTERESTS: readonly Interest[] = [
+  {
+    name: 'Swimming',
+    description: 'Endurance, not speed — always chasing a cleaner stroke and a longer set.',
+    icon: 'pool',
+  },
+  {
+    name: 'Bouldering',
+    description:
+      'Took it up after a spinal injury ended my BJJ — still physical, still problem-solving.',
+    icon: 'terrain',
+  },
+  {
+    name: 'Chess',
+    description: 'The occasional game, when I want a slower kind of puzzle.',
+    icon: 'extension',
+  },
+  {
+    name: 'Learning Mandarin',
+    description: 'Recently started, on top of German, English and Thai.',
+    icon: 'translate',
+  },
+];

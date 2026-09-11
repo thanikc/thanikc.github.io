@@ -153,14 +153,22 @@ describe('ProfileComponent', () => {
     expect(text).toContain('mandarin');
   });
 
-  it('places the interests section before the projects', () => {
-    const interests = [...el().querySelectorAll('section')].find(section =>
-      section.textContent?.includes('Beyond the Code'),
-    )!;
+  // Personality stays, but after the professional story: interests close the page.
+  it('closes with the interests, after the toolbox and before the ad slot', () => {
+    const interests = el().querySelector('app-profile-interests');
+    const toolbox = el().querySelector('app-profile-toolbox')!;
 
+    expect(interests).not.toBeNull();
     expect(
-      interests.compareDocumentPosition(projectsHost()!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      toolbox.compareDocumentPosition(interests!) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(interests?.nextElementSibling?.classList.contains('ad-slot')).toBe(true);
+  });
+
+  it('keeps each interest to one short line', () => {
+    for (const interest of component.interests) {
+      expect(interest.description.length).toBeLessThanOrEqual(90);
+    }
   });
 
   describe('how I work', () => {
