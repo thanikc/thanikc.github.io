@@ -6,6 +6,7 @@
 
 .chat-scrim {
   background-color: color-mix(in srgb, var(--mat-sys-scrim) 32%, transparent);
+  animation: fade-in 250ms ease-out;
 }
 
 .chat-sheet {
