@@ -6,7 +6,8 @@ import { ProfileHeroComponent } from './profile-hero.component';
 import { ProfilePrinciplesComponent } from './profile-principles.component';
 import { ProfileProjectsComponent } from './profile-projects.component';
 import { ProfileThemesComponent } from './profile-themes.component';
-import { PRINCIPLES, PROJECTS, WORK_THEMES } from './profile.content';
+import { ProfileToolboxComponent } from './profile-toolbox.component';
+import { PRINCIPLES, PROJECTS, TOOLBOX, WORK_THEMES } from './profile.content';
 
 export interface Interest {
   name: string;
@@ -48,6 +49,7 @@ const INTERESTS: readonly Interest[] = [
     ProfileThemesComponent,
     ProfileProjectsComponent,
     ProfilePrinciplesComponent,
+    ProfileToolboxComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -60,6 +62,7 @@ export class ProfileComponent {
   readonly workThemes = WORK_THEMES;
   readonly projects = PROJECTS;
   readonly principles = PRINCIPLES;
+  readonly toolbox = TOOLBOX;
   readonly interests = INTERESTS;
   readonly showBanner = computed(
     () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),
