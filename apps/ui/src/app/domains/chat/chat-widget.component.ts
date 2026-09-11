@@ -18,6 +18,14 @@ import { ChatService } from './chat.service';
  * Floating launcher for the résumé chatbot. The launcher and the panel are mutually
  * exclusive — opening swaps the button out for the panel, closing swaps it back and
  * returns focus. The conversation lives in `ChatService` and survives closing.
+ *
+ * The panel is a hand-rolled `cdkTrapFocus` sheet rather than `MatDialog` on purpose:
+ * `MatDialog` is built on `@angular/cdk/overlay`, and with `cli.cache.enabled: false`
+ * in this repo's `angular.json`, importing that overlay/scrolling module blows up the
+ * dev server (`Cannot read properties of undefined (reading 'CdkScrollable')`). A
+ * centred modal also doesn't fit this widget's docked, anchor-to-corner layout, which
+ * `MatDialog` doesn't support without overriding its internal DOM — itself against the
+ * "don't override internal Material DOM" rule.
  */
 @Component({
   selector: 'app-chat-widget',
