@@ -67,6 +67,20 @@ describe('AskLingLinkComponent', () => {
     expect(img.getAttribute('height')).toBeTruthy();
   });
 
+  // Without a question it just opens the chat, where the starters take over.
+  it('opens AI Ling without a question when given none', () => {
+    fixture.componentRef.setInput('question', undefined);
+    fixture.detectChanges();
+
+    button().click();
+
+    expect(mockChatService.open).toHaveBeenCalledWith(undefined);
+    expect(button().querySelector('.sr-only')?.textContent?.trim()).toBe(
+      ': opens the AI Ling chat',
+    );
+    expect(button().getAttribute('data-cta-tracking')).toBe('Ask AI Ling');
+  });
+
   it('reports the question to CTA analytics', () => {
     expect(button().getAttribute('data-cta-tracking')).toBe(`Ask AI Ling: ${QUESTION}`);
   });

@@ -1,0 +1,44 @@
+<section
+  class="hero-card relative mb-8 flex flex-col overflow-hidden rounded-2xl p-8 shadow-sm"
+  aria-labelledby="hero-name"
+>
+  <div class="hero-photo" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+
+  <div class="relative flex flex-1 flex-col gap-2">
+    <span class="hero-badge text-sm font-bold tracking-wider uppercase">{{ title }}</span>
+    <h1 id="hero-name" class="hero-name text-3xl font-bold tracking-tight sm:text-4xl">
+      Thanik Cheowtirakul
+    </h1>
+    <p class="hero-positioning max-w-2xl text-lg leading-relaxed font-medium">
+      {{ positioning }}
+    </p>
+
+    <div class="hero-next mt-auto flex flex-col gap-3 pt-8">
+      <p class="hero-invitation max-w-2xl text-base">{{ invitation }}</p>
+      <div class="flex flex-wrap items-center gap-2">
+        <app-ask-ling-link appearance="filled" />
+        <a
+          matButton="outlined"
+          class="min-h-11"
+          [href]="email.href"
+          [attr.aria-label]="email.ariaLabel"
+          data-cta-tracking="Hero: Email"
+        >
+          Email
+        </a>
+        <a
+          matButton="outlined"
+          class="min-h-11"
+          [href]="linkedIn.href"
+          target="_blank"
+          rel="noopener noreferrer"
+          [attr.aria-label]="linkedIn.ariaLabel"
+          data-cta-tracking="Hero: LinkedIn"
+        >
+          LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
