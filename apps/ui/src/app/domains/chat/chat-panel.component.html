@@ -16,7 +16,7 @@
         height="40"
       />
       <div class="min-w-0">
-        <h2 [id]="headingId" class="text-base font-semibold tracking-tight">Résumé assistant</h2>
+        <h2 [id]="headingId" class="text-base font-semibold tracking-tight">AI Ling</h2>
         <p class="chat-muted text-sm">Ask away — I've read Thanik's résumé so you don't have to.</p>
       </div>
     </div>
@@ -57,7 +57,7 @@
     <ol class="flex flex-col gap-4" aria-live="polite">
       @for (turn of turns(); track $index) {
         <li class="chat-turn flex" [attr.data-role]="turn.role">
-          <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'Assistant said:' }}</span>
+          <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'AI Ling said:' }}</span>
           @if (turn.role === 'assistant') {
             <div
               class="chat-message chat-markdown min-w-0 flex-1"
@@ -76,7 +76,7 @@
 
     @if (pending()) {
       <div class="chat-typing mt-4 flex items-center gap-1.5 py-2" role="status">
-        <span class="sr-only">Assistant is typing…</span>
+        <span class="sr-only">AI Ling is typing…</span>
         <span class="chat-dot size-2 rounded-full" aria-hidden="true"></span>
         <span class="chat-dot size-2 rounded-full [animation-delay:0.4s]" aria-hidden="true"></span>
         <span class="chat-dot size-2 rounded-full [animation-delay:0.8s]" aria-hidden="true"></span>

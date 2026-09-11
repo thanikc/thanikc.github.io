@@ -19,6 +19,12 @@ describe('buildMessages', () => {
     expect(messages.at(-1)).toEqual({ role: 'user', content: 'What did Thanik build?' });
   });
 
+  it('gives the model its persona name', () => {
+    const system = buildMessages('who are you?', [])[0]?.content ?? '';
+
+    expect(system).toContain('You are AI Ling');
+  });
+
   it('tells the model to invite the visitor to contact Thanik when the answer is missing', () => {
     const system = buildMessages('what is his favourite colour?', [])[0]?.content ?? '';
 

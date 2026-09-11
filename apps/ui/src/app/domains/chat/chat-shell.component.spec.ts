@@ -38,6 +38,7 @@ describe('ChatShellComponent', () => {
     const blurb = fixture.nativeElement.querySelector('.sr-only');
     expect(blurb).not.toBeNull();
     expect(blurb.textContent).toContain("Thanik's professional experience");
+    expect(blurb.textContent).toContain('AI Ling');
   });
 
   it('renders the chat widget once the defer block completes', async () => {
