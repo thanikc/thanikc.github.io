@@ -13,8 +13,8 @@ so the type is best read as a lean rather than a label.
 That split matches how Thanik works. He is structured and closure-seeking on
 client projects and deadlines, where he plans the shape of a solution before
 building and likes decisions to stay settled. He is deliberately loose
-everywhere else: side projects, learning, and this website, which mostly exists
-so he can try out new patterns without a plan.
+everywhere else: side projects, learning, and this website, where he tries new
+Angular and AI patterns on something real but low-stakes.
 
 What the INTP type gets right about Thanik is his habit of understanding why a
 system works before trusting it, his comfort in the world of ideas and abstract
