@@ -37,6 +37,16 @@ body {
   color-scheme: dark;
 }
 
+// M3 has no success/warning role. These are app-specific semantic tokens for
+// data-provenance chips (e.g. "live" vs "baseline" data); centralised here,
+// following `light-dark()`, so no component hard-codes its own hex pair.
+:root {
+  --app-sys-success-container: light-dark(#d1fae5, #05271c);
+  --app-sys-on-success-container: light-dark(#04543c, #6ee7b7);
+  --app-sys-warning-container: light-dark(#fef3c7, #2e1a03);
+  --app-sys-on-warning-container: light-dark(#7a350c, #fcd34d);
+}
+
 // The generated M3 neutral palette is fairly desaturated, which makes the
 // dark theme read as near-black. Override the dark-mode surfaces with a
 // fixed dark-navy scale (tinted towards the primary hue) so it feels like a

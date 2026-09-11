@@ -20,8 +20,7 @@
 }
 
 // Green/amber carry the live-vs-baseline distinction, but the icon and label
-// carry it too, so the tone is never the only signal. `light-dark()` keeps the
-// pair following the same `color-scheme` the theme toggle sets on :root.
+// carry it too, so the tone is never the only signal.
 .data-source-chip {
   display: inline-flex;
   align-items: center;
@@ -34,13 +33,13 @@
   white-space: nowrap;
 
   &.live {
-    background-color: light-dark(#d1fae5, #05271c);
-    color: light-dark(#04543c, #6ee7b7);
+    background-color: var(--app-sys-success-container);
+    color: var(--app-sys-on-success-container);
   }
 
   &.baseline {
-    background-color: light-dark(#fef3c7, #2e1a03);
-    color: light-dark(#7a350c, #fcd34d);
+    background-color: var(--app-sys-warning-container);
+    color: var(--app-sys-on-warning-container);
   }
 
   &.loading {
