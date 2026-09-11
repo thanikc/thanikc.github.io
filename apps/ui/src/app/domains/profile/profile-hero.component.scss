@@ -14,7 +14,7 @@
       color-mix(in srgb, var(--mat-sys-primary) 10%, transparent) 0%,
       transparent 60%
     ),
-    var(--mat-sys-surface-container-lowest);
+    var(--app-surface-raised);
 
   @media (min-width: 1024px) {
     min-height: 420px;
@@ -31,9 +31,9 @@
 // reads at 2.8:1 against the previous 75%-at-45% ramp.
 $hero-scrim: linear-gradient(
   100deg,
-  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 97%, transparent) 0%,
-  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 92%, transparent) 62%,
-  color-mix(in srgb, var(--mat-sys-surface-container-lowest) 45%, transparent) 100%
+  color-mix(in srgb, var(--app-surface-raised) 97%, transparent) 0%,
+  color-mix(in srgb, var(--app-surface-raised) 92%, transparent) 62%,
+  color-mix(in srgb, var(--app-surface-raised) 45%, transparent) 100%
 );
 
 // The photo only appears once the hero is wide enough for the text column
@@ -94,8 +94,8 @@ $hero-scrim: linear-gradient(
   animation: shine 1.4s ease-out forwards;
   // drop-shadow, not text-shadow: it haloes the gradient text's alpha shape
   // instead of painting a solid glyph over its fill.
-  filter: drop-shadow(0 0 2px var(--mat-sys-surface-container-lowest))
-    drop-shadow(0 0 6px var(--mat-sys-surface-container-lowest));
+  filter: drop-shadow(0 0 2px var(--app-surface-raised))
+    drop-shadow(0 0 6px var(--app-surface-raised));
 }
 
 /** Resume-style printout: flatten decoration, drop CTAs and animation. */

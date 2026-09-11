@@ -68,7 +68,8 @@ button.chat-fab {
   border-radius: 50%;
   background-color: var(--mat-sys-primary);
   color: var(--mat-sys-on-primary);
-  border: 2px solid var(--mat-sys-surface);
+  // The ring cuts the badge out of the FAB against the page behind it.
+  border: 2px solid var(--app-surface-base);
   box-shadow: var(--mat-sys-level1);
   overflow: visible;
   font-size: calc(var(--chat-fab-badge-size) * 0.7);

@@ -8,9 +8,9 @@
 
 .summary-cards {
   .card {
-    background-color: var(--mat-sys-surface-container-low);
-    // `outline`, not `outline-variant`: these boxes sit on a near-identical
-    // surface, so the border carries the whole boundary and needs 3:1.
+    background-color: var(--app-surface-raised);
+    // The raised fill separates the box from the page; the border still carries the
+    // boundary at 3:1 (`outline`, not `outline-variant`), since fills alone can't.
     border: 1px solid var(--mat-sys-outline);
     transition:
       transform 0.2s ease,
