@@ -3,6 +3,12 @@
   width: 100%;
 }
 
+// Material's icon button defaults to a 40px state layer; the touch-target rule is
+// 44px. The token cascades into the toggle without touching Material's DOM.
+app-theme-toggle {
+  --mat-icon-button-state-layer-size: 44px;
+}
+
 .app-header {
   // The inner container owns the page gutter. The toolbar's own 16px padding
   // stacks on top of it and pushes the brand 16px outside the content column
