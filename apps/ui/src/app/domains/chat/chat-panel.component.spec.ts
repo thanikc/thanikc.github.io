@@ -109,7 +109,7 @@ describe('ChatPanelComponent', () => {
 
       expect(el().querySelector('.chat-empty')).toBeNull();
       expect(items.map(li => li.dataset['role'])).toEqual(['user', 'assistant', 'user']);
-      expect(items.map(li => li.querySelector('.chat-bubble')?.textContent?.trim())).toEqual(
+      expect(items.map(li => li.querySelector('.chat-message')?.textContent?.trim())).toEqual(
         TURNS.map(t => t.content),
       );
     });
@@ -131,29 +131,37 @@ describe('ChatPanelComponent', () => {
       expect(el().querySelector('.chat-typing')).not.toBeNull();
     });
 
-    // The avatar identifies who is speaking at a glance, mirroring the launcher FAB.
-    it('leads each assistant turn with a decorative round avatar, and no user turn', () => {
+    // One avatar in the header says who is speaking. Repeating it per turn spends
+    // ~40px of the panel's width restating what the dialog title already carries.
+    it('shows the assistant avatar once in the header, never per turn', () => {
       setInputs({ turns: TURNS });
-      const [userItem, assistantItem] = transcriptItems();
 
-      const avatar = assistantItem.querySelector<HTMLImageElement>('img.chat-avatar');
+      const avatar = el().querySelector<HTMLImageElement>('header img.chat-avatar');
       expect(avatar).not.toBeNull();
       expect(avatar!.getAttribute('src')).toContain('chat_avatar');
       expect(avatar!.getAttribute('alt')).toBe('');
       expect(avatar!.getAttribute('width')).toBeTruthy();
       expect(avatar!.getAttribute('height')).toBeTruthy();
-      // Avatar precedes the bubble in the DOM so it reads as "leading" the answer.
-      expect(assistantItem.querySelector('.chat-avatar ~ .chat-bubble')).not.toBeNull();
 
-      expect(userItem.querySelector('img.chat-avatar')).toBeNull();
+      expect(el().querySelectorAll('ol img.chat-avatar')).toHaveLength(0);
+      expect(el().querySelector('.chat-typing img.chat-avatar')).toBeNull();
     });
 
-    it('leads the typing indicator with the same avatar', () => {
-      setInputs({ turns: TURNS, pending: true });
-      const avatar = el().querySelector<HTMLImageElement>('.chat-typing img.chat-avatar');
+    // A bubble caps the measure near 40 characters, well under the 65-75 the type
+    // scale targets, and the assistant is the side that answers in Markdown prose.
+    it('bubbles user turns and renders assistant turns full width', () => {
+      setInputs({ turns: TURNS });
+      const [userItem, assistantItem] = transcriptItems();
 
-      expect(avatar).not.toBeNull();
-      expect(avatar!.getAttribute('src')).toContain('chat_avatar');
+      expect(userItem.querySelector('.chat-message.chat-bubble')).not.toBeNull();
+      expect(assistantItem.querySelector('.chat-message')).not.toBeNull();
+      expect(assistantItem.querySelector('.chat-bubble')).toBeNull();
+    });
+
+    it('animates the typing indicator with three dots', () => {
+      setInputs({ turns: TURNS, pending: true });
+
+      expect(el().querySelectorAll('.chat-typing .chat-dot')).toHaveLength(3);
     });
   });
 
@@ -164,7 +172,7 @@ describe('ChatPanelComponent', () => {
           { role: 'assistant', content: 'Thanik knows **Angular** and:\n\n- RxJS\n- Signals' },
         ],
       });
-      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+      const bubble = transcriptItems()[0].querySelector('.chat-message')!;
 
       expect(bubble.querySelector('strong')?.textContent).toBe('Angular');
       expect(bubble.querySelectorAll('li')).toHaveLength(2);
@@ -172,7 +180,7 @@ describe('ChatPanelComponent', () => {
 
     it('shows user Markdown verbatim rather than as HTML', () => {
       setInputs({ turns: [{ role: 'user', content: 'what about **bold**?' }] });
-      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+      const bubble = transcriptItems()[0].querySelector('.chat-message')!;
 
       expect(bubble.querySelector('strong')).toBeNull();
       expect(bubble.textContent).toContain('**bold**');
@@ -187,7 +195,7 @@ describe('ChatPanelComponent', () => {
           },
         ],
       });
-      const bubble = transcriptItems()[0].querySelector('.chat-bubble')!;
+      const bubble = transcriptItems()[0].querySelector('.chat-message')!;
 
       expect(bubble.querySelector('script')).toBeNull();
       expect(bubble.querySelector('img')?.hasAttribute('onerror')).not.toBe(true);
@@ -208,6 +216,12 @@ describe('ChatPanelComponent', () => {
       el().querySelector<HTMLButtonElement>('[role="alert"] button')!.click();
 
       expect(retrySpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('pairs the error with an icon rather than carrying it by colour alone', () => {
+      setInputs({ turns: TURNS, error: 'Something went wrong' });
+
+      expect(el().querySelector('[role="alert"] mat-icon')).not.toBeNull();
     });
 
     it('shows no alert without an error', () => {
@@ -253,6 +267,25 @@ describe('ChatPanelComponent', () => {
       expect(textarea().value).toBe('Another question');
     });
 
+    // Send silently no-ops on an empty draft or a pending reply; a live-looking
+    // control that does nothing is the defect, so say so in the button's state.
+    it('disables send until there is a message to send', () => {
+      expect(sendButton().disabled).toBe(true);
+
+      type('Hello');
+      expect(sendButton().disabled).toBe(false);
+
+      type('   ');
+      expect(sendButton().disabled).toBe(true);
+    });
+
+    it('disables send while a reply is pending', () => {
+      type('Hello');
+      setInputs({ pending: true });
+
+      expect(sendButton().disabled).toBe(true);
+    });
+
     it('submits on Enter', () => {
       type('Hello');
       const event = pressKey(textarea(), 'Enter');
@@ -267,6 +300,46 @@ describe('ChatPanelComponent', () => {
 
       expect(sendSpy).not.toHaveBeenCalled();
       expect(event.defaultPrevented).toBe(false);
+    });
+  });
+
+  describe('scroll anchoring', () => {
+    const transcript = () => el().querySelector<HTMLElement>('.chat-transcript')!;
+
+    // jsdom does no layout, so the scroll geometry has to be stubbed onto the node.
+    const stubScroll = (scrollTop: number) => {
+      const node = transcript();
+      let top = scrollTop;
+      Object.defineProperty(node, 'scrollHeight', { configurable: true, value: 1000 });
+      Object.defineProperty(node, 'clientHeight', { configurable: true, value: 400 });
+      Object.defineProperty(node, 'scrollTop', {
+        configurable: true,
+        get: () => top,
+        set: (value: number) => (top = value),
+      });
+      node.dispatchEvent(new Event('scroll'));
+      return node;
+    };
+
+    it('follows the conversation while the reader is at the bottom', async () => {
+      setInputs({ turns: TURNS });
+      const node = stubScroll(600); // 1000 - 400: pinned to the bottom
+
+      setInputs({ turns: [...TURNS, { role: 'assistant', content: 'Since 2019.' }] });
+      await fixture.whenStable();
+
+      expect(node.scrollTop).toBe(1000);
+    });
+
+    // Yanking the reader back down mid-scroll is the bug: they are reading something.
+    it('leaves the scroll alone once the reader has scrolled up', async () => {
+      setInputs({ turns: TURNS });
+      const node = stubScroll(100);
+
+      setInputs({ turns: [...TURNS, { role: 'assistant', content: 'Since 2019.' }] });
+      await fixture.whenStable();
+
+      expect(node.scrollTop).toBe(100);
     });
   });
 

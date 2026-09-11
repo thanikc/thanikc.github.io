@@ -16,6 +16,9 @@
   color: var(--mat-sys-on-surface-variant);
 }
 
+// The visitor writes a line; the assistant answers in Markdown prose. Only the
+// short side gets a bubble — bubbling both would cap the answer's measure near
+// 40 characters, far under the 65-75 the type scale is built around.
 .chat-turn[data-role='user'] {
   justify-content: flex-end;
 
@@ -23,11 +26,6 @@
     background-color: var(--mat-sys-primary-container);
     color: var(--mat-sys-on-primary-container);
   }
-}
-
-.chat-turn[data-role='assistant'] .chat-bubble {
-  background-color: var(--mat-sys-surface-container-high);
-  color: var(--mat-sys-on-surface);
 }
 
 // Rendered Markdown from the assistant. Tailwind's preflight strips list markers
@@ -125,9 +123,21 @@
 
 .chat-dot {
   background-color: var(--mat-sys-on-surface-variant);
+  animation: typing-dot 1.2s ease-in-out infinite;
 }
 
+// A neutral surface with an error-coloured icon: state is never carried by hue
+// alone, and the retry button keeps its own contrast-checked colours.
 .chat-error {
-  background-color: var(--mat-sys-error-container);
-  color: var(--mat-sys-on-error-container);
+  background-color: var(--mat-sys-surface-container-high);
+  border-color: var(--mat-sys-outline-variant);
+}
+
+.chat-error-icon {
+  color: var(--mat-sys-error);
+}
+
+// Full-screen on phones, so the composer has to clear the home indicator.
+.chat-composer {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }

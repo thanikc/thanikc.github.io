@@ -39,10 +39,18 @@ export class ChatWidgetComponent {
   protected readonly open = signal(false);
   protected readonly panelId = 'chat-dialog';
 
+  /**
+   * The launcher's tip is a hover affordance, which touch does not have. It reveals
+   * itself once shortly after arrival instead, then retires for good: a visitor who
+   * has opened the chat already knows what the portrait button does.
+   */
+  protected readonly showHint = signal(true);
+
   private readonly injector = inject(Injector);
   private readonly fab = viewChild('fab', { read: ElementRef<HTMLButtonElement> });
 
   protected launch(): void {
+    this.showHint.set(false);
     this.open.set(true);
   }
 

@@ -86,6 +86,19 @@ describe('ChatWidgetComponent', () => {
       expect(fab().getAttribute('aria-describedby')).toBe('chat-fab-tip');
     });
 
+    // Hover has no touch equivalent, so the tip reveals itself once on arrival and
+    // then retires: after the chat has been opened the visitor knows what it is.
+    it('peeks the tooltip until the chat has been opened', () => {
+      const tip = () => el().querySelector('#chat-fab-tip')!;
+      expect(tip().classList.contains('chat-fab-tip-peek')).toBe(true);
+
+      openPanel();
+      panelInstance().close.emit();
+      fixture.detectChanges();
+
+      expect(tip().classList.contains('chat-fab-tip-peek')).toBe(false);
+    });
+
     it('opens the panel and removes the launcher when clicked', () => {
       openPanel();
 
