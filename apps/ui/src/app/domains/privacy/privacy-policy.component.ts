@@ -13,7 +13,7 @@ export class PrivacyPolicyComponent {
   private readonly consent = inject(CookieConsentService);
 
   // Static legal content: no reactivity needed.
-  readonly lastUpdated = 'August 20, 2026';
+  readonly lastUpdated = 'September 11, 2026';
   readonly contactEmail = 'thanikc@gmail.com';
 
   reopenCookieBanner(): void {
