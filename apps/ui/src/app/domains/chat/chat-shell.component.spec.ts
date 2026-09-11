@@ -14,9 +14,12 @@ describe('ChatShellComponent', () => {
     pending: signal(false),
     error: signal<string | null>(null),
     hasConversation: signal(false),
+    isOpen: signal(false),
     send: vi.fn(),
     retry: vi.fn(),
     reset: vi.fn(),
+    open: vi.fn(),
+    close: vi.fn(),
   };
 
   beforeEach(async () => {

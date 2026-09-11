@@ -21,6 +21,23 @@ export class ChatService {
   readonly error = signal<string | null>(null);
   readonly hasConversation = computed(() => this.turns().length > 0);
 
+  /**
+   * Whether the chat panel is showing. Lives here rather than in the widget so any
+   * part of the page can open the chat — including before the idle-deferred widget
+   * has loaded, which then renders straight into the open state.
+   */
+  readonly isOpen = signal(false);
+
+  /** Opens the panel; with a `question`, also asks it (contextual "Ask AI Ling" links). */
+  open(question?: string): void {
+    this.isOpen.set(true);
+    if (question) void this.send(question);
+  }
+
+  close(): void {
+    this.isOpen.set(false);
+  }
+
   /** Appends `message` as a user turn and asks the worker to answer it. */
   async send(message: string): Promise<void> {
     const content = message.trim();
