@@ -44,8 +44,14 @@
     <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      display=optional, not swap: a swap re-flows every line when Roboto lands after
+      first paint. The Playwright design check measured CLS 0.14 on /privacy-policy
+      from that alone (0.00 with the font blocked). Optional keeps the fallback for
+      that page view instead; cached visits get Roboto from the first frame.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=optional"
       rel="stylesheet"
     />
     <link
