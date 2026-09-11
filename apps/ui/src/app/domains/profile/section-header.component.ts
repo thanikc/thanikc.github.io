@@ -5,7 +5,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-section-header',
   template: `
     <div class="surface-rule border-b pb-3">
-      <h2 [id]="headingId()" class="text-2xl font-bold tracking-tight">{{ heading() }}</h2>
+      <h2 [id]="headingId()" class="scroll-mt-24 text-2xl font-bold tracking-tight">
+        {{ heading() }}
+      </h2>
       <p class="surface-muted text-sm font-medium">{{ subtitle() }}</p>
     </div>
   `,

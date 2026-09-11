@@ -39,6 +39,14 @@ describe('FooterComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The header's "Contact" link jumps to the footer, clear of the sticky header.
+  it('is the #contact target for the header navigation', () => {
+    const footer = (fixture.nativeElement as HTMLElement).querySelector('footer');
+
+    expect(footer?.id).toBe('contact');
+    expect(footer?.classList.contains('scroll-mt-24')).toBe(true);
+  });
+
   it('should render a <footer> element', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('footer')).not.toBeNull();

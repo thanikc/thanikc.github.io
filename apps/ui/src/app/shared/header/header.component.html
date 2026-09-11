@@ -1,10 +1,22 @@
 <mat-toolbar class="app-header sticky top-0 z-50">
-  <div class="header-container mx-auto flex w-full max-w-6xl items-center justify-between px-4">
+  <div
+    class="header-container mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4"
+  >
     <a routerLink="/" class="brand-link flex items-center gap-2 text-lg font-bold no-underline">
       <img src="img/logo.svg" alt="" aria-hidden="true" class="brand-logo" width="28" height="28" />
-      <span>Dev Info</span>
+      <span>Thanik Cheowtirakul</span>
     </a>
 
-    <app-theme-toggle />
+    <div class="flex items-center gap-1">
+      <nav aria-label="Primary" class="hidden items-center gap-1 sm:flex">
+        @for (link of navLinks; track link.fragment) {
+          <a matButton class="min-h-11" routerLink="/" [fragment]="link.fragment">
+            {{ link.label }}
+          </a>
+        }
+      </nav>
+
+      <app-theme-toggle />
+    </div>
   </div>
 </mat-toolbar>

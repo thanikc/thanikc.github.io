@@ -1,5 +1,5 @@
 import { ApplicationConfig, isDevMode, provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
@@ -14,7 +14,8 @@ const DEPLOYED_CHAT_API_URL = 'https://thanikc-worker.thanikc.workers.dev';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
-    provideRouter(routes),
+    // Header nav links are `/#fragment` links; the router only scrolls to them when asked.
+    provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideHttpClient(withFetch()),
     provideAnalytics(),
     provideClientHydration(withEventReplay()),
