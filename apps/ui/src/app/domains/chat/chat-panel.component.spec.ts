@@ -134,6 +134,28 @@ describe('ChatPanelComponent', () => {
       expect(sendSpy).toHaveBeenCalledWith(suggestion.textContent!.trim());
     });
 
+    // "Looked in", not "based on": retrieval always returns its closest chunks, so
+    // the label claims only where the assistant searched, not what it used.
+    it('lists where an answer looked, under the answer', () => {
+      setInputs({
+        turns: [
+          { role: 'user', content: 'What has Thanik built?' },
+          { role: 'assistant', content: 'Two banking products.', sources: ['Projects', 'Summary'] },
+        ],
+      });
+
+      const sources = transcriptItems()[1].querySelector('.chat-sources');
+      expect(sources?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'Looked in: Projects · Summary',
+      );
+    });
+
+    it('shows no source line when an answer has no sources', () => {
+      setInputs({ turns: TURNS });
+
+      expect(el().querySelector('.chat-sources')).toBeNull();
+    });
+
     it('renders turns in order with role-distinct markup', () => {
       setInputs({ turns: TURNS });
       const items = transcriptItems();

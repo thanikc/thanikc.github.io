@@ -62,10 +62,14 @@
         <li class="chat-turn flex" [attr.data-role]="turn.role">
           <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'AI Ling said:' }}</span>
           @if (turn.role === 'assistant') {
-            <div
-              class="chat-message chat-markdown min-w-0 flex-1"
-              [innerHTML]="turn.content | markdown"
-            ></div>
+            <div class="min-w-0 flex-1">
+              <div class="chat-message chat-markdown" [innerHTML]="turn.content | markdown"></div>
+              @if (turn.sources?.length) {
+                <p class="chat-sources chat-muted mt-2 text-xs">
+                  Looked in: {{ turn.sources!.join(' · ') }}
+                </p>
+              }
+            </div>
           } @else {
             <p
               class="chat-message chat-bubble max-w-[85%] rounded-2xl px-4 py-2 break-words whitespace-pre-line"

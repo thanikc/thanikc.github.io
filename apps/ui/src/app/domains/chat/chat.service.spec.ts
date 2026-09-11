@@ -77,6 +77,47 @@ describe('ChatService', () => {
     await done;
   });
 
+  it('records the distinct source titles an answer looked in, in retrieval order', async () => {
+    const done = service.send('What has Thanik built?');
+    httpMock.expectOne(CHAT_ENDPOINT).flush({
+      answer: 'Two banking products.',
+      provider: 'groq',
+      sources: [
+        { text: 'a', score: 0.9, title: 'Projects' },
+        { text: 'b', score: 0.8, title: 'Experience' },
+        { text: 'c', score: 0.7, title: 'Projects' },
+        { text: 'd', score: 0.6 },
+      ],
+    } satisfies ChatResponse);
+    await done;
+
+    expect(service.turns().at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Two banking products.',
+      sources: ['Projects', 'Experience'],
+    });
+  });
+
+  it('keeps history free of source titles', async () => {
+    const first = service.send('Hello');
+    httpMock.expectOne(CHAT_ENDPOINT).flush({
+      answer: 'Hi',
+      provider: 'groq',
+      sources: [{ text: 'a', score: 0.9, title: 'Summary' }],
+    } satisfies ChatResponse);
+    await first;
+
+    const done = service.send('And then?');
+    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    expect(req.request.body.history).toEqual([
+      { role: 'user', content: 'Hello' },
+      { role: 'assistant', content: 'Hi' },
+    ]);
+
+    req.flush(answer('More'));
+    await done;
+  });
+
   it('appends the assistant turn on success', async () => {
     await exchange('Hello', 'Hi there');
 
