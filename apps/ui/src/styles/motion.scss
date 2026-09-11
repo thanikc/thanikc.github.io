@@ -45,6 +45,17 @@
   }
 }
 
+// Plain opacity reveal, for elements a translate would visibly displace — a
+// full-bleed scrim leaves a gap at the edge if it slides in.
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 // Chat typing indicator. Dots rest dim and lift as the wave passes; the collapsed
 // duration under reduced motion leaves them legible and still.
 @keyframes typing-dot {

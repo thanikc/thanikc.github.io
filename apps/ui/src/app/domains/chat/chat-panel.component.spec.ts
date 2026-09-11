@@ -239,6 +239,15 @@ describe('ChatPanelComponent', () => {
       expect(el().querySelector(`label[for="${id}"]`)).not.toBeNull();
     });
 
+    // The answers are generated, and the panel is the only place the visitor sees
+    // them — the disclosure belongs here, not only in the privacy policy.
+    it('discloses that answers are AI-generated, outside the live region', () => {
+      const composer = el().querySelector('.chat-composer')!;
+
+      expect(composer.textContent).toMatch(/\bAI\b/);
+      expect(el().querySelector('ol')?.contains(composer)).toBe(false);
+    });
+
     it('emits the trimmed message on submit and clears the input', () => {
       type('  Where does Thanik work?  ');
       sendButton().click();
