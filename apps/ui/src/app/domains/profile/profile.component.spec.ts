@@ -5,7 +5,7 @@ import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
-import { PROJECTS, WORK_THEMES } from './profile.content';
+import { PRINCIPLES, PROJECTS, WORK_THEMES } from './profile.content';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 
@@ -163,10 +163,49 @@ describe('ProfileComponent', () => {
     ).toBeTruthy();
   });
 
-  it('renders a labeled ad slot directly after the projects', () => {
-    const adSlot = projectsHost()?.nextElementSibling;
+  describe('how I work', () => {
+    it('follows the projects with the principles', () => {
+      const principles = el().querySelector('app-profile-principles');
 
-    expect(adSlot?.classList.contains('ad-slot')).toBe(true);
+      expect(principles).not.toBeNull();
+      expect(
+        projectsHost()!.compareDocumentPosition(principles!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+    });
+
+    // Concise on purpose: four habits, each pointing at checkable evidence.
+    it('keeps four principles, each with evidence', () => {
+      expect(PRINCIPLES).toHaveLength(4);
+      for (const principle of PRINCIPLES) {
+        expect(principle.evidence.label.length).toBeGreaterThan(0);
+      }
+    });
+
+    it('links evidence only to the public repository', () => {
+      const urls = PRINCIPLES.flatMap(p => (p.evidence.kind === 'link' ? [p.evidence.url] : []));
+
+      expect(urls.length).toBeGreaterThan(0);
+      for (const url of urls) {
+        expect(url.startsWith('https://github.com/thanikc/thanikc.github.io/')).toBe(true);
+      }
+    });
+
+    // The no-streaming story is principle 4's evidence; the page shouldn't tell it twice.
+    it('tells the no-streaming story once, as a principle', () => {
+      expect(project('AI Ling').decision).not.toMatch(/stream/i);
+      expect(JSON.stringify(PRINCIPLES)).toMatch(/stream/i);
+    });
+
+    it('names no companies', () => {
+      expect(JSON.stringify(PRINCIPLES)).not.toMatch(COMPANIES);
+    });
+  });
+
+  it('renders a labeled ad slot as the last element of the page', () => {
+    const page = el().querySelector('.profile-page');
+    const adSlot = el().querySelector('.ad-slot');
+
+    expect(page?.lastElementChild).toBe(adSlot);
     expect(adSlot?.textContent).toContain('Advertisement');
     expect(adSlot?.querySelector('app-ad-banner')).not.toBeNull();
   });
@@ -179,10 +218,12 @@ describe('ProfileComponent', () => {
     expect(adSlot?.classList.contains('mt-auto')).toBe(true);
   });
 
-  it('keeps at least a 2rem gap between the projects and the ad slot', () => {
+  it('keeps at least a 2rem gap between the last section and the ad slot', () => {
     // mb-8 = 2rem, applied as a fixed margin so it survives even when the
     // ad slot's mt-auto collapses to 0 on a short page.
-    expect(projectsHost()?.classList.contains('mb-8')).toBe(true);
+    const lastSection = el().querySelector('.ad-slot')?.previousElementSibling;
+
+    expect(lastSection?.classList.contains('mb-8')).toBe(true);
   });
 
   it('should display the ad banner when showBanner signal is true', () => {
