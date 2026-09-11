@@ -5,17 +5,19 @@ import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
-import { WORK_THEMES } from './profile.content';
+import { PROJECTS, WORK_THEMES } from './profile.content';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { AdBannerComponent } from '../ads/ad-banner.component';
+
+const COMPANIES = /attempto|Atruvia|Fiducia|Genossenschaft/i;
 
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
 
-  const projectLinks = () => [
-    ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>('.project-card'),
-  ];
+  const el = () => fixture.nativeElement as HTMLElement;
+  const projectsHost = () => el().querySelector('app-profile-projects');
+  const project = (name: string) => PROJECTS.find(candidate => candidate.name === name)!;
 
   const mockShowBanner = signal(true);
   const mockRouteAllowsAds = signal(true);
@@ -47,110 +49,87 @@ describe('ProfileComponent', () => {
   });
 
   it('opens with the hero', () => {
-    const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
+    const page = el().querySelector('.profile-page');
 
     expect(page?.firstElementChild?.tagName).toBe('APP-PROFILE-HERO');
   });
 
   it('follows the hero with the "What I work on" themes', () => {
-    const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
+    const page = el().querySelector('.profile-page');
 
     expect(page?.children[1]?.tagName).toBe('APP-PROFILE-THEMES');
   });
 
   // The stack now lives inside the themes, in context; it no longer leads the page.
   it('no longer leads with a technology list', () => {
-    const headings = [...(fixture.nativeElement as HTMLElement).querySelectorAll('h2')].map(h =>
-      h.textContent?.trim(),
-    );
+    const headings = [...el().querySelectorAll('h2')].map(h => h.textContent?.trim());
 
     expect(headings).not.toContain('Technical Expertise');
   });
 
   // Owner's decision: the static page names the industry, never the companies.
   it('names no companies in its work themes', () => {
-    const text = JSON.stringify(WORK_THEMES);
-
     expect(WORK_THEMES.length).toBeGreaterThanOrEqual(3);
     expect(WORK_THEMES.length).toBeLessThanOrEqual(4);
-    expect(text).not.toMatch(/attempto|Atruvia|Fiducia|Genossenschaft/i);
+    expect(JSON.stringify(WORK_THEMES)).not.toMatch(COMPANIES);
   });
 
-  it('should render one card per configured side project', () => {
-    expect(projectLinks().length).toBe(component.sideProjects.length);
-    expect(projectLinks().map(link => link.getAttribute('href'))).toEqual(
-      component.sideProjects.map(project => project.url),
-    );
-  });
+  describe('projects', () => {
+    it('renders every project', () => {
+      expect(projectsHost()?.querySelectorAll('app-project-card')).toHaveLength(PROJECTS.length);
+    });
 
-  it('should link to CrashDash with its description', () => {
-    const crashDash = projectLinks().find(
-      link => link.getAttribute('href') === 'https://crashdash.singdee.de/',
-    );
+    // CrashDash and AI Ling are the strongest evidence; the small tools follow.
+    it('features CrashDash and AI Ling, then the quiz and the calculator', () => {
+      expect(PROJECTS.map(p => p.name)).toEqual([
+        'CrashDash',
+        'AI Ling',
+        'BJJ Quiz',
+        'Retirement Calculator',
+      ]);
+      expect(PROJECTS.filter(p => p.featured).map(p => p.name)).toEqual(['CrashDash', 'AI Ling']);
+    });
 
-    expect(crashDash).toBeDefined();
-    expect(crashDash!.textContent).toContain('CrashDash');
-    expect(crashDash!.textContent).toContain('market crash');
-  });
+    // CrashDash is access-restricted: its link lands on a sign-in wall, so the
+    // card says so before the visitor clicks.
+    it('marks CrashDash as private and sign-in required, and still links to it', () => {
+      expect(project('CrashDash').status.label).toBe('Private — sign-in required');
+      expect(project('CrashDash').primary?.url).toBe('https://crashdash.singdee.de/');
+      expect(project('CrashDash').tagline).toContain('market crash');
+    });
 
-  // CrashDash is access-restricted: the link lands on a sign-in wall, so the
-  // card must say so before the visitor clicks.
-  it('marks CrashDash as private and sign-in required', () => {
-    const crashDash = projectLinks().find(
-      link => link.getAttribute('href') === 'https://crashdash.singdee.de/',
-    );
-    const badge = crashDash?.querySelector('.project-access');
+    it('links the BJJ Quiz externally and the calculator in-app', () => {
+      expect(project('BJJ Quiz').primary).toEqual(
+        expect.objectContaining({ url: 'https://bjj-quiz.thanikc.workers.dev/', external: true }),
+      );
+      expect(project('Retirement Calculator').primary).toEqual(
+        expect.objectContaining({ url: '/calculator', external: false }),
+      );
+    });
 
-    expect(badge?.textContent?.trim()).toBe('Private — sign-in required');
-  });
+    // AI Ling is the page's own AI application: its source is the public repo.
+    it('points AI Ling at its public source', () => {
+      expect(project('AI Ling').source?.url).toBe(
+        'https://github.com/thanikc/thanikc.github.io/tree/main/apps/worker',
+      );
+    });
 
-  it('shows no access badge on publicly usable projects', () => {
-    const publicCards = projectLinks().filter(
-      link => link.getAttribute('href') !== 'https://crashdash.singdee.de/',
-    );
+    // Private sources (Q7, Q8): no source links for CrashDash or the quiz.
+    it('links no private source code', () => {
+      expect(project('CrashDash').source).toBeUndefined();
+      expect(project('BJJ Quiz').source).toBeUndefined();
+    });
 
-    expect(publicCards.length).toBeGreaterThan(0);
-    for (const card of publicCards) {
-      expect(card.querySelector('.project-access')).toBeNull();
-    }
-  });
-
-  // Hover lift signals "clickable": only links may carry it, so static skill and
-  // interest cards don't read as controls.
-  it('gives the hover affordance to project links only', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const interactive = [...compiled.querySelectorAll('.card-interactive')];
-
-    expect(interactive.length).toBe(component.sideProjects.length);
-    for (const card of interactive) {
-      expect(card.tagName).toBe('A');
-    }
-  });
-
-  it('should open external project links safely in a new tab', () => {
-    const externalLinks = projectLinks().filter(link =>
-      link.getAttribute('href')?.startsWith('http'),
-    );
-
-    expect(externalLinks.length).toBeGreaterThan(0);
-    for (const link of externalLinks) {
-      expect(link.getAttribute('target')).toBe('_blank');
-      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
-    }
-  });
-
-  it('should link to the BJJ Quiz with its description', () => {
-    const bjjQuiz = projectLinks().find(
-      link => link.getAttribute('href') === 'https://bjj-quiz.thanikc.workers.dev/',
-    );
-
-    expect(bjjQuiz).toBeDefined();
-    expect(bjjQuiz!.textContent).toContain('BJJ Quiz');
-    expect(bjjQuiz!.textContent).toContain('belt');
+    it('gives every project a hook question and names no companies', () => {
+      for (const p of PROJECTS) {
+        expect(p.question.length).toBeGreaterThan(0);
+      }
+      expect(JSON.stringify(PROJECTS)).not.toMatch(COMPANIES);
+    });
   });
 
   it('renders a "Beyond the Code" section with one card per interest', () => {
-    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
+    const sections = [...el().querySelectorAll('section')];
     const interestsSection = sections.find(section =>
       section.querySelector('h2')?.textContent?.includes('Beyond the Code'),
     );
@@ -174,33 +153,18 @@ describe('ProfileComponent', () => {
     expect(text).toContain('mandarin');
   });
 
-  it('places the interests section before the side projects section', () => {
-    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
-    const interestsIdx = sections.findIndex(section =>
+  it('places the interests section before the projects', () => {
+    const interests = [...el().querySelectorAll('section')].find(section =>
       section.textContent?.includes('Beyond the Code'),
-    );
-    const sideProjectsIdx = sections.findIndex(section =>
-      section.textContent?.includes('Side Projects'),
-    );
+    )!;
 
-    expect(interestsIdx).toBeGreaterThanOrEqual(0);
-    expect(interestsIdx).toBeLessThan(sideProjectsIdx);
+    expect(
+      interests.compareDocumentPosition(projectsHost()!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
-  it('should link to the Retirement Calculator as an in-app route', () => {
-    const calculatorLink = projectLinks().find(link => link.getAttribute('href') === '/calculator');
-
-    expect(calculatorLink).toBeDefined();
-    expect(calculatorLink!.textContent).toContain('Retirement Calculator');
-    expect(calculatorLink!.getAttribute('target')).toBeNull();
-  });
-
-  it('renders a labeled ad slot directly after the side projects section', () => {
-    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
-    const sideProjectsSection = sections.find(section =>
-      section.textContent?.includes('Side Projects'),
-    );
-    const adSlot = sideProjectsSection?.nextElementSibling;
+  it('renders a labeled ad slot directly after the projects', () => {
+    const adSlot = projectsHost()?.nextElementSibling;
 
     expect(adSlot?.classList.contains('ad-slot')).toBe(true);
     expect(adSlot?.textContent).toContain('Advertisement');
@@ -208,23 +172,17 @@ describe('ProfileComponent', () => {
   });
 
   it('pins the ad slot to the bottom of the page above the footer', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const page = compiled.querySelector('.profile-page');
-    const adSlot = compiled.querySelector('.ad-slot');
+    const page = el().querySelector('.profile-page');
+    const adSlot = el().querySelector('.ad-slot');
 
     expect(page?.classList.contains('flex-1')).toBe(true);
     expect(adSlot?.classList.contains('mt-auto')).toBe(true);
   });
 
-  it('keeps at least a 2rem gap between the side projects section and the ad slot', () => {
-    const sections = [...(fixture.nativeElement as HTMLElement).querySelectorAll('section')];
-    const sideProjectsSection = sections.find(section =>
-      section.textContent?.includes('Side Projects'),
-    );
-
+  it('keeps at least a 2rem gap between the projects and the ad slot', () => {
     // mb-8 = 2rem, applied as a fixed margin so it survives even when the
     // ad slot's mt-auto collapses to 0 on a short page.
-    expect(sideProjectsSection?.classList.contains('mb-8')).toBe(true);
+    expect(projectsHost()?.classList.contains('mb-8')).toBe(true);
   });
 
   it('should display the ad banner when showBanner signal is true', () => {
@@ -260,7 +218,7 @@ describe('ProfileComponent', () => {
   // <main> already applies the page container, gutters and max width; repeating
   // them here inset the content twice and pinned it to a narrower column.
   it('does not repeat the page gutters already applied by <main>', () => {
-    const page = (fixture.nativeElement as HTMLElement).querySelector('.profile-page');
+    const page = el().querySelector('.profile-page');
 
     expect(page?.classList.contains('container')).toBe(false);
     expect(page?.classList.contains('px-4')).toBe(false);
