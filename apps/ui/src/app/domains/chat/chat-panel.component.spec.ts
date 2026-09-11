@@ -165,6 +165,23 @@ describe('ChatPanelComponent', () => {
     });
   });
 
+  describe('disclosure', () => {
+    // The answers are generated, and the panel is the only place a visitor reads
+    // them — the disclosure belongs here, not only in the privacy policy. It closes
+    // the transcript rather than the composer, and stays out of the live region so
+    // it is not re-announced with every turn.
+    it('closes the transcript by naming the answers as AI-generated', () => {
+      setInputs({ turns: TURNS });
+      const note = el().querySelector('.chat-disclaimer')!;
+
+      expect(note).not.toBeNull();
+      expect(note.textContent).toMatch(/\bAI\b/);
+      expect(el().querySelector('.chat-transcript')!.lastElementChild).toBe(note);
+      expect(el().querySelector('ol')!.contains(note)).toBe(false);
+      expect(el().querySelector('.chat-composer')!.textContent).not.toMatch(/\bAI\b/);
+    });
+  });
+
   describe('markdown rendering', () => {
     it('renders assistant Markdown as formatted HTML', () => {
       setInputs({
@@ -237,15 +254,6 @@ describe('ChatPanelComponent', () => {
 
       expect(id).toBeTruthy();
       expect(el().querySelector(`label[for="${id}"]`)).not.toBeNull();
-    });
-
-    // The answers are generated, and the panel is the only place the visitor sees
-    // them — the disclosure belongs here, not only in the privacy policy.
-    it('discloses that answers are AI-generated, outside the live region', () => {
-      const composer = el().querySelector('.chat-composer')!;
-
-      expect(composer.textContent).toMatch(/\bAI\b/);
-      expect(el().querySelector('ol')?.contains(composer)).toBe(false);
     });
 
     it('emits the trimmed message on submit and clears the input', () => {
