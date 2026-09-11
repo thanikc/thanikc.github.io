@@ -62,6 +62,29 @@ describe('HeaderComponent', () => {
     });
   });
 
+  // Found by the Playwright design check: <mat-toolbar> alone is not a banner landmark.
+  it('should wrap the toolbar in a <header> landmark', () => {
+    const header = (fixture.nativeElement as HTMLElement).querySelector('header');
+
+    expect(header).not.toBeNull();
+    expect(header!.querySelector('mat-toolbar')).not.toBeNull();
+  });
+
+  // Found by the Playwright design check: the brand link was 28px tall.
+  it('should give the brand link a 44px hit area', () => {
+    const brandLink = (fixture.nativeElement as HTMLElement).querySelector('.brand-link');
+
+    expect(brandLink?.classList.contains('min-h-11')).toBe(true);
+  });
+
+  // Found by the Playwright design check: nav links and the toggle sat 4px apart.
+  it('should keep 8px between the nav links and the theme toggle', () => {
+    const nav = (fixture.nativeElement as HTMLElement).querySelector('nav');
+
+    expect(nav?.classList.contains('gap-2')).toBe(true);
+    expect(nav?.parentElement?.classList.contains('gap-2')).toBe(true);
+  });
+
   it('should render the theme toggle', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
