@@ -103,4 +103,6 @@ Before reporting a UX/UI change complete, confirm:
 - [ ] Reduced-motion honoured.
 - [ ] Existing specs still pass (`ng test --watch=false`).
 
-State plainly which of these were verified in a browser and which were reasoned about.
+Verify these in a browser with Playwright as described in
+[DESIGN-VERIFICATION.md](DESIGN-VERIFICATION.md). State plainly which of these were verified
+in a browser and which were reasoned about.

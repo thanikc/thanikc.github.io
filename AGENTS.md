@@ -64,3 +64,4 @@ Before executing a complex task, review the corresponding skill folder to unders
 ### Design & UX/UI
 
 - **UX/UI:** For any UX or UI task (layout, styling, theming, responsiveness, accessibility, interaction, or visual design), read `.agents/rules/UX-UI.md` first and follow its rules.
+- **Design verification:** Before reporting a UI change done, verify it in a browser with Playwright per `.agents/rules/DESIGN-VERIFICATION.md` (themes × widths matrix, axe contrast, keyboard, hit areas, layout shift, overflow).
