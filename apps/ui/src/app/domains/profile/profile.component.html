@@ -95,7 +95,7 @@
             [href]="project.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="skill-card project-card rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
+            class="skill-card project-card card-interactive rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
             [style.animation-delay.ms]="i * 80"
             [attr.data-cta-tracking]="project.name"
           >
@@ -107,11 +107,17 @@
               <mat-icon class="external-icon ml-auto" aria-hidden="true">open_in_new</mat-icon>
             </div>
             <p class="hero-subtitle text-sm">{{ project.description }}</p>
+            @if (project.access; as access) {
+              <p class="project-access-row mt-auto flex items-center gap-1 text-xs font-semibold">
+                <mat-icon class="project-access-icon" aria-hidden="true">lock</mat-icon>
+                <span class="project-access">{{ access }}</span>
+              </p>
+            }
           </a>
         } @else {
           <a
             [routerLink]="project.url"
-            class="skill-card project-card rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
+            class="skill-card project-card card-interactive rounded-xl p-6 flex flex-col gap-4 shadow-sm no-underline"
             [style.animation-delay.ms]="i * 80"
             [attr.data-cta-tracking]="project.name"
           >
@@ -122,6 +128,12 @@
               <h3 class="text-lg font-bold">{{ project.name }}</h3>
             </div>
             <p class="hero-subtitle text-sm">{{ project.description }}</p>
+            @if (project.access; as access) {
+              <p class="project-access-row mt-auto flex items-center gap-1 text-xs font-semibold">
+                <mat-icon class="project-access-icon" aria-hidden="true">lock</mat-icon>
+                <span class="project-access">{{ access }}</span>
+              </p>
+            }
           </a>
         }
       } @empty {

@@ -117,17 +117,25 @@ $hero-scrim: linear-gradient(
 .card-avatar {
   background-color: var(--mat-sys-primary-container);
   color: var(--mat-sys-on-primary-container);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .skill-card {
   background-color: var(--mat-sys-surface-container-lowest);
   opacity: 0;
   animation: card-rise 0.5s ease forwards;
+}
+
+// Lift on hover says "clickable", so only links get it — static skill and
+// interest cards must not read as controls.
+.card-interactive {
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease,
     border-color 0.25s ease;
+
+  .card-avatar {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
 
   &:hover {
     transform: translateY(-4px);
@@ -142,6 +150,16 @@ $hero-scrim: linear-gradient(
 
 .project-card {
   text-decoration: none;
+}
+
+.project-access-row {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.project-access-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
 }
 
 .external-icon {
@@ -164,11 +182,6 @@ $hero-scrim: linear-gradient(
 .skill-chip {
   background-color: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
-  transition: transform 0.15s ease;
-
-  &:hover {
-    transform: translateY(-2px) scale(1.05);
-  }
 }
 
 /** Resume-style printout: flatten decoration, drop CTAs and animation. */
