@@ -103,7 +103,7 @@ export const PROJECTS: readonly Project[] = [
       'The assistant on this page: it answers questions about my career from a knowledge base I wrote.',
     why: 'So this page can stay short while the detail is one question away.',
     decision:
-      "Answers aren't streamed, so a failing model provider can hand over to the next one without a garbled reply.",
+      "It answers only from a knowledge base I wrote, and says so when a question isn't covered.",
     stack: ['Cloudflare Workers', 'Hono', 'Vectorize', 'RAG', 'Angular'],
     status: { label: 'Open source', icon: 'code' },
     featured: true,
@@ -141,5 +141,58 @@ export const PROJECTS: readonly Project[] = [
     primary: { label: 'Open calculator', url: '/calculator', external: false },
     hookLabel: 'Ask where the numbers come from',
     question: 'Where does the retirement calculator get its assumptions?',
+  },
+];
+
+/** What backs a principle: a question for AI Ling, or a link to the public repo. */
+export type PrincipleEvidence =
+  { kind: 'ask'; label: string; question: string } | { kind: 'link'; label: string; url: string };
+
+/** A working habit, stated in one line and backed by something checkable. */
+export interface Principle {
+  title: string;
+  detail: string;
+  evidence: PrincipleEvidence;
+}
+
+export const PRINCIPLES: readonly Principle[] = [
+  {
+    title: 'Find out why before changing it',
+    detail:
+      'Before I patch a bug, I trace it to its root — like a portal timing problem that turned out to be an old time-to-market quick fix.',
+    evidence: {
+      kind: 'ask',
+      label: 'Ask about that bug',
+      question: 'What was the timing problem Thanik traced back to a quick fix?',
+    },
+  },
+  {
+    title: 'Tests first, even with AI',
+    detail: 'Red, green, refactor — and my AI assistants are held to the same loop.',
+    evidence: {
+      kind: 'link',
+      label: 'Read the workflow they follow',
+      url: `${REPO_URL}/blob/main/AGENTS.md`,
+    },
+  },
+  {
+    title: 'Give the AI rules, not just prompts',
+    detail:
+      "Written rules for architecture, coding standards and testing make AI output meet the team's bar.",
+    evidence: {
+      kind: 'ask',
+      label: 'Ask about the team rules',
+      question: 'What are the AI rules Thanik wrote for his team?',
+    },
+  },
+  {
+    title: 'Pick the boring option when it’s right',
+    detail:
+      'Reliable beats impressive: AI Ling returns whole answers instead of streaming them, so a failing provider can hand over to the next one.',
+    evidence: {
+      kind: 'link',
+      label: 'Read why it doesn’t stream',
+      url: `${REPO_URL}/blob/main/apps/worker/README.md`,
+    },
   },
 ];

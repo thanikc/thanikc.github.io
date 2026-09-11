@@ -3,9 +3,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { AdBannerComponent } from '../ads/ad-banner.component';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { ProfileHeroComponent } from './profile-hero.component';
+import { ProfilePrinciplesComponent } from './profile-principles.component';
 import { ProfileProjectsComponent } from './profile-projects.component';
 import { ProfileThemesComponent } from './profile-themes.component';
-import { PROJECTS, WORK_THEMES } from './profile.content';
+import { PRINCIPLES, PROJECTS, WORK_THEMES } from './profile.content';
 
 export interface Interest {
   name: string;
@@ -46,6 +47,7 @@ const INTERESTS: readonly Interest[] = [
     ProfileHeroComponent,
     ProfileThemesComponent,
     ProfileProjectsComponent,
+    ProfilePrinciplesComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -57,6 +59,7 @@ export class ProfileComponent {
   // Static presentation content: no reactivity needed.
   readonly workThemes = WORK_THEMES;
   readonly projects = PROJECTS;
+  readonly principles = PRINCIPLES;
   readonly interests = INTERESTS;
   readonly showBanner = computed(
     () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),

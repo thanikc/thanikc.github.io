@@ -1,0 +1,43 @@
+<section class="space-y-6" [attr.aria-labelledby]="headingId">
+  <app-section-header
+    heading="How I work"
+    [headingId]="headingId"
+    subtitle="Four habits, each with the evidence behind it"
+  />
+
+  @if (principles().length > 0) {
+    <ol class="grid grid-cols-1 gap-6 md:grid-cols-2">
+      @for (principle of principles(); track principle.title) {
+        <li class="surface-card flex flex-col gap-3 rounded-xl p-6 shadow-sm">
+          <h3 class="text-lg font-bold">{{ principle.title }}</h3>
+          <p class="surface-muted text-sm leading-relaxed">{{ principle.detail }}</p>
+
+          <!-- -ml-3 cancels the text button's inner padding so its label lines up
+               with the copy; mt-auto keeps evidence aligned across a row. -->
+          @if (principle.evidence.kind === 'ask') {
+            <app-ask-ling-link
+              class="mt-auto -ml-3 self-start"
+              [question]="principle.evidence.question"
+              [label]="principle.evidence.label"
+            />
+          } @else {
+            <a
+              matButton
+              class="mt-auto -ml-3 min-h-11 self-start"
+              [href]="principle.evidence.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              [attr.data-cta-tracking]="'Principle: ' + principle.evidence.label"
+            >
+              {{ principle.evidence.label }}
+              <mat-icon iconPositionEnd aria-hidden="true">open_in_new</mat-icon>
+              <span class="sr-only">(opens in a new tab)</span>
+            </a>
+          }
+        </li>
+      }
+    </ol>
+  } @else {
+    <p class="surface-muted text-sm">Nothing to show yet.</p>
+  }
+</section>
