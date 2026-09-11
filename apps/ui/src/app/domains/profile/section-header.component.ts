@@ -3,6 +3,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 /** Heading, subtitle and divider that open each profile section. */
 @Component({
   selector: 'app-section-header',
+  // Block, not the custom-element default of inline: the parent section's `space-y-*`
+  // margin does nothing on an inline box, and the divider ran into the cards below.
+  host: { class: 'block' },
   template: `
     <div class="surface-rule border-b pb-3">
       <h2 [id]="headingId()" class="scroll-mt-24 text-2xl font-bold tracking-tight">

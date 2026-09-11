@@ -149,6 +149,8 @@ describe('ProjectCardComponent', () => {
       'Retrieve',
     ]);
     expect(steps[1].textContent).toContain('top 5 chunks');
+    // Found in visual review: the step number rendered glued to its label ("1.Question").
+    expect(steps[0].querySelector('.flow-step-title')?.classList.contains('gap-1')).toBe(true);
   });
 
   it('shows no flow when the project has none', () => {

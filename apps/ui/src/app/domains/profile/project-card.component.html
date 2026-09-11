@@ -34,7 +34,8 @@
     >
       @for (step of flow; track step.label; let i = $index) {
         <li class="surface-rule flex flex-col rounded-lg border p-3">
-          <span class="text-sm font-semibold">
+          <!-- An explicit gap: Angular drops the whitespace between the two spans. -->
+          <span class="flow-step-title flex gap-1 text-sm font-semibold">
             <span class="surface-muted" aria-hidden="true">{{ i + 1 }}.</span>
             <span class="flow-label">{{ step.label }}</span>
           </span>
