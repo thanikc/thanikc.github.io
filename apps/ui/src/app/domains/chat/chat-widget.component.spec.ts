@@ -187,6 +187,17 @@ describe('ChatWidgetComponent', () => {
 
       expect(paletteClassesIn(el())).toEqual([]);
     });
+
+    it('locks page scroll while the panel is open, and unlocks it on close', () => {
+      expect(document.body.classList.contains('chat-scroll-lock')).toBe(false);
+
+      openPanel();
+      expect(document.body.classList.contains('chat-scroll-lock')).toBe(true);
+
+      panelInstance().close.emit();
+      fixture.detectChanges();
+      expect(document.body.classList.contains('chat-scroll-lock')).toBe(false);
+    });
   });
 
   describe('panel wiring', () => {

@@ -36,7 +36,7 @@
 
   <div
     #transcript
-    class="chat-transcript scroll-smooth flex flex-1 flex-col overflow-y-auto px-4 py-4"
+    class="chat-transcript scroll-smooth flex flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-4"
     (scroll)="trackScrollPosition()"
   >
     @if (turns().length === 0) {
