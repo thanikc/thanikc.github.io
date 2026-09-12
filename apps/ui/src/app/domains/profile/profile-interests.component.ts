@@ -11,7 +11,7 @@ import { Interest } from './profile.content';
   selector: 'app-profile-interests',
   imports: [MatIconModule, SectionHeaderComponent],
   template: `
-    <section class="space-y-6" [attr.aria-labelledby]="headingId">
+    <section class="space-y-6 mb-4" [attr.aria-labelledby]="headingId">
       <app-section-header
         heading="Beyond the Code"
         [headingId]="headingId"
