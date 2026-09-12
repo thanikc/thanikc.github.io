@@ -16,6 +16,14 @@ import { ChatWidgetComponent } from './chat-widget.component';
  * the launcher inside it floats near the viewport bottom while scrolling, then comes
  * to rest above the footer instead of covering it. `mt-auto` (set in the template)
  * keeps that rest position pinned to the footer on short pages too.
+ *
+ * `position: sticky` plus a non-auto `z-index` makes this host a stacking context, so
+ * everything painted inside it — including the open panel's `fixed inset-0 z-50` sheet —
+ * is capped at this element's z-index when compared against unrelated fixed/sticky
+ * siblings elsewhere on the page, no matter what z-index those descendants declare.
+ * The header (`z-50`, sticky) and the scroll-to-top button (`z-40`, its own sticky
+ * stacking context, later in the DOM) are two such siblings, so this has to outrank
+ * both or they paint over the open chat sheet instead of under it.
  */
 @Component({
   selector: 'app-chat-shell',
@@ -34,7 +42,7 @@ import { ChatWidgetComponent } from './chat-widget.component';
       display: block;
       position: sticky;
       bottom: 0;
-      z-index: 40;
+      z-index: 60;
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

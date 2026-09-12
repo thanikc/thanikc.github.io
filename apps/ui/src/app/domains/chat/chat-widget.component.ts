@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   DOCUMENT,
   ElementRef,
   Injector,
@@ -66,6 +67,15 @@ export class ChatWidgetComponent {
       this.returnFocusTo =
         active instanceof HTMLElement && active !== this.document.body ? active : null;
     });
+
+    // The sheet covers the viewport on mobile and docks over the page on wider
+    // screens; either way, scrolling inside it shouldn't also scroll the page
+    // behind it. Locked via a body class rather than the effect above since it
+    // has nothing to do with focus, and needs its own teardown.
+    effect(() => {
+      this.document.body.classList.toggle('chat-scroll-lock', this.chat.isOpen());
+    });
+    inject(DestroyRef).onDestroy(() => this.document.body.classList.remove('chat-scroll-lock'));
   }
 
   protected launch(): void {

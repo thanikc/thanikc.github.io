@@ -16,3 +16,9 @@
     }
   }
 }
+
+/* Set while the chat sheet is open (see ChatWidgetComponent), so scrolling the
+   transcript can't also scroll the page behind it. */
+body.chat-scroll-lock {
+  overflow: hidden;
+}
