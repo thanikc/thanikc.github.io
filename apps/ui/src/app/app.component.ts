@@ -5,6 +5,7 @@ import { FooterComponent } from './shared/footer/footer.component';
 import { CookieConsentBannerComponent } from './shared/cookie-consent/cookie-consent-banner.component';
 import { CtaTrackingDirective } from './shared/analytics/cta-tracking.directive';
 import { ChatShellComponent } from './domains/chat/chat-shell.component';
+import { ScrollToTopComponent } from './shared/scroll-to-top/scroll-to-top.component';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { ChatShellComponent } from './domains/chat/chat-shell.component';
     FooterComponent,
     CookieConsentBannerComponent,
     ChatShellComponent,
+    ScrollToTopComponent,
   ],
   hostDirectives: [CtaTrackingDirective],
   templateUrl: './app.component.html',

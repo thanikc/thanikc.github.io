@@ -15,7 +15,12 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     // Header nav links are `/#fragment` links; the router only scrolls to them when asked.
-    provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
+    // `scrollPositionRestoration: 'enabled'` scrolls new navigations to the top (e.g. to
+    // the privacy policy) while still restoring the prior position on back/forward.
+    provideRouter(
+      routes,
+      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
+    ),
     provideHttpClient(withFetch()),
     provideAnalytics(),
     provideClientHydration(withEventReplay()),
