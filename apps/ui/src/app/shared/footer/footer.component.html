@@ -1,25 +1,27 @@
 <footer
   id="contact"
-  class="container mx-auto px-4 py-4 max-w-6xl flex w-full flex-wrap items-center gap-4 scroll-mt-24"
+  class="container mx-auto px-4 py-4 max-w-6xl flex w-full flex-col items-center gap-4 scroll-mt-24 sm:flex-row sm:flex-wrap"
 >
   @if (adsEnabled) {
     <app-ad-banner-toggle />
   }
 
-  <p class="footer-note surface-muted flex max-w-md items-start gap-1.5 text-xs font-thin">
+  <p
+    class="footer-note surface-muted order-2 flex max-w-md items-start gap-1.5 text-xs font-thin sm:order-none"
+  >
     <mat-icon class="footer-note-icon shrink-0" aria-hidden="true">info</mat-icon>
     <span>I use this site to try something real but low-stakes. The source is public.</span>
   </p>
 
-  <div class="flex flex-wrap items-center gap-4 ml-auto">
+  <div class="order-1 flex flex-wrap items-center justify-center gap-4 sm:order-none sm:ml-auto">
     <a
       routerLink="/privacy-policy"
-      class="footer-link inline-flex min-h-11 items-center text-sm font-medium hover:underline"
+      class="footer-link order-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline sm:order-none"
     >
       Privacy Policy
     </a>
 
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="order-1 flex flex-wrap items-center gap-2 sm:order-none">
       @for (link of socialLinks; track link.label) {
         <a
           [href]="link.href"
