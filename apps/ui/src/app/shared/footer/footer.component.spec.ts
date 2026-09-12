@@ -62,15 +62,16 @@ describe('FooterComponent', () => {
     expect(footer?.classList.contains('max-w-6xl')).toBe(true);
   });
 
-  // `ml-auto` on the content group (not `justify-between` on the footer) pushes
-  // it to the right, so it stays right-aligned even with the ad toggle hidden.
+  // `sm:ml-auto` on the content group (not `justify-between` on the footer) pushes
+  // it to the right from the sm breakpoint up, so it stays right-aligned even with
+  // the ad toggle hidden; below sm the footer stacks in a column instead.
   it('should keep the content group right-aligned regardless of whether the ad toggle renders', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const contentGroup = compiled.querySelector(
       'footer a[routerLink="/privacy-policy"]',
     )?.parentElement;
 
-    expect(contentGroup?.classList.contains('ml-auto')).toBe(true);
+    expect(contentGroup?.classList.contains('sm:ml-auto')).toBe(true);
   });
 
   // Ads are currently deactivated site-wide (AdBannerService.adsEnabled); a
