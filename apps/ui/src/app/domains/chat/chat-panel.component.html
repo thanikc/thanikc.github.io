@@ -132,7 +132,7 @@
           [color]="listening() ? 'warn' : undefined"
           [attr.aria-pressed]="listening()"
           [attr.aria-label]="listening() ? 'Stop voice input' : 'Start voice input'"
-          (click)="toggleMic()"
+          (click)="toggleMic(); $event.stopPropagation()"
         >
           <mat-icon aria-hidden="true">{{ listening() ? 'mic' : 'mic_none' }}</mat-icon>
         </button>
