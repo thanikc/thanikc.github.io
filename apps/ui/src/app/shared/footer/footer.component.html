@@ -1,14 +1,14 @@
 <footer
   id="contact"
-  class="container mx-auto px-4 py-8 max-w-6xl flex w-full flex-wrap items-center gap-4 scroll-mt-24"
+  class="container mx-auto px-4 py-4 max-w-6xl flex w-full flex-wrap items-center gap-4 scroll-mt-24"
 >
   @if (adsEnabled) {
     <app-ad-banner-toggle />
   }
 
-  <p class="footer-note surface-muted max-w-md text-sm">
-    I use this site to try new Angular and AI patterns on something real but low-stakes. It's built
-    test-first, and the source is public.
+  <p class="footer-note surface-muted flex max-w-md items-start gap-1.5 text-xs font-thin">
+    <mat-icon class="footer-note-icon shrink-0" aria-hidden="true">info</mat-icon>
+    <span>I use this site to try something real but low-stakes. The source is public.</span>
   </p>
 
   <div class="flex flex-wrap items-center gap-4 ml-auto">

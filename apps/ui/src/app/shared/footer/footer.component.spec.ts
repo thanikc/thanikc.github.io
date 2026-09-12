@@ -113,6 +113,15 @@ describe('FooterComponent', () => {
     expect(note?.textContent).not.toMatch(/in production/i);
   });
 
+  it('should lead the footer note with a decorative info icon', () => {
+    const note = (fixture.nativeElement as HTMLElement).querySelector('footer .footer-note');
+    const icon = note?.querySelector('mat-icon');
+
+    expect(icon?.textContent?.trim()).toBe('info');
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+    expect(note?.firstElementChild).toBe(icon);
+  });
+
   it('should link Email to a mailto address with no target attribute', () => {
     const link = linkFor('Email');
 
