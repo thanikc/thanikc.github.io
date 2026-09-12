@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { type Mock, vi } from 'vitest';
 import { ChatPanelComponent } from './chat-panel.component';
 import { ChatTurn } from './chat.models';
+import { SpeechRecognitionCallbacks, SpeechRecognitionService } from './speech-recognition.service';
 import { paletteClassesIn } from '../../shared/testing/palette-classes';
 
 const TURNS: ChatTurn[] = [
@@ -41,9 +42,23 @@ describe('ChatPanelComponent', () => {
     return event;
   };
 
-  beforeEach(async () => {
+  let speech: {
+    isSupported: Mock<() => boolean>;
+    start: Mock<(callbacks: SpeechRecognitionCallbacks) => void>;
+    stop: Mock<() => void>;
+  };
+
+  const micButton = () => el().querySelector<HTMLButtonElement>('button[aria-label*="voice"]');
+
+  // `micSupported` is read once at construction (real browser support can't change mid-session),
+  // so tests that need the mic button must set the mock before the fixture is created.
+  const createFixture = async (speechSupported: boolean) => {
+    speech = { isSupported: vi.fn(() => speechSupported), start: vi.fn(), stop: vi.fn() };
+
+    TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [ChatPanelComponent],
+      providers: [{ provide: SpeechRecognitionService, useValue: speech }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatPanelComponent);
@@ -54,6 +69,10 @@ describe('ChatPanelComponent', () => {
     fixture.componentInstance.close.subscribe(closeSpy);
     fixture.componentInstance.retry.subscribe(retrySpy);
     setInputs({ turns: [] });
+  };
+
+  beforeEach(async () => {
+    await createFixture(false);
   });
 
   afterEach(() => {
@@ -379,6 +398,94 @@ describe('ChatPanelComponent', () => {
 
       expect(sendSpy).not.toHaveBeenCalled();
       expect(event.defaultPrevented).toBe(false);
+    });
+  });
+
+  describe('voice input', () => {
+    it('shows no microphone button when the browser has no speech recognition', () => {
+      expect(micButton()).toBeNull();
+    });
+
+    describe('when speech recognition is supported', () => {
+      const startCallbacks = () => speech.start.mock.calls[0][0];
+
+      beforeEach(async () => {
+        await createFixture(true);
+      });
+
+      it('shows a microphone button', () => {
+        expect(micButton()?.getAttribute('aria-label')).toBe('Start voice input');
+      });
+
+      it('starts recognition when the microphone button is clicked', () => {
+        micButton()!.click();
+
+        expect(speech.start).toHaveBeenCalledTimes(1);
+      });
+
+      it('labels the button as listening once recognition starts', () => {
+        micButton()!.click();
+        fixture.detectChanges();
+
+        expect(micButton()!.getAttribute('aria-label')).toBe('Stop voice input');
+      });
+
+      it('stops recognition when clicked again while listening', () => {
+        micButton()!.click();
+        fixture.detectChanges();
+        micButton()!.click();
+
+        expect(speech.stop).toHaveBeenCalledTimes(1);
+      });
+
+      it('relabels the button once recognition ends on its own', () => {
+        micButton()!.click();
+        fixture.detectChanges();
+
+        startCallbacks().onEnd();
+        fixture.detectChanges();
+
+        expect(micButton()!.getAttribute('aria-label')).toBe('Start voice input');
+      });
+
+      it('stops listening and relabels the button on a recognition error', () => {
+        micButton()!.click();
+        fixture.detectChanges();
+
+        startCallbacks().onError('no-speech');
+        fixture.detectChanges();
+
+        expect(micButton()!.getAttribute('aria-label')).toBe('Start voice input');
+      });
+
+      it('sets a recognised transcript as the draft when starting from empty', () => {
+        micButton()!.click();
+
+        startCallbacks().onResult('Where does Thanik work');
+        fixture.detectChanges();
+
+        expect(textarea().value).toBe('Where does Thanik work');
+      });
+
+      it('appends a recognised transcript to whatever was already typed', () => {
+        type('Where does');
+        micButton()!.click();
+
+        startCallbacks().onResult('Thanik work');
+        fixture.detectChanges();
+
+        expect(textarea().value).toBe('Where does Thanik work');
+      });
+
+      it('lets a transcribed message be sent', () => {
+        micButton()!.click();
+
+        startCallbacks().onResult('Where does Thanik work');
+        fixture.detectChanges();
+        sendButton().click();
+
+        expect(sendSpy).toHaveBeenCalledWith('Where does Thanik work');
+      });
     });
   });
 
