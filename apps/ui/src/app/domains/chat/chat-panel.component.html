@@ -124,6 +124,19 @@
         (keydown.enter)="onEnter($event)"
       ></textarea>
     </mat-form-field>
+    @if (micSupported) {
+      <button
+        mat-icon-button
+        type="button"
+        class="min-h-11 min-w-11 shrink-0"
+        [color]="listening() ? 'warn' : undefined"
+        [attr.aria-pressed]="listening()"
+        [attr.aria-label]="listening() ? 'Stop voice input' : 'Start voice input'"
+        (click)="toggleMic()"
+      >
+        <mat-icon aria-hidden="true">{{ listening() ? 'mic' : 'mic_none' }}</mat-icon>
+      </button>
+    }
     <button
       matMiniFab
       type="submit"

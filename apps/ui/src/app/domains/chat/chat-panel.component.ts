@@ -4,6 +4,7 @@ import {
   ElementRef,
   afterRenderEffect,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -17,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { CHAT_SUGGESTIONS } from './chat.constants';
 import { ChatTurn } from './chat.models';
 import { MarkdownPipe } from './markdown.pipe';
+import { SpeechRecognitionService } from './speech-recognition.service';
 
 let nextId = 0;
 
@@ -52,7 +54,11 @@ export class ChatPanelComponent {
   protected readonly canSend = computed(() => this.draft().trim() !== '' && !this.pending());
   protected readonly headingId = `chat-heading-${nextId}`;
   protected readonly inputId = `chat-input-${nextId++}`;
+  protected readonly listening = signal(false);
 
+  private readonly speech = inject(SpeechRecognitionService);
+  /** Checked once: real browser support doesn't change over a component's lifetime. */
+  protected readonly micSupported = this.speech.isSupported();
   private readonly transcript = viewChild.required<ElementRef<HTMLElement>>('transcript');
 
   /** Whether new turns should pull the view down. False once the reader scrolls up. */
@@ -96,5 +102,22 @@ export class ChatPanelComponent {
 
   protected updateDraft(event: Event): void {
     this.draft.set((event.target as HTMLTextAreaElement).value);
+  }
+
+  protected toggleMic(): void {
+    if (this.listening()) {
+      this.speech.stop();
+      return;
+    }
+
+    this.listening.set(true);
+    this.speech.start({
+      onResult: transcript => {
+        const prefix = this.draft().trim();
+        this.draft.set(prefix ? `${prefix} ${transcript}` : transcript);
+      },
+      onEnd: () => this.listening.set(false),
+      onError: () => this.listening.set(false),
+    });
   }
 }
