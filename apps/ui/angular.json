@@ -73,7 +73,7 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "polyfills": []
+              "polyfills": ["src/test-polyfills.ts"]
             }
           },
           "defaultConfiguration": "production"
