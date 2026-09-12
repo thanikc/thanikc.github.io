@@ -45,10 +45,12 @@ export async function retrieve(query: string, env: Env, topK = 5): Promise<Retri
 
   return matches
     .map((match): RetrievedChunk => {
-      const text = match.metadata?.['text'];
-      const title = match.metadata?.['title'];
+      const { text, title, prevChunk, nextChunk } = match.metadata ?? {};
+      const stitched = [prevChunk, text, nextChunk]
+        .filter((part): part is string => typeof part === 'string')
+        .join('\n\n');
       return {
-        text: typeof text === 'string' ? text : '',
+        text: stitched,
         score: match.score,
         ...(typeof title === 'string' && { title }),
       };

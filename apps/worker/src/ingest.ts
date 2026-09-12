@@ -2,11 +2,9 @@ import { embed, vectorize } from './rag';
 
 /**
  * Splits text into overlapping character windows on paragraph/whitespace boundaries.
- * Known limitation: fixed-size splitting with no semantic awareness can separate an
- * idea from context it depends on (e.g. a long paragraph split mid-sentence, or a
- * detail and its explanation landing in different chunks that aren't both retrieved).
- * If retrieval quality issues trace back to this, consider larger overlap, storing
- * chunk adjacency in metadata for neighbor expansion, or section-aware chunking.
+ * Fixed-size splitting can still separate an idea from context it depends on (e.g. a
+ * long paragraph cut mid-sentence). `ingest` mitigates this by storing each chunk's
+ * neighbors in metadata so `retrieve` can stitch them back in on a match.
  */
 export function chunk(text: string, size = 800, overlap = 100): string[] {
   const normalized = text.replace(/\r\n/g, '\n').trim();
@@ -49,7 +47,15 @@ export async function ingest(
     chunks.map(async (content, i) => ({
       id: `${docId}:${i}`,
       values: await embed(content, env),
-      metadata: { ...metadata, docId, text: content },
+      metadata: {
+        ...metadata,
+        docId,
+        text: content,
+        chunkIndex: i,
+        totalChunks: chunks.length,
+        ...(i > 0 && { prevChunk: chunks[i - 1] }),
+        ...(i < chunks.length - 1 && { nextChunk: chunks[i + 1] }),
+      },
     })),
   );
 

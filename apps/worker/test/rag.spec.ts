@@ -112,4 +112,35 @@ describe('retrieve', () => {
     ]);
     expect(chunks[1]).not.toHaveProperty('title');
   });
+
+  // A chunk's text can be cut off at its boundary; the ingest step stores the
+  // adjoining chunks' text alongside it so a match still carries the full idea.
+  it('stitches in neighboring chunk text when the match carries it', async () => {
+    const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+    const query = vi.fn().mockResolvedValue({
+      matches: [
+        {
+          score: 0.9,
+          metadata: { text: 'middle part', prevChunk: 'start part', nextChunk: 'end part' },
+        },
+      ],
+    });
+    const env = fakeEnv({ AI: { run }, VECTORIZE: { query } } as unknown as Partial<Env>);
+
+    const chunks = await retrieve('question', env);
+
+    expect(chunks).toEqual([{ text: 'start part\n\nmiddle part\n\nend part', score: 0.9 }]);
+  });
+
+  it('leaves the text alone when there is no neighbor metadata', async () => {
+    const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+    const query = vi.fn().mockResolvedValue({
+      matches: [{ score: 0.9, metadata: { text: 'lone chunk' } }],
+    });
+    const env = fakeEnv({ AI: { run }, VECTORIZE: { query } } as unknown as Partial<Env>);
+
+    const chunks = await retrieve('question', env);
+
+    expect(chunks).toEqual([{ text: 'lone chunk', score: 0.9 }]);
+  });
 });
