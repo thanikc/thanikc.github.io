@@ -25,6 +25,19 @@ let nextId = 0;
 /** Distance from the bottom still counted as "following along", in pixels. */
 const FOLLOW_THRESHOLD_PX = 64;
 
+/**
+ * User-facing text for recognition errors worth surfacing. `no-speech` and `aborted`
+ * are expected/silent outcomes (timeout, user stopped it) and are omitted on purpose.
+ */
+const MIC_ERROR_MESSAGES: Record<string, string> = {
+  'not-allowed': 'Voice input needs microphone and speech recognition permission for this site.',
+  'service-not-allowed':
+    'Voice input needs microphone and speech recognition permission for this site.',
+  'audio-capture': 'No microphone was found.',
+  network: 'Voice input needs a network connection.',
+  'not-supported': "This browser doesn't support voice input.",
+};
+
 /** Presentational chat transcript + composer. State lives in `ChatService`, wired by the widget. */
 @Component({
   selector: 'app-chat-panel',
@@ -55,6 +68,7 @@ export class ChatPanelComponent {
   protected readonly headingId = `chat-heading-${nextId}`;
   protected readonly inputId = `chat-input-${nextId++}`;
   protected readonly listening = signal(false);
+  protected readonly micError = signal<string | null>(null);
 
   private readonly speech = inject(SpeechRecognitionService);
   /** Checked once: real browser support doesn't change over a component's lifetime. */
@@ -110,6 +124,7 @@ export class ChatPanelComponent {
       return;
     }
 
+    this.micError.set(null);
     this.listening.set(true);
     this.speech.start({
       onResult: transcript => {
@@ -117,7 +132,10 @@ export class ChatPanelComponent {
         this.draft.set(prefix ? `${prefix} ${transcript}` : transcript);
       },
       onEnd: () => this.listening.set(false),
-      onError: () => this.listening.set(false),
+      onError: error => {
+        this.listening.set(false);
+        this.micError.set(MIC_ERROR_MESSAGES[error] ?? null);
+      },
     });
   }
 }

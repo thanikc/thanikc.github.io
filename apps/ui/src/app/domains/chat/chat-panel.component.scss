@@ -151,3 +151,7 @@
 .chat-composer {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
+
+.chat-mic-error {
+  color: var(--mat-sys-error);
+}
