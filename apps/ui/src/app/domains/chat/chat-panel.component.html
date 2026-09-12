@@ -110,7 +110,7 @@
     @if (micError(); as message) {
       <p role="alert" class="chat-mic-error mb-2 text-xs">{{ message }}</p>
     }
-    <form class="flex items-end gap-2" (submit)="submit($event)">
+    <form class="flex items-center gap-2" (submit)="submit($event)">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
         <mat-label>Ask a question</mat-label>
         <textarea
