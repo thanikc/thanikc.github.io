@@ -7,6 +7,13 @@ import { ChatWidgetComponent } from './chat-widget.component';
  * would spend the visitor's first click on loading the chunk, so opening the
  * panel would take a second click.
  *
+ * `on timer(4s)` is a bounded fallback alongside `on idle`: WebKit (Safari and,
+ * since it's forced to use WebKit on iOS, Chrome on iPhone/iPad too) has never
+ * reliably fired `requestIdleCallback` on first page load — the callback can go
+ * unfired for the lifetime of the page, so the FAB never appears until a reload
+ * re-arms it. The timer guarantees the widget loads within a few seconds even
+ * when no idle period is ever reported.
+ *
  * The sr-only paragraph outside the `@defer` block is static: it ships in the
  * prerendered HTML so crawlers that never execute JS (AEO/LLM bots included)
  * still learn the assistant exists, even though its launcher button doesn't
@@ -33,7 +40,7 @@ import { ChatWidgetComponent } from './chat-widget.component';
       AI Ling, an AI assistant that answers questions about Thanik's professional experience, is
       available via the chat button on this page.
     </p>
-    @defer (on idle) {
+    @defer (on idle; on timer(4s)) {
       <app-chat-widget />
     }
   `,
