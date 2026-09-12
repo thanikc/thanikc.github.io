@@ -50,6 +50,9 @@ When generating plans, avoid generic summaries. Outputs **must** strictly includ
 ## Missing Tooling & Efficiency Rule
 
 - **No Workarounds for Missing Tools:** If optimal tooling (e.g., standard image encoders, libraries) is missing, do not improvise multi-step workarounds, iterative trial-and-error scripts, or pull heavy files into context. Stop immediately and instruct the user to install the required dependency or tool.
+- **Image Manipulation:** Use ImageMagick (`convert`) for all image manipulation (resize, crop, format conversion, compositing, etc.). Do not reach for alternative tools as a workaround.
+  - **SVG decode exception:** `convert` here always uses its internal MSVG renderer for `.svg` (even with `rsvg-convert` installed) and silently drops gradients (renders solid black). For any gradient SVG, decode with `rsvg-convert -w SIZE -h SIZE --background-color=none source.svg -o out.png`, then do everything else (resize, flatten, composite) with `convert` as normal.
+  - If a case doesn't fit that, stop and flag it to the user rather than swapping tools further.
 - **Token Economy:** Keep diagnostic scripts single-pass. Never read binary/image assets into conversation context when metrics or logs suffice.
 
 ## Available Skills & Capabilities
