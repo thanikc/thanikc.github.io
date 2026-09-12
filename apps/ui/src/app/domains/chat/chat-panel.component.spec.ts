@@ -62,6 +62,7 @@ describe('ChatPanelComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatPanelComponent);
+    document.body.appendChild(fixture.nativeElement);
     sendSpy = vi.fn();
     closeSpy = vi.fn();
     retrySpy = vi.fn();
@@ -76,6 +77,7 @@ describe('ChatPanelComponent', () => {
   });
 
   afterEach(() => {
+    fixture.nativeElement.remove();
     vi.restoreAllMocks();
   });
 
@@ -421,6 +423,14 @@ describe('ChatPanelComponent', () => {
         micButton()!.click();
 
         expect(speech.start).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not move focus to the textarea when clicked', () => {
+        textarea().blur();
+
+        micButton()!.click();
+
+        expect(document.activeElement).not.toBe(textarea());
       });
 
       it('labels the button as listening once recognition starts', () => {
