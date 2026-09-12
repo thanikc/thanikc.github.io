@@ -56,6 +56,10 @@ describe('ChatPanelComponent', () => {
     setInputs({ turns: [] });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('structure', () => {
     it('is a dialog labelled by its heading', () => {
       const dialog = el().querySelector('[role="dialog"]');
@@ -258,6 +262,10 @@ describe('ChatPanelComponent', () => {
     });
 
     it('strips unsafe markup from assistant content', () => {
+      // Angular's sanitizer warns to the console whenever it strips content;
+      // that's exactly what this test exercises, so silence the expected noise.
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+
       setInputs({
         turns: [
           {

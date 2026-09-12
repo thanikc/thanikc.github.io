@@ -39,6 +39,12 @@ describe('ChatWidgetComponent', () => {
     fixture.detectChanges();
   };
 
+  // jsdom never lays elements out, so CdkTrapFocus's focusability check sees zero
+  // geometry on the textarea it auto-captures and warns "not focusable" -- a
+  // test-environment artifact, not a real accessibility bug. Let any other
+  // warning through so this doesn't hide something real.
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
   beforeEach(async () => {
     turns.set([]);
     pending.set(false);
@@ -48,6 +54,14 @@ describe('ChatWidgetComponent', () => {
     mockChatService.retry.mockClear();
     mockChatService.open.mockClear();
     mockChatService.close.mockClear();
+
+    const originalWarn = console.warn.bind(console);
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
+      if (typeof args[0] === 'string' && args[0].includes('cdkFocusInitial')) {
+        return;
+      }
+      originalWarn(...args);
+    });
 
     await TestBed.configureTestingModule({
       imports: [ChatWidgetComponent],
@@ -61,6 +75,7 @@ describe('ChatWidgetComponent', () => {
 
   afterEach(() => {
     fixture.nativeElement.remove();
+    warnSpy.mockRestore();
   });
 
   describe('launcher', () => {
