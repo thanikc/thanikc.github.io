@@ -1,6 +1,13 @@
 import { embed, vectorize } from './rag';
 
-/** Splits text into overlapping character windows on paragraph/whitespace boundaries. */
+/**
+ * Splits text into overlapping character windows on paragraph/whitespace boundaries.
+ * Known limitation: fixed-size splitting with no semantic awareness can separate an
+ * idea from context it depends on (e.g. a long paragraph split mid-sentence, or a
+ * detail and its explanation landing in different chunks that aren't both retrieved).
+ * If retrieval quality issues trace back to this, consider larger overlap, storing
+ * chunk adjacency in metadata for neighbor expansion, or section-aware chunking.
+ */
 export function chunk(text: string, size = 800, overlap = 100): string[] {
   const normalized = text.replace(/\r\n/g, '\n').trim();
   if (normalized.length <= size) {
