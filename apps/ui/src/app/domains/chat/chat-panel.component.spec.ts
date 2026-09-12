@@ -496,6 +496,46 @@ describe('ChatPanelComponent', () => {
 
         expect(sendSpy).toHaveBeenCalledWith('Where does Thanik work');
       });
+
+      const micErrorMessage = () => el().querySelector('.chat-mic-error');
+
+      it('shows a permission message when the microphone is blocked', () => {
+        micButton()!.click();
+
+        startCallbacks().onError('not-allowed');
+        fixture.detectChanges();
+
+        expect(micErrorMessage()?.textContent).toContain('permission');
+      });
+
+      it('shows a permission message when the recognition service is blocked', () => {
+        micButton()!.click();
+
+        startCallbacks().onError('service-not-allowed');
+        fixture.detectChanges();
+
+        expect(micErrorMessage()?.textContent).toContain('permission');
+      });
+
+      it('does not show an error message for an ordinary no-speech timeout', () => {
+        micButton()!.click();
+
+        startCallbacks().onError('no-speech');
+        fixture.detectChanges();
+
+        expect(micErrorMessage()).toBeNull();
+      });
+
+      it('clears a previous error message once listening starts again', () => {
+        micButton()!.click();
+        startCallbacks().onError('not-allowed');
+        fixture.detectChanges();
+
+        micButton()!.click();
+        fixture.detectChanges();
+
+        expect(micErrorMessage()).toBeNull();
+      });
     });
   });
 
