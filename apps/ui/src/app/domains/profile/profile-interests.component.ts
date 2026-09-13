@@ -13,8 +13,10 @@ import { Interest } from './profile.content';
   template: `
     <section class="space-y-6 mb-4" [attr.aria-labelledby]="headingId">
       <app-section-header
+        i18n-heading="Heading of the interests section@@interests.heading"
         heading="Beyond the Code"
         [headingId]="headingId"
+        i18n-subtitle="Subtitle of the interests section@@interests.subtitle"
         subtitle="How I stay physical, sharp, and curious away from the keyboard"
       />
 
@@ -33,7 +35,7 @@ import { Interest } from './profile.content';
           }
         </div>
       } @else {
-        <p class="page-muted text-sm">Nothing to show yet.</p>
+        <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
       }
     </section>
   `,

@@ -55,8 +55,16 @@
       into a same-sized local face removes that reflow instead of blocking
       Roboto on every uncached page view.
     -->
+    <!--
+      Noto Sans Thai rides along in the same request: Google's Roboto has no Thai
+      subset (latin, latin-ext, cyrillic, greek, vietnamese, math, symbols only), so
+      the Thai build would otherwise render in whatever Thai face the visitor's OS
+      happens to have — or in tofu boxes on a machine with none. Each @font-face
+      carries a unicode-range, so English and German visitors pay for the extra CSS
+      entry and never download the Thai woff2.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Noto+Sans+Thai:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <!--

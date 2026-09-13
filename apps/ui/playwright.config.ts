@@ -20,7 +20,10 @@ export default defineConfig({
     baseURL: ORIGIN,
   },
   webServer: {
-    command: `python3 -m http.server ${PORT} --bind 127.0.0.1 --directory dist/thanikc/browser`,
+    // Not a plain file server: scripts/serve-pages.mjs answers unknown paths with
+    // 404.html the way GitHub Pages does, which the language redirect depends on.
+    command: `node scripts/serve-pages.mjs`,
+    env: { PORT: String(PORT) },
     url: `${ORIGIN}/`,
     reuseExistingServer: !process.env['CI'],
   },

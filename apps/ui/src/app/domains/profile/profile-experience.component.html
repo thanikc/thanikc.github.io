@@ -1,7 +1,9 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
   <app-section-header
+    i18n-heading="Heading of the experience section@@experience.heading"
     heading="Experience"
     [headingId]="headingId"
+    i18n-subtitle="Subtitle of the experience section@@experience.subtitle"
     subtitle="Scale and responsibility, in specifics"
   />
 
@@ -25,6 +27,6 @@
       }
     </div>
   } @else {
-    <p class="page-muted text-sm">Nothing to show yet.</p>
+    <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
   }
 </section>

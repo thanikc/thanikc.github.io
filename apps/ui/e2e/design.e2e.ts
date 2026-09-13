@@ -9,7 +9,9 @@ import { Browser, Page, expect, test } from '@playwright/test';
  * motion checks. Measurements are written to tmp/design-check/measure/ for the report.
  */
 
-const ROUTES = ['/', '/calculator', '/privacy-policy'] as const;
+// Every locale is its own build under its own subpath; the design checks run against
+// the English one, and the language checks at the bottom cover the other two.
+const ROUTES = ['/en/', '/en/calculator', '/en/privacy-policy'] as const;
 const WIDTHS = [360, 768, 1440] as const;
 const HEIGHT: Record<number, number> = { 360: 800, 768: 1024, 1440: 900 };
 
@@ -111,7 +113,7 @@ function record(name: string, data: unknown): void {
   writeFileSync(join(OUT, 'measure', `${name}.json`), JSON.stringify(data, null, 2));
 }
 
-const slug = (route: string) => (route === '/' ? 'home' : route.slice(1));
+const slug = (route: string) => route.replace(/^\/|\/$/g, '').replace(/\//g, '-') || 'home';
 
 /** Interactive elements too small, or closer than MIN_GAP to a neighbour. */
 async function targetViolations(page: Page) {
@@ -310,8 +312,22 @@ async function surfaceSeparation(page: Page) {
   });
 }
 
-for (const route of ROUTES) {
-  for (const width of WIDTHS) {
+/**
+ * English at every width, then the translated builds at the narrowest and widest —
+ * German words run longer than their English source and Thai wraps differently, so
+ * overflow and clipping have to be re-measured per language, not assumed from /en/.
+ */
+const MATRIX = [
+  ...ROUTES.flatMap(route => WIDTHS.map(width => ({ route, width: width as number }))),
+  ...(['de', 'th'] as const).flatMap(locale =>
+    ROUTES.flatMap(route =>
+      [360, 1440].map(width => ({ route: route.replace('/en/', `/${locale}/`), width })),
+    ),
+  ),
+];
+
+for (const { route, width } of MATRIX) {
+  {
     const name = `${slug(route)}-${width}`;
 
     test(`design: ${route} · ${width}px`, async ({ browser }) => {
@@ -403,7 +419,7 @@ for (const route of ROUTES) {
 
 // The launcher tip is hover-only text; measure it fully shown.
 test('contrast: chat launcher tip is readable on hover', async ({ browser }) => {
-  const page = await openPage(browser, '/', { width: 1440, reducedMotion: 'reduce' });
+  const page = await openPage(browser, '/en/', { width: 1440, reducedMotion: 'reduce' });
   await page.locator('button.chat-fab').hover();
   await expect(page.locator('#chat-fab-tip')).toHaveCSS('opacity', '1');
 
@@ -422,7 +438,7 @@ test.describe('keyboard', () => {
   for (const width of [360, 1440] as const) {
     test(`keyboard: / is fully operable at ${width}px`, async ({ browser }) => {
       // Reduced motion collapses focus transitions, so styles are read in their end state.
-      const page = await openPage(browser, '/', { width, reducedMotion: 'reduce' });
+      const page = await openPage(browser, '/en/', { width, reducedMotion: 'reduce' });
       // :focus / :focus-visible only match in a document with system focus; with many
       // contexts in parallel that is not a given. Without it, focus can't be judged.
       await page.bringToFront();
@@ -551,4 +567,125 @@ test.describe('keyboard', () => {
       await page.context().close();
     });
   }
+});
+
+/**
+ * Language: one build per locale under its own subpath, reached either by the
+ * redirect page at the root (which reads the browser's languages and the remembered
+ * choice) or by the selector in the header.
+ */
+test.describe('language', () => {
+  const open = async (browser: Browser, locales: string[], stored?: string) => {
+    const context = await browser.newContext({
+      viewport: { width: 1440, height: 900 },
+      locale: locales[0],
+    });
+    // navigator.languages is not settable through newContext; the redirect reads it.
+    await context.addInitScript(
+      ([languages, choice]: [string[], string | undefined]) => {
+        Object.defineProperty(navigator, 'languages', { get: () => languages });
+        localStorage.setItem('cookie-consent', 'rejected');
+        if (choice) localStorage.setItem('preferred-language', choice);
+      },
+      [locales, stored] as [string[], string | undefined],
+    );
+    return context;
+  };
+
+  test('sends a visitor to the language their browser asks for', async ({ browser }) => {
+    const context = await open(browser, ['de-DE', 'de']);
+    const page = await context.newPage();
+
+    await page.goto('/');
+    await page.waitForURL('**/de/');
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'de');
+    await expect(page.getByRole('navigation', { name: 'Hauptnavigation' })).toBeVisible();
+
+    await context.close();
+  });
+
+  test('falls back to English for a language the site is not built in', async ({ browser }) => {
+    const context = await open(browser, ['fr-FR', 'ja']);
+    const page = await context.newPage();
+
+    await page.goto('/');
+    await page.waitForURL('**/en/');
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+
+    await context.close();
+  });
+
+  test('prefers a remembered choice over the browser language', async ({ browser }) => {
+    const context = await open(browser, ['de-DE'], 'th');
+    const page = await context.newPage();
+
+    await page.goto('/');
+    await page.waitForURL('**/th/');
+
+    await expect(page.locator('html')).toHaveAttribute('lang', 'th');
+
+    await context.close();
+  });
+
+  // The pre-i18n URLs, and any shared deep link, arrive at GitHub Pages' 404.
+  test('keeps the route when an unprefixed URL is opened', async ({ browser }) => {
+    const context = await open(browser, ['de-DE']);
+    const page = await context.newPage();
+
+    await page.goto('/calculator');
+    await page.waitForURL('**/de/calculator');
+
+    await expect(page.locator('h1')).toHaveText('Rentenrechner');
+
+    await context.close();
+  });
+
+  test('switching language keeps the page and is remembered', async ({ browser }) => {
+    const context = await open(browser, ['en-US']);
+    const page = await context.newPage();
+
+    await page.goto('/en/privacy-policy');
+    await page.getByRole('combobox', { name: 'Language' }).selectOption('de');
+    await page.waitForURL('**/de/privacy-policy');
+
+    await expect(page.locator('h1')).toHaveText('Datenschutzerklärung');
+    expect(await page.evaluate(() => localStorage.getItem('preferred-language'))).toBe('de');
+
+    // And the choice survives: the root now goes straight to German.
+    await page.goto('/');
+    await page.waitForURL('**/de/');
+
+    await context.close();
+  });
+
+  test('offers the languages named in their own language', async ({ browser }) => {
+    const context = await open(browser, ['en-US']);
+    const page = await context.newPage();
+
+    await page.goto('/en/');
+    const select = page.getByRole('combobox', { name: 'Language' });
+
+    await expect(select).toHaveValue('en');
+    const labels = (await select.locator('option').allInnerTexts()).map(label => label.trim());
+    expect(labels).toEqual(['English', 'Deutsch', 'ไทย']);
+
+    // No room for the language name next to the brand on a phone: only the flag
+    // shows, and it has to still be there (not just the label hidden away). It's an
+    // inline SVG, not a flag emoji glyph — those need a system font this can't rely on.
+    const narrow = await browser.newContext({ viewport: { width: 360, height: 800 } });
+    const narrowPage = await narrow.newPage();
+    await narrowPage.goto('/en/');
+    await expect(narrowPage.locator('.language-label')).toBeHidden();
+    await expect(narrowPage.locator('.language-flag')).toBeVisible();
+    await expect(narrowPage.locator('.language-flag svg')).toBeVisible();
+    await narrow.close();
+
+    // 44px hit area, like every other control in the header.
+    const box = await select.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(MIN_TARGET);
+
+    await context.close();
+  });
 });

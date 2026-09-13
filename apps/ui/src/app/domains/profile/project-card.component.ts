@@ -34,6 +34,12 @@ interface CardLink extends ProjectLink {
 export class ProjectCardComponent {
   readonly project = input.required<Project>();
 
+  /** Built here, not in the template: `i18n-` only marks up static attributes. */
+  protected readonly flowLabel = computed(
+    () =>
+      $localize`:Accessible name of the how-it-works diagram on a project card@@projects.flowLabel:How ${this.project().name}:projectName: works`,
+  );
+
   /** The primary action reads as a button; the source link stays quieter. */
   protected readonly links = computed<CardLink[]>(() => {
     const { primary, source } = this.project();

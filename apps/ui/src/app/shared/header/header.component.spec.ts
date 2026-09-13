@@ -91,4 +91,19 @@ describe('HeaderComponent', () => {
 
     expect(container?.classList.contains('max-w-6xl')).toBe(true);
   });
+
+  describe('language selector', () => {
+    const selector = () =>
+      (fixture.nativeElement as HTMLElement).querySelector('app-language-selector');
+
+    it('is offered in the header', () => {
+      expect(selector()).not.toBeNull();
+    });
+
+    // The nav collapses below sm; changing language must not collapse with it,
+    // since a visitor who cannot read the page needs it most on a phone.
+    it('stays visible at every width', () => {
+      expect(selector()?.closest('.hidden')).toBeNull();
+    });
+  });
 });

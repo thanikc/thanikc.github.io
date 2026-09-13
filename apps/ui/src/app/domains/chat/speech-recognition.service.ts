@@ -1,4 +1,15 @@
-import { Injectable } from '@angular/core';
+import { Injectable, LOCALE_ID, inject } from '@angular/core';
+import { DEFAULT_LOCALE, SupportedLocale, matchLocaleTag } from '../../shared/i18n/locales';
+
+/**
+ * The Web Speech API wants a full BCP 47 tag, not a bare language: a recogniser
+ * asked for `de` transcribes German speech as if it were English.
+ */
+const SPEECH_TAGS: Record<SupportedLocale, string> = {
+  en: 'en-US',
+  de: 'de-DE',
+  th: 'th-TH',
+};
 
 export interface SpeechRecognitionCallbacks {
   onResult: (transcript: string) => void;
@@ -30,6 +41,8 @@ function speechRecognitionCtor(): SpeechRecognitionCtor | undefined {
 /** Thin wrapper around the browser's Web Speech API, kept out of components for testability. */
 @Injectable({ providedIn: 'root' })
 export class SpeechRecognitionService {
+  private readonly speechTag = SPEECH_TAGS[matchLocaleTag(inject(LOCALE_ID)) ?? DEFAULT_LOCALE];
+
   private recognition: SpeechRecognitionLike | null = null;
 
   isSupported(): boolean {
@@ -44,7 +57,7 @@ export class SpeechRecognitionService {
     }
 
     const recognition = new Ctor();
-    recognition.lang = 'en-US';
+    recognition.lang = this.speechTag;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.onresult = event => callbacks.onResult(event.results[0]?.[0]?.transcript ?? '');

@@ -36,7 +36,9 @@ export class AskLingLinkComponent {
   private readonly chat = inject(ChatService);
 
   readonly question = input<string>();
-  readonly label = input('Ask AI Ling');
+  readonly label = input(
+    $localize`:Default label of a link that opens the AI chat@@askLing.defaultLabel:Ask AI Ling`,
+  );
   readonly appearance = input<AskLingAppearance>('text');
 
   protected readonly trackingLabel = computed(() => {
@@ -46,7 +48,9 @@ export class AskLingLinkComponent {
 
   protected readonly screenReaderHint = computed(() => {
     const question = this.question();
-    return question ? `: asks AI Ling “${question}”` : ': opens the AI Ling chat';
+    return question
+      ? $localize`:Screen-reader-only suffix naming the question the link asks@@askLing.hintWithQuestion:: asks AI Ling “${question}:question:”`
+      : $localize`:Screen-reader-only suffix for a link that just opens the chat@@askLing.hintPlain:: opens the AI Ling chat`;
   });
 
   protected ask(): void {

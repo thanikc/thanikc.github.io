@@ -17,7 +17,7 @@
       />
       <div class="min-w-0">
         <h2 [id]="headingId" class="text-base font-semibold tracking-tight">AI Ling</h2>
-        <p class="chat-muted text-sm">
+        <p class="chat-muted text-sm" i18n="Subtitle under the assistant's name@@chat.subtitle">
           I've read Thanik's résumé so you don't have to, including the parts that aren't on this
           page.
         </p>
@@ -27,6 +27,7 @@
       mat-icon-button
       type="button"
       class="min-h-11 min-w-11 shrink-0"
+      i18n-aria-label="Accessible name of the chat close button@@chat.close"
       aria-label="Close chat"
       (click)="close.emit()"
     >
@@ -41,7 +42,9 @@
   >
     @if (turns().length === 0) {
       <div class="chat-empty flex flex-col gap-3">
-        <p class="chat-muted text-sm">Try one of these:</p>
+        <p class="chat-muted text-sm" i18n="Intro above the starter questions@@chat.tryOneOfThese">
+          Try one of these:
+        </p>
         <div class="flex flex-wrap gap-2">
           @for (suggestion of suggestions; track suggestion) {
             <button
@@ -60,12 +63,25 @@
     <ol class="flex flex-col gap-4" aria-live="polite">
       @for (turn of turns(); track $index) {
         <li class="chat-turn flex" [attr.data-role]="turn.role">
-          <span class="sr-only">{{ turn.role === 'user' ? 'You said:' : 'AI Ling said:' }}</span>
+          @if (turn.role === 'user') {
+            <span
+              class="sr-only"
+              i18n="Screen-reader prefix on the visitor's own message@@chat.youSaid"
+              >You said:</span
+            >
+          } @else {
+            <span class="sr-only" i18n="Screen-reader prefix on an assistant message@@chat.lingSaid"
+              >AI Ling said:</span
+            >
+          }
           @if (turn.role === 'assistant') {
             <div class="min-w-0 flex-1">
               <div class="chat-message chat-markdown" [innerHTML]="turn.content | markdown"></div>
               @if (turn.sources?.length) {
-                <p class="chat-sources chat-muted mt-2 text-xs">
+                <p
+                  class="chat-sources chat-muted mt-2 text-xs"
+                  i18n="Lists the knowledge-base documents an answer came from@@chat.lookedIn"
+                >
                   Looked in: {{ turn.sources!.join(' · ') }}
                 </p>
               }
@@ -83,7 +99,9 @@
 
     @if (pending()) {
       <div class="chat-typing mt-4 flex items-center gap-1.5 py-2" role="status">
-        <span class="sr-only">AI Ling is typing…</span>
+        <span class="sr-only" i18n="Announced while an answer is being generated@@chat.typing"
+          >AI Ling is typing…</span
+        >
         <span class="chat-dot size-2 rounded-full" aria-hidden="true"></span>
         <span class="chat-dot size-2 rounded-full [animation-delay:0.4s]" aria-hidden="true"></span>
         <span class="chat-dot size-2 rounded-full [animation-delay:0.8s]" aria-hidden="true"></span>
@@ -97,11 +115,22 @@
       >
         <mat-icon class="chat-error-icon shrink-0" aria-hidden="true">error_outline</mat-icon>
         <p class="min-w-0 flex-1 text-sm">{{ message }}</p>
-        <button matButton type="button" class="min-h-11" (click)="retry.emit()">Try again</button>
+        <button
+          matButton
+          type="button"
+          class="min-h-11"
+          i18n="Retries a failed chat request@@chat.tryAgain"
+          (click)="retry.emit()"
+        >
+          Try again
+        </button>
       </div>
     }
 
-    <p class="chat-disclaimer chat-muted mt-auto pt-6 text-center text-xs italic">
+    <p
+      class="chat-disclaimer chat-muted mt-auto pt-6 text-center text-xs italic"
+      i18n="Standing disclaimer at the bottom of the transcript@@chat.disclaimer"
+    >
       I'm an AI, so check anything that matters.
     </p>
   </div>
@@ -112,7 +141,7 @@
     }
     <form class="flex items-center gap-2" (submit)="submit($event)">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="flex-1">
-        <mat-label>Ask a question</mat-label>
+        <mat-label i18n="Label of the chat input@@chat.inputLabel">Ask a question</mat-label>
         <textarea
           matInput
           cdkTextareaAutosize
@@ -132,7 +161,7 @@
             class="min-h-11 min-w-11 shrink-0"
             [color]="listening() ? 'warn' : undefined"
             [attr.aria-pressed]="listening()"
-            [attr.aria-label]="listening() ? 'Stop voice input' : 'Start voice input'"
+            [attr.aria-label]="micLabel()"
             (click)="toggleMic(); $event.stopPropagation()"
           >
             <mat-icon aria-hidden="true">{{ listening() ? 'mic' : 'mic_none' }}</mat-icon>
@@ -144,6 +173,7 @@
         type="submit"
         class="min-h-11 min-w-11 shrink-0"
         [disabled]="!canSend()"
+        i18n-aria-label="Accessible name of the chat send button@@chat.send"
         aria-label="Send"
       >
         <mat-icon aria-hidden="true">send</mat-icon>

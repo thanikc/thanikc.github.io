@@ -1,7 +1,9 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
   <app-section-header
+    i18n-heading="Heading of the working-principles section@@principles.heading"
     heading="How I work"
     [headingId]="headingId"
+    i18n-subtitle="Subtitle of the working-principles section@@principles.subtitle"
     subtitle="Four habits, each with the evidence behind it"
   />
 
@@ -31,13 +33,13 @@
             >
               {{ principle.evidence.label }}
               <mat-icon iconPositionEnd aria-hidden="true">open_in_new</mat-icon>
-              <span class="sr-only">(opens in a new tab)</span>
+              <span class="sr-only" i18n="@@common.opensInNewTab">(opens in a new tab)</span>
             </a>
           }
         </li>
       }
     </ol>
   } @else {
-    <p class="page-muted text-sm">Nothing to show yet.</p>
+    <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
   }
 </section>

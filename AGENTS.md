@@ -30,6 +30,37 @@ Run the tests yourself (`pnpm --filter @thanikc/ui test`) at every RED and GREEN
 - Clean Code & SOLID: Focus on single responsibility, expressive naming, small pure functions, and immutable Signal state. Avoid side effects.
 - Testing Stack: Vitest runner (`ng test`). Mock domain data cleanly in spec files using explicit `vi.fn()` imports. Avoid Jasmine/Karma globals (`jasmine.createSpyObj`).
 
+## Internationalization (apps/ui)
+
+The site is built three times — English (source), German, Thai — and served from
+`/en/`, `/de/` and `/th/` (the `i18n` block in `angular.json`). Consequences that
+change how you work:
+
+- **Every user-facing string is translated.** Mark it up as you add it:
+  `i18n="what this is@@area.key"` on a template element, `i18n-aria-label=` (and the
+  same for any other attribute), or `` $localize`:what this is@@area.key:text` `` in
+  TypeScript. Always give an explicit `@@id` — Angular derives ids from the text
+  otherwise, and every copy edit then silently drops the translations.
+- **Then translate it.** Add the id to `src/locale/messages.de.json` and
+  `messages.th.json` and run `pnpm --filter @thanikc/ui i18n:check` (extracts, then
+  verifies every message is translated and its placeholders match). A message with a
+  missing or mismatched translation falls back to English in a build that otherwise
+  looks fine, so treat that check as part of green.
+- **Keep out of i18n:** proper nouns and product names (Angular, CrashDash, AI Ling),
+  technology chips, and `SocialLink.label` — that one doubles as the analytics CTA
+  label and must stay stable across locales.
+- **`i18n-` only marks up static attributes.** For a bound one, build the string in
+  the component with `$localize` and bind that (see `project-card.component.ts`).
+- **Backticks are forbidden inside an inline `styles:` or `template:` comment** —
+  they close the template literal. Use quotes.
+- **Layout is verified per language, not just in English.** German words are longer
+  than their English source and Thai wraps differently; `e2e/design.e2e.ts` re-runs
+  the 360px and 1440px checks for `/de/` and `/th/` for exactly that reason.
+- **Deploy with `build:pages`**, never bare `build`: the localized build writes
+  nothing to the deployment root, and `scripts/emit-pages-root.mjs` adds the language
+  redirect (`index.html`, `404.html`) plus the root-only files.
+- `ng serve` and `ng test` run the English build only (`localize: ["en"]`).
+
 ## Plan Mode Directives (For Planning Agent)
 
 When generating plans, avoid generic summaries. Outputs **must** strictly include:

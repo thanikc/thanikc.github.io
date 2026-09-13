@@ -21,17 +21,19 @@
     <p class="project-why surface-muted text-sm leading-relaxed">{{ why }}</p>
   }
   <p class="project-decision surface-muted text-sm leading-relaxed">
-    <span class="font-semibold">Decision:</span> {{ project().decision }}
+    <span
+      class="font-semibold"
+      i18n="Label before the engineering decision on a project card@@projects.decisionLabel"
+      >Decision:</span
+    >
+    {{ project().decision }}
   </p>
 
   @if (project().flow; as flow) {
     <!-- The diagram is an ordered list: real text, theme tokens, and it reflows
          to a 2×2 grid instead of shrinking. The list conveys the order, so the
          visible step numbers are decorative. -->
-    <ol
-      class="project-flow grid grid-cols-2 gap-2"
-      [attr.aria-label]="'How ' + project().name + ' works'"
-    >
+    <ol class="project-flow grid grid-cols-2 gap-2" [attr.aria-label]="flowLabel()">
       @for (step of flow; track step.label; let i = $index) {
         <li class="surface-rule flex flex-col rounded-lg border p-3">
           <!-- An explicit gap: Angular drops the whitespace between the two spans. -->
@@ -45,7 +47,11 @@
     </ol>
   }
 
-  <ul class="flex flex-wrap gap-2" aria-label="Stack">
+  <ul
+    class="flex flex-wrap gap-2"
+    i18n-aria-label="Name of the tech-stack chip list on a project card@@projects.stack"
+    aria-label="Stack"
+  >
     @for (tech of project().stack; track tech) {
       <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ tech }}</li>
     }
@@ -64,7 +70,7 @@
         >
           {{ link.label }}
           <mat-icon iconPositionEnd aria-hidden="true">open_in_new</mat-icon>
-          <span class="sr-only">(opens in a new tab)</span>
+          <span class="sr-only" i18n="@@common.opensInNewTab">(opens in a new tab)</span>
         </a>
       } @else {
         <a

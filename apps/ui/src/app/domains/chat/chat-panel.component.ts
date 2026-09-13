@@ -29,13 +29,14 @@ const FOLLOW_THRESHOLD_PX = 64;
  * User-facing text for recognition errors worth surfacing. `no-speech` and `aborted`
  * are expected/silent outcomes (timeout, user stopped it) and are omitted on purpose.
  */
+const MIC_PERMISSION_MESSAGE = $localize`:Voice input error@@chat.mic.permission:Voice input needs microphone and speech recognition permission for this site.`;
+
 const MIC_ERROR_MESSAGES: Record<string, string> = {
-  'not-allowed': 'Voice input needs microphone and speech recognition permission for this site.',
-  'service-not-allowed':
-    'Voice input needs microphone and speech recognition permission for this site.',
-  'audio-capture': 'No microphone was found.',
-  network: 'Voice input needs a network connection.',
-  'not-supported': "This browser doesn't support voice input.",
+  'not-allowed': MIC_PERMISSION_MESSAGE,
+  'service-not-allowed': MIC_PERMISSION_MESSAGE,
+  'audio-capture': $localize`:Voice input error@@chat.mic.noMicrophone:No microphone was found.`,
+  network: $localize`:Voice input error@@chat.mic.network:Voice input needs a network connection.`,
+  'not-supported': $localize`:Voice input error@@chat.mic.unsupported:This browser doesn't support voice input.`,
 };
 
 /** Presentational chat transcript + composer. State lives in `ChatService`, wired by the widget. */
@@ -68,6 +69,11 @@ export class ChatPanelComponent {
   protected readonly headingId = `chat-heading-${nextId}`;
   protected readonly inputId = `chat-input-${nextId++}`;
   protected readonly listening = signal(false);
+  protected readonly micLabel = computed(() =>
+    this.listening()
+      ? $localize`:Accessible name of the voice-input button while listening@@chat.mic.stop:Stop voice input`
+      : $localize`:Accessible name of the voice-input button@@chat.mic.start:Start voice input`,
+  );
   protected readonly micError = signal<string | null>(null);
 
   private readonly speech = inject(SpeechRecognitionService);

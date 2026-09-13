@@ -12,13 +12,30 @@ The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from th
 
 ## Endpoints
 
-| Method | Path          | Purpose                                                           |
-| ------ | ------------- | ----------------------------------------------------------------- |
-| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                             |
-| POST   | `/api/chat`   | `{ message, history? }` → `{ answer, provider, sources }` (RAG)   |
-| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks |
+| Method | Path          | Purpose                                                                   |
+| ------ | ------------- | ------------------------------------------------------------------------- |
+| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                                     |
+| POST   | `/api/chat`   | `{ message, history?, locale? }` → `{ answer, provider, sources }` (RAG)  |
+| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks         |
 
 CORS allows `https://thanikc.github.io` and `http://localhost:4200`.
+
+### Answer language
+
+`locale` is the language the visitor is reading the site in (`en`, `de` or `th` — see
+the i18n section of the root README). `buildMessages` adds a language instruction to
+the system prompt for `de` and `th`, and English needs none. It is visitor input, so
+anything other than a language the site is published in is ignored rather than
+reaching the prompt.
+
+The knowledge base in `content/` stays English and so does retrieval: the embedding
+model (`@cf/baai/bge-base-en-v1.5`) is English-only, so a question typed in German or
+Thai embeds poorly against English chunks and can retrieve the wrong context — the
+answer then comes back in the right language but with less to work with. Moving
+`EMBEDDING_MODEL` to a multilingual model (e.g. `@cf/baai/bge-m3`) fixes that, and
+needs the Vectorize index recreated at the new dimension and every document
+re-ingested (`pnpm ingest:deployed`), so it is a deliberate migration, not a config
+tweak.
 
 `/api/chat` returns the full answer in one response rather than streaming tokens.
 This is deliberate: the provider chain in `chat/client.ts` fails over from Groq to

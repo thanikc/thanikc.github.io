@@ -1,17 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Every route exists in each language at its own subpath (see the i18n block
+     in angular.json). The hreflang links between the three copies of a page are
+     written into the prerendered HTML by LocaleLinksService. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://thanikc.github.io/</loc>
+    <loc>https://thanikc.github.io/en/</loc>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://thanikc.github.io/calculator</loc>
+    <loc>https://thanikc.github.io/de/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/th/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/en/calculator</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://thanikc.github.io/privacy-policy</loc>
+    <loc>https://thanikc.github.io/de/calculator</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/th/calculator</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/en/privacy-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.1</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/de/privacy-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.1</priority>
+  </url>
+  <url>
+    <loc>https://thanikc.github.io/th/privacy-policy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.1</priority>
   </url>

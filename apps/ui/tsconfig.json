@@ -19,7 +19,7 @@
     "target": "ES2022",
     "module": "ES2022",
     "useDefineForClassFields": false,
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals", "@angular/localize"]
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

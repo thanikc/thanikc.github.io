@@ -19,7 +19,10 @@
     class="ad-slot rounded-xl px-4 pt-3 pb-1 mt-auto"
     [style.display]="showBanner() ? '' : 'none'"
   >
-    <p class="ad-label text-xs font-semibold uppercase tracking-wider text-center mb-1">
+    <p
+      class="ad-label text-xs font-semibold uppercase tracking-wider text-center mb-1"
+      i18n="Label above the ad slot@@ads.label"
+    >
       Advertisement
     </p>
     <app-ad-banner [visible]="showBanner()" />

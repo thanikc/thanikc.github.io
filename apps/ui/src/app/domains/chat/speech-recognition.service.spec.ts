@@ -1,3 +1,4 @@
+import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { SpeechRecognitionService } from './speech-recognition.service';
@@ -63,6 +64,20 @@ describe('SpeechRecognitionService', () => {
     expect(instances[0].lang).toBe('en-US');
     expect(instances[0].interimResults).toBe(false);
     expect(instances[0].start).toHaveBeenCalledTimes(1);
+  });
+
+  // Dictating a German question into an English recogniser transcribes nonsense.
+  it('listens in the language the page is being read in', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [{ provide: LOCALE_ID, useValue: 'th' }] });
+
+    TestBed.inject(SpeechRecognitionService).start({
+      onResult: vi.fn(),
+      onEnd: vi.fn(),
+      onError: vi.fn(),
+    });
+
+    expect(instances.at(-1)?.lang).toBe('th-TH');
   });
 
   it('reports the transcript of the first result', () => {

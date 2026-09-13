@@ -40,7 +40,9 @@
         primary: brand.$primary-palette,
         tertiary: brand.$tertiary-palette,
       ),
-      typography: '"Roboto", "Roboto Fallback", Arial, sans-serif',
+      // "Noto Sans Thai" covers what Roboto has no glyphs for; the browser picks per
+      // glyph, so Latin still comes from Roboto in every locale (see index.html).
+      typography: '"Roboto", "Noto Sans Thai", "Roboto Fallback", Arial, sans-serif',
       density: 0,
     )
   );
@@ -68,7 +70,27 @@ body {
 
 h1,
 h2 {
-  font-family: 'Fraunces', 'Fraunces Fallback', Georgia, serif;
+  // Thai has no established serif display face here, and Fraunces has no Thai
+  // glyphs: Thai headings are set in the same sans as Thai body copy.
+  font-family: 'Fraunces', 'Noto Sans Thai', 'Fraunces Fallback', Georgia, serif;
+}
+
+// The site is published in English, German and Thai from one layout, and German
+// compounds ("Datenschutz-Grundverordnung") are longer than anything the English
+// copy contains: at 360px they widened the page past the viewport. Every page
+// declares its language, so `hyphens: auto` breaks them where that language allows,
+// with a hard break as the last resort for what has no hyphenation rules (URLs,
+// Thai strings). See the per-locale widths in e2e/design.e2e.ts.
+h1,
+h2,
+h3,
+p,
+li,
+dt,
+dd,
+code {
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 // Echoes to-top.ch's decorative line motif under section headings. Tertiary

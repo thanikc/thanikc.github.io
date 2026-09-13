@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { LanguageSelectorComponent } from '../i18n/language-selector.component';
 
 interface NavLink {
   readonly label: string;
@@ -10,14 +11,23 @@ interface NavLink {
 }
 
 const NAV_LINKS: readonly NavLink[] = [
-  { label: 'Work', fragment: 'work-heading' },
-  { label: 'Projects', fragment: 'projects-heading' },
-  { label: 'Contact', fragment: 'contact' },
+  {
+    label: $localize`:Header nav link to the "What I work on" section@@header.nav.work:Work`,
+    fragment: 'work-heading',
+  },
+  {
+    label: $localize`:Header nav link to the projects section@@header.nav.projects:Projects`,
+    fragment: 'projects-heading',
+  },
+  {
+    label: $localize`:Header nav link to the contact details in the footer@@header.nav.contact:Contact`,
+    fragment: 'contact',
+  },
 ];
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, MatButtonModule, MatToolbarModule],
+  imports: [RouterLink, MatButtonModule, MatToolbarModule, LanguageSelectorComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

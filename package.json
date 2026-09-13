@@ -9,6 +9,7 @@
     "start:ui": "pnpm --filter @thanikc/ui start",
     "start:worker": "pnpm --filter @thanikc/worker start",
     "build": "pnpm --filter @thanikc/ui build",
+    "build:pages": "pnpm --filter @thanikc/ui build:pages",
     "test": "pnpm -r test",
     "test:ui": "pnpm --filter @thanikc/ui test",
     "test:worker": "pnpm --filter @thanikc/worker test",

@@ -1,5 +1,7 @@
 /** Shapes of the worker's `POST /api/chat` contract (see `apps/worker/src/index.ts`). */
 
+import { SupportedLocale } from '../../shared/i18n/locales';
+
 export type ChatRole = 'user' | 'assistant';
 
 export interface ChatTurn {
@@ -18,6 +20,8 @@ export interface ChatSource {
 export interface ChatRequest {
   message: string;
   history: ChatTurn[];
+  /** Language the answer should come back in; the worker validates it. */
+  locale: SupportedLocale;
 }
 
 export interface ChatResponse {

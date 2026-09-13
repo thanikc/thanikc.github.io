@@ -1,7 +1,9 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
   <app-section-header
+    i18n-heading="Heading of the projects section@@projects.heading"
     heading="Things I’ve built"
     [headingId]="headingId"
+    i18n-subtitle="Subtitle of the projects section@@projects.subtitle"
     subtitle="Complete products I build independently, from data model to deployment"
   />
 
@@ -22,6 +24,6 @@
   }
 
   @if (projects().length === 0) {
-    <p class="page-muted text-sm">Nothing to show yet.</p>
+    <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
   }
 </section>

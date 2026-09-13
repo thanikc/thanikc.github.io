@@ -4,7 +4,12 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { provideAnalytics } from './shared/analytics/analytics.provider';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideLocaleHead } from './shared/i18n/locale-head.provider';
+import {
+  provideClientHydration,
+  withEventReplay,
+  withI18nSupport,
+} from '@angular/platform-browser';
 import { CHAT_API_URL } from './domains/chat/chat.config';
 
 /** `wrangler dev` default port. */
@@ -23,7 +28,11 @@ export const appConfig: ApplicationConfig = {
     ),
     provideHttpClient(withFetch()),
     provideAnalytics(),
-    provideClientHydration(withEventReplay()),
+    provideLocaleHead(),
+    // withI18nSupport: without it, hydration cannot match the translated blocks in the
+    // prerendered HTML and destroys and re-renders each one instead — measured as a
+    // 0.58 layout shift on the home page at 360px (e2e/design.e2e.ts).
+    provideClientHydration(withEventReplay(), withI18nSupport()),
     { provide: CHAT_API_URL, useValue: isDevMode() ? LOCAL_CHAT_API_URL : DEPLOYED_CHAT_API_URL },
   ],
 };

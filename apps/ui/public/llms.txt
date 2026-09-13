@@ -9,9 +9,14 @@ using retrieval-augmented generation over a knowledge base he wrote.
 
 ## Pages
 
-- [Profile](https://thanikc.github.io/): Positioning, the kinds of problems he works on, projects (CrashDash, AI Ling, BJJ Quiz, Retirement Calculator), how he works, toolbox, and interests.
-- [Retirement Calculator](https://thanikc.github.io/calculator): Small interactive Angular side project with live World Bank data.
-- [Privacy Policy](https://thanikc.github.io/privacy-policy): Data handling, including for the chat assistant.
+The site is published in English, German and Thai, one copy per language under
+`/en/`, `/de/` and `/th/`. `https://thanikc.github.io/` sends a visitor to the
+language their browser asks for, falling back to English. The English pages are
+canonical for anything not listed in another language.
+
+- [Profile](https://thanikc.github.io/en/): Positioning, the kinds of problems he works on, projects (CrashDash, AI Ling, BJJ Quiz, Retirement Calculator), how he works, toolbox, and interests.
+- [Retirement Calculator](https://thanikc.github.io/en/calculator): Small interactive Angular side project with live World Bank data.
+- [Privacy Policy](https://thanikc.github.io/en/privacy-policy): Data handling, including for the chat assistant.
 
 ## Source
 

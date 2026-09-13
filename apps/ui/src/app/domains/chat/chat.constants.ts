@@ -2,15 +2,15 @@
 export const CHAT_HISTORY_LIMIT = 6;
 
 /** Shown when the worker cannot answer (every provider failed, or the network is down). */
-export const CHAT_ERROR_MESSAGE = "Sorry, I couldn't get an answer just now. Please try again.";
+export const CHAT_ERROR_MESSAGE = $localize`:Shown when the chat request fails@@chat.error:Sorry, I couldn't get an answer just now. Please try again.`;
 
 /**
  * Starter questions offered in the empty transcript. Each leads into depth the static
  * page leaves out, and each is answerable from the knowledge base in `apps/worker/content`.
  */
 export const CHAT_SUGGESTIONS: readonly string[] = [
-  "What's the most complex system Thanik has worked on?",
-  'What has Thanik built from scratch?',
-  'How does Thanik use AI in a team?',
-  'How does AI Ling work?',
+  $localize`:Starter question offered in the empty chat@@chat.suggestion.complexSystem:What's the most complex system Thanik has worked on?`,
+  $localize`:Starter question offered in the empty chat@@chat.suggestion.builtFromScratch:What has Thanik built from scratch?`,
+  $localize`:Starter question offered in the empty chat@@chat.suggestion.aiInTeam:How does Thanik use AI in a team?`,
+  $localize`:Starter question offered in the empty chat@@chat.suggestion.howAiLingWorks:How does AI Ling work?`,
 ];

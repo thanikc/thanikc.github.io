@@ -58,11 +58,27 @@ export async function retrieve(query: string, env: Env, topK = 5): Promise<Retri
     .filter(chunk => chunk.text !== '');
 }
 
+/**
+ * Languages the site is published in (see the `i18n` block in `apps/ui/angular.json`).
+ * English needs no instruction — it is the language of the knowledge base and of the
+ * prompt itself.
+ */
+const ANSWER_LANGUAGES: Record<string, string> = {
+  de: 'German',
+  th: 'Thai',
+};
+
+/** The language the answer must come back in, or null for English. */
+export function answerLanguage(locale: unknown): string | null {
+  return typeof locale === 'string' ? (ANSWER_LANGUAGES[locale] ?? null) : null;
+}
+
 /** Builds the grounded message list handed to the chat provider. */
 export function buildMessages(
   question: string,
   chunks: RetrievedChunk[],
   history: ChatMessage[] = [],
+  locale?: string,
 ): ChatMessage[] {
   const context = chunks.map((chunk, i) => `[${i + 1}] ${chunk.text}`).join('\n\n');
   const system = [
@@ -92,7 +108,24 @@ export function buildMessages(
     '',
     'Context:',
     context || '(no relevant context found)',
-  ].join('\n');
+  ];
 
-  return [{ role: 'system', content: system }, ...history, { role: 'user', content: question }];
+  const language = answerLanguage(locale);
+  if (language) {
+    // Placed after the context so it is the last thing the model reads about form.
+    system.push(
+      '',
+      `Language: answer in ${language}, however the visitor writes. The context is in English —`,
+      'translate what you need from it rather than quoting it untranslated. Keep names,',
+      'technologies and product names as they are.',
+    );
+  }
+
+  const systemPrompt = system.join('\n');
+
+  return [
+    { role: 'system', content: systemPrompt },
+    ...history,
+    { role: 'user', content: question },
+  ];
 }

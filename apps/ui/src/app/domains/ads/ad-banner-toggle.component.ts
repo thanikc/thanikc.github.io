@@ -5,7 +5,10 @@ import { AdBannerService } from './ad-banner.service';
 @Component({
   selector: 'app-ad-banner-toggle',
   imports: [MatSlideToggle],
-  template: `<mat-slide-toggle [checked]="showBanner()" (change)="onToggleChange($event)"
+  template: `<mat-slide-toggle
+    [checked]="showBanner()"
+    (change)="onToggleChange($event)"
+    i18n="Footer switch that shows or hides the ad banner@@ads.toggle"
     >ads</mat-slide-toggle
   >`,
   changeDetection: ChangeDetectionStrategy.OnPush,

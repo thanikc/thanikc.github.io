@@ -1,9 +1,10 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CHAT_API_URL } from './chat.config';
 import { CHAT_ERROR_MESSAGE, CHAT_HISTORY_LIMIT } from './chat.constants';
 import { ChatRequest, ChatResponse, ChatSource, ChatTurn } from './chat.models';
+import { DEFAULT_LOCALE, matchLocaleTag } from '../../shared/i18n/locales';
 
 /**
  * The last `CHAT_HISTORY_LIMIT` turns, which is all the worker needs for follow-ups —
@@ -24,6 +25,8 @@ const titlesOf = (sources: ChatSource[] = []): string[] => [
 export class ChatService {
   private readonly http = inject(HttpClient);
   private readonly endpoint = `${inject(CHAT_API_URL)}/api/chat`;
+  /** The language the page is being read in; the worker answers in it. */
+  private readonly locale = matchLocaleTag(inject(LOCALE_ID)) ?? DEFAULT_LOCALE;
 
   readonly turns = signal<ChatTurn[]>([]);
   readonly pending = signal(false);
@@ -54,7 +57,7 @@ export class ChatService {
 
     const history = recent(this.turns());
     this.turns.update(turns => [...turns, { role: 'user', content }]);
-    await this.ask({ message: content, history });
+    await this.ask({ message: content, history, locale: this.locale });
   }
 
   /** Re-asks the trailing user turn after a failed request. */
@@ -63,7 +66,11 @@ export class ChatService {
     const last = turns.at(-1);
     if (last?.role !== 'user' || this.pending()) return;
 
-    await this.ask({ message: last.content, history: recent(turns.slice(0, -1)) });
+    await this.ask({
+      message: last.content,
+      history: recent(turns.slice(0, -1)),
+      locale: this.locale,
+    });
   }
 
   reset(): void {

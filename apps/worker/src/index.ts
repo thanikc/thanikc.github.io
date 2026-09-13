@@ -22,6 +22,7 @@ app.post('/api/chat', async c => {
   const body = (await c.req.json().catch(() => null)) as {
     message?: unknown;
     history?: unknown;
+    locale?: unknown;
   } | null;
 
   const message = typeof body?.message === 'string' ? body.message.trim() : '';
@@ -43,7 +44,13 @@ app.post('/api/chat', async c => {
   const chunks = await retrieve(message, c.env);
 
   try {
-    const { answer, provider } = await generate(buildMessages(message, chunks, history), c.env);
+    // `locale` is visitor input; buildMessages only honours a language the site
+    // is actually published in and ignores anything else.
+    const locale = typeof body?.locale === 'string' ? body.locale : undefined;
+    const { answer, provider } = await generate(
+      buildMessages(message, chunks, history, locale),
+      c.env,
+    );
     return c.json({ answer, provider, sources: chunks });
   } catch (err) {
     if (err instanceof ChatError) {

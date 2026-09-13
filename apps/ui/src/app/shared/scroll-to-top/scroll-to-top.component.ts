@@ -34,6 +34,7 @@ const SCROLL_VISIBILITY_THRESHOLD_PX = 400;
         mat-mini-fab
         type="button"
         class="scroll-to-top-fab"
+        i18n-aria-label="Accessible name of the back-to-top button@@shell.scrollToTop"
         aria-label="Scroll to top"
         (click)="scrollToTop()"
       >

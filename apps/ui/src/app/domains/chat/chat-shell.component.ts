@@ -36,7 +36,7 @@ import { ChatWidgetComponent } from './chat-widget.component';
   selector: 'app-chat-shell',
   imports: [ChatWidgetComponent],
   template: `
-    <p class="sr-only">
+    <p class="sr-only" i18n="Screen-reader announcement of the chat button@@chat.shell.announce">
       AI Ling, an AI assistant that answers questions about Thanik's professional experience, is
       available via the chat button on this page.
     </p>

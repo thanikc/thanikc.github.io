@@ -46,8 +46,11 @@ jobs:
       - name: Run Tests
         run: pnpm --filter @thanikc/ui test
 
+      # build:pages, not build: it adds the deployment root the localized build
+      # leaves empty (language redirect + the root-only files). See
+      # apps/ui/scripts/emit-pages-root.mjs.
       - name: Production Build
-        run: pnpm --filter @thanikc/ui build --configuration=production
+        run: pnpm --filter @thanikc/ui build:pages
 
       - name: Upload Build Artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3

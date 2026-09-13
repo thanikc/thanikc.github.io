@@ -2,16 +2,33 @@
   <div
     class="cookie-banner fixed inset-x-0 bottom-0 z-50 flex flex-col gap-3 border-t p-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
     role="region"
+    i18n-aria-label="Name of the cookie consent region@@cookies.regionLabel"
     aria-label="Cookie consent"
   >
-    <p class="cookie-text max-w-prose text-sm">
+    <p class="cookie-text max-w-prose text-sm" i18n="Cookie consent banner text@@cookies.text">
       This site uses cookies for analytics. You can accept or reject non-essential cookies. Learn
       more in our
       <a routerLink="/privacy-policy" class="cookie-link underline">Privacy Policy</a>.
     </p>
     <div class="flex shrink-0 gap-2 self-end sm:self-auto">
-      <button matButton="outlined" type="button" class="min-h-11" (click)="reject()">Reject</button>
-      <button matButton="filled" type="button" class="min-h-11" (click)="accept()">Accept</button>
+      <button
+        matButton="outlined"
+        type="button"
+        class="min-h-11"
+        i18n="Rejects non-essential cookies@@cookies.reject"
+        (click)="reject()"
+      >
+        Reject
+      </button>
+      <button
+        matButton="filled"
+        type="button"
+        class="min-h-11"
+        i18n="Accepts non-essential cookies@@cookies.accept"
+        (click)="accept()"
+      >
+        Accept
+      </button>
     </div>
   </div>
 }

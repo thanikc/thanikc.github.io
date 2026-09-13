@@ -3,13 +3,13 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Thanik Cheowtirakul — Full-stack engineer',
+    title: $localize`:@@seo.siteTitle:Thanik Cheowtirakul — Full-stack engineer`,
     loadComponent: () =>
       import('./domains/profile/profile.component').then(m => m.ProfileComponent),
   },
   {
     path: 'calculator',
-    title: 'Retirement Calculator',
+    title: $localize`:@@calculator.title:Retirement Calculator`,
     // No ads: this is an interactive tool page, not publisher content — serving ads
     // here trips AdSense's "ads on screens without publisher content" policy.
     data: { ads: false },
@@ -20,7 +20,7 @@ export const routes: Routes = [
   },
   {
     path: 'privacy-policy',
-    title: 'Privacy Policy',
+    title: $localize`:@@privacy.title:Privacy Policy`,
     // Thin legal/informational content is a poor fit for ads (Google's "low
     // value content" policy), same reasoning as the calculator route above.
     data: { ads: false },

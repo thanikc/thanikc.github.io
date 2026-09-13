@@ -12,8 +12,10 @@ import { ToolGroup } from './profile.content';
   template: `
     <section class="space-y-6" [attr.aria-labelledby]="headingId">
       <app-section-header
+        i18n-heading="Heading of the toolbox section@@toolbox.heading"
         heading="Toolbox"
         [headingId]="headingId"
+        i18n-subtitle="Subtitle of the toolbox section@@toolbox.subtitle"
         subtitle="The stack behind the work above"
       />
 
@@ -28,7 +30,7 @@ import { ToolGroup } from './profile.content';
           }
         </dl>
       } @else {
-        <p class="page-muted text-sm">Nothing to show yet.</p>
+        <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
       }
     </section>
   `,

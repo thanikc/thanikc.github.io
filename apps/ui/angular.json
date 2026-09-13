@@ -5,6 +5,22 @@
   "projects": {
     "thanikc": {
       "projectType": "application",
+      "i18n": {
+        "sourceLocale": {
+          "code": "en",
+          "subPath": "en"
+        },
+        "locales": {
+          "de": {
+            "translation": "src/locale/messages.de.json",
+            "subPath": "de"
+          },
+          "th": {
+            "translation": "src/locale/messages.th.json",
+            "subPath": "th"
+          }
+        }
+      },
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
@@ -20,7 +36,7 @@
             "outputPath": "dist/thanikc",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": [],
+            "polyfills": ["@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
@@ -49,6 +65,7 @@
           },
           "configurations": {
             "production": {
+              "localize": true,
               "baseHref": "/",
               "budgets": [
                 {
@@ -65,15 +82,17 @@
               "outputHashing": "all"
             },
             "development": {
+              "localize": ["en"],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
             },
             "testing": {
+              "localize": ["en"],
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true,
-              "polyfills": ["src/test-polyfills.ts"]
+              "polyfills": ["@angular/localize/init", "src/test-polyfills.ts"]
             }
           },
           "defaultConfiguration": "production"

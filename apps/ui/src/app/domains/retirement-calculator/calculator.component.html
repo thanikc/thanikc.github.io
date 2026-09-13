@@ -1,12 +1,19 @@
 <section>
-  <h1 class="page-heading text-2xl font-bold mb-6">Retirement Calculator</h1>
+  <h1
+    class="page-heading text-2xl font-bold mb-6"
+    i18n="Heading of the calculator page@@calculator.pageTitle"
+  >
+    Retirement Calculator
+  </h1>
 
   <!-- A raised card, not the bare page: mat-form-field's outline appearance has no
        fill of its own, so its label/input text (Material's own on-surface tokens,
        tuned dark for a light surface) needs a light surface underneath it. -->
   <form class="surface-card grid grid-cols-1 md:grid-cols-3 gap-4 rounded-2xl p-4 mb-6 sm:p-6">
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Current Net Worth</mat-label>
+      <mat-label i18n="Calculator input label@@calculator.netWorth.label"
+        >Current Net Worth</mat-label
+      >
       <span matPrefix class="px-2">$</span>
       <input
         matInput
@@ -16,13 +23,16 @@
         [ngModel]="currentNetWorth()"
         (ngModelChange)="updateAmount(currentNetWorth, $event)"
         name="currentNetWorth"
+        i18n-aria-label="Accessible name of the net-worth input@@calculator.netWorth.ariaLabel"
         aria-label="Current Net Worth in dollars"
       />
       <mat-icon matSuffix aria-hidden="true">account_balance</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Years Until Retirement</mat-label>
+      <mat-label i18n="Calculator input label@@calculator.years.label"
+        >Years Until Retirement</mat-label
+      >
       <input
         matInput
         type="number"
@@ -32,13 +42,16 @@
         [ngModel]="yearsUntilRetirement()"
         (ngModelChange)="updateAmount(yearsUntilRetirement, $event)"
         name="yearsUntilRetirement"
+        i18n-aria-label="Accessible name of the years input@@calculator.years.ariaLabel"
         aria-label="Years until retirement"
       />
       <mat-icon matSuffix aria-hidden="true">hourglass_bottom</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="w-full">
-      <mat-label>Target Monthly Income</mat-label>
+      <mat-label i18n="Calculator input label@@calculator.income.label"
+        >Target Monthly Income</mat-label
+      >
       <span matPrefix class="px-2">$</span>
       <input
         matInput
@@ -48,6 +61,7 @@
         [ngModel]="targetMonthlyIncome()"
         (ngModelChange)="updateAmount(targetMonthlyIncome, $event)"
         name="targetMonthlyIncome"
+        i18n-aria-label="Accessible name of the target-income input@@calculator.income.ariaLabel"
         aria-label="Target monthly income in dollars"
       />
       <mat-icon matSuffix aria-hidden="true">payments</mat-icon>
@@ -63,11 +77,22 @@
       <mat-expansion-panel-header>
         <mat-panel-title class="flex flex-none items-center gap-2 font-medium">
           <mat-icon class="panel-icon" aria-hidden="true">tune</mat-icon>
-          <span class="sm:hidden">Assumptions</span>
-          <span class="hidden sm:inline">Investment Assumptions</span>
+          <span
+            class="sm:hidden"
+            i18n="Short form of the assumptions panel title@@calculator.assumptions.titleShort"
+            >Assumptions</span
+          >
+          <span
+            class="hidden sm:inline"
+            i18n="Assumptions panel title@@calculator.assumptions.title"
+            >Investment Assumptions</span
+          >
         </mat-panel-title>
         <mat-panel-description class="grow justify-end whitespace-nowrap">
-          <span class="hidden sm:inline">
+          <span
+            class="hidden sm:inline"
+            i18n="Collapsed summary of the two assumptions@@calculator.assumptions.summary"
+          >
             {{ estimatedAnnualReturn() }}% return, {{ safeWithdrawalRate() }}% withdrawal rate
           </span>
           <span class="sm:hidden">
@@ -78,7 +103,9 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
         <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Estimated Annual Return (%)</mat-label>
+          <mat-label i18n="Calculator input label@@calculator.return.label"
+            >Estimated Annual Return (%)</mat-label
+          >
           <input
             matInput
             type="number"
@@ -89,14 +116,20 @@
             [ngModel]="estimatedAnnualReturn()"
             (ngModelChange)="updateAmount(estimatedAnnualReturn, $event)"
             name="estimatedAnnualReturn"
+            i18n-aria-label="
+              Accessible name of the annual return input@@calculator.return.ariaLabel"
             aria-label="Estimated annual investment return percentage"
           />
           <span matSuffix class="px-2">%</span>
-          <mat-hint>Historical stock market average (~7% adjusted for inflation)</mat-hint>
+          <mat-hint i18n="Hint under the annual return input@@calculator.return.hint"
+            >Historical stock market average (~7% adjusted for inflation)</mat-hint
+          >
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Safe Withdrawal Rate (%)</mat-label>
+          <mat-label i18n="Calculator input label@@calculator.withdrawal.label"
+            >Safe Withdrawal Rate (%)</mat-label
+          >
           <input
             matInput
             type="number"
@@ -107,10 +140,14 @@
             [ngModel]="safeWithdrawalRate()"
             (ngModelChange)="updateAmount(safeWithdrawalRate, $event)"
             name="safeWithdrawalRate"
+            i18n-aria-label="
+              Accessible name of the withdrawal rate input@@calculator.withdrawal.ariaLabel"
             aria-label="Safe withdrawal rate percentage"
           />
           <span matSuffix class="px-2">%</span>
-          <mat-hint>Standard rule of thumb (~4% Trinity Study rule)</mat-hint>
+          <mat-hint i18n="Hint under the withdrawal rate input@@calculator.withdrawal.hint"
+            >Standard rule of thumb (~4% Trinity Study rule)</mat-hint
+          >
         </mat-form-field>
       </div>
     </mat-expansion-panel>
@@ -118,28 +155,36 @@
 
   <div class="summary-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium">Total Nest Egg Goal</span>
+      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.nestEgg"
+        >Total Nest Egg Goal</span
+      >
       <p class="text-2xl font-semibold mt-1">
         {{ totalNestEggNeeded() | currency: 'USD' : 'symbol' : '1.0-0' }}
       </p>
     </div>
 
     <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium">Compounded Net Worth</span>
+      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.compounded"
+        >Compounded Net Worth</span
+      >
       <p class="text-2xl font-semibold mt-1">
         {{ futureNetWorth() | currency: 'USD' : 'symbol' : '1.0-0' }}
       </p>
     </div>
 
     <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium">Remaining Gap</span>
+      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.gap"
+        >Remaining Gap</span
+      >
       <p class="text-2xl font-semibold mt-1">
         {{ remainingTargetNestEgg() | currency: 'USD' : 'symbol' : '1.0-0' }}
       </p>
     </div>
 
     <div class="card highlight p-4 rounded-xl">
-      <span class="text-sm font-medium">Required Monthly Savings</span>
+      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.monthly"
+        >Required Monthly Savings</span
+      >
       <p class="text-2xl font-semibold mt-1">
         {{ requiredMonthlyContribution() | currency: 'USD' : 'symbol' : '1.0-0' }}
       </p>

@@ -6,10 +6,13 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:pages": "ng build --configuration=production && node scripts/emit-pages-root.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
+    "i18n:extract": "ng extract-i18n --format=json --output-path=src/locale --out-file=messages.json",
+    "i18n:check": "pnpm i18n:extract && node scripts/check-translations.mjs && rm src/locale/messages.json",
     "test:watch": "ng test",
-    "e2e:design": "ng build && playwright test"
+    "e2e:design": "pnpm build:pages && playwright test"
   },
   "dependencies": {
     "@angular/cdk": "22.1.1",
@@ -17,6 +20,7 @@
     "@angular/compiler": "22.1.1",
     "@angular/core": "22.1.1",
     "@angular/forms": "22.1.1",
+    "@angular/localize": "22.1.1",
     "@angular/material": "22.1.1",
     "@angular/platform-browser": "22.1.1",
     "@angular/platform-browser-dynamic": "22.1.1",

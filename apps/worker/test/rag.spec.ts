@@ -58,6 +58,26 @@ describe('buildMessages', () => {
     expect(lower).toMatch(/ignore.*instructions|override|jailbreak/);
   });
 
+  // The site is published in English, German and Thai; the knowledge base is
+  // English, so the language of the answer is decided here, not by the context.
+  it('asks for the answer in the language the visitor is reading', () => {
+    const german = buildMessages('Was hat er gebaut?', [], [], 'de')[0]?.content ?? '';
+    const thai = buildMessages('เขาสร้างอะไร?', [], [], 'th')[0]?.content ?? '';
+
+    expect(german).toContain('German');
+    expect(german).toContain('context is in English');
+    expect(thai).toContain('Thai');
+    expect(thai).not.toContain('German');
+  });
+
+  it('answers in English by default, without a language instruction', () => {
+    const fallback = buildMessages('What did he build?', [])[0]?.content ?? '';
+    const english = buildMessages('What did he build?', [], [], 'en')[0]?.content ?? '';
+
+    expect(fallback).not.toContain('Answer in');
+    expect(english).not.toContain('Answer in');
+  });
+
   it('keeps prior history between the system prompt and the new question', () => {
     const history = [
       { role: 'user' as const, content: 'hi' },

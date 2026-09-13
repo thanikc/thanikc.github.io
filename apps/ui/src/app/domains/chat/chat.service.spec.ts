@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { LOCALE_ID } from '@angular/core';
 import { ChatService } from './chat.service';
 import { CHAT_API_URL } from './chat.config';
 import { ChatResponse, ChatTurn } from './chat.models';
@@ -20,6 +21,7 @@ describe('ChatService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: CHAT_API_URL, useValue: API_URL },
+        { provide: LOCALE_ID, useValue: 'de' },
       ],
     });
 
@@ -50,7 +52,11 @@ describe('ChatService', () => {
 
     const req = httpMock.expectOne(CHAT_ENDPOINT);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual({ message: 'Where does Thanik work?', history: [] });
+    expect(req.request.body).toEqual({
+      message: 'Where does Thanik work?',
+      history: [],
+      locale: 'de',
+    });
 
     req.flush(answer('At a consultancy.'));
     await done;
@@ -209,6 +215,7 @@ describe('ChatService', () => {
         { role: 'user', content: 'Hello' },
         { role: 'assistant', content: 'Hi there' },
       ],
+      locale: 'de',
     });
 
     req.flush(answer('At a consultancy.'));
@@ -251,6 +258,7 @@ describe('ChatService', () => {
         { role: 'user', content: 'Hello' },
         { role: 'assistant', content: 'Hi there' },
       ],
+      locale: 'de',
     });
 
     req.flush(answer('At a consultancy.'));
@@ -321,5 +329,33 @@ describe('ChatService', () => {
     expect(service.turns()).toEqual([]);
     expect(service.error()).toBeNull();
     expect(service.hasConversation()).toBe(false);
+  });
+});
+
+describe('ChatService language', () => {
+  // The worker answers in the language the page is being read in, so the visitor
+  // is not handed an English answer under a German question.
+  it('tells the worker which language to answer in', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CHAT_API_URL, useValue: API_URL },
+        { provide: LOCALE_ID, useValue: 'th' },
+      ],
+    });
+
+    const service = TestBed.inject(ChatService);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    const done = service.send('Hello');
+    const req = httpMock.expectOne(CHAT_ENDPOINT);
+
+    expect(req.request.body.locale).toBe('th');
+
+    req.flush(answer('Hi'));
+    await done;
+    httpMock.verify();
   });
 });

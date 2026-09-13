@@ -1,25 +1,39 @@
 <mat-card class="info-card mt-6">
-  <mat-card-header class="flex items-start gap-2">
-    <div class="flex grow">
+  <!-- flex-wrap, not one row: the status chip is as wide as its longest translation
+       ("Live-Raten werden geladen …"), and at 360px it has to drop below the title
+       rather than push the card wider than the page. -->
+  <mat-card-header class="flex flex-wrap items-start gap-2">
+    <div class="flex min-w-0 grow">
       <mat-icon matCardAvatar aria-hidden="true" class="info-icon">info</mat-icon>
-      <mat-card-title class="info-title text-base font-semibold">
+      <mat-card-title
+        class="info-title text-base font-semibold"
+        i18n="Title of the how-it-is-calculated card@@calculator.info.title"
+      >
         How It Is Calculated & Underlying Assumptions
       </mat-card-title>
     </div>
 
-    <div class="flex justify-self-end">
+    <div class="flex min-w-0 shrink-0 justify-self-end">
       @if (isLoading()) {
         <div class="data-source-chip loading">
           <mat-spinner diameter="12"></mat-spinner>
-          <span>Fetching live rates...</span>
+          <span i18n="Shown while the World Bank rates load@@calculator.info.fetching"
+            >Fetching live rates...</span
+          >
         </div>
       } @else if (isLive()) {
-        <span class="data-source-chip live">
+        <span
+          class="data-source-chip live"
+          i18n="Chip: assumptions came from the live API@@calculator.info.liveData"
+        >
           <mat-icon class="chip-icon" aria-hidden="true">check_circle</mat-icon>
           Live Economic Data
         </span>
       } @else {
-        <span class="data-source-chip baseline">
+        <span
+          class="data-source-chip baseline"
+          i18n="Chip: assumptions fell back to fixed values@@calculator.info.baselineData"
+        >
           <mat-icon class="chip-icon" aria-hidden="true">history</mat-icon>
           Baseline Assumptions
         </span>
@@ -28,7 +42,7 @@
   </mat-card-header>
 
   <mat-card-content class="info-body mt-3 space-y-3 text-sm">
-    <p>
+    <p i18n="How the target nest egg is derived@@calculator.info.step1">
       <strong>1. Target Nest Egg:</strong> Based on the standard
       <strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate</strong> (Trinity Study rule), your
       required nest egg is calculated as:
@@ -37,7 +51,7 @@
       </code>
     </p>
 
-    <p>
+    <p i18n="How the current net worth is grown@@calculator.info.step2">
       <strong>2. Current Net Worth Growth:</strong> Your existing net worth is assumed to compound
       annually at an estimated rate of <strong>{{ estimatedAnnualReturn() }}%</strong> over the
       remaining years until retirement:
@@ -46,7 +60,7 @@
       </code>
     </p>
 
-    <p>
+    <p i18n="How the required monthly contribution is derived@@calculator.info.step3">
       <strong>3. Required Monthly Contribution:</strong> The remaining gap between your target nest
       egg and the future value of your current net worth is funded via monthly contributions
       compounding over time at <strong>{{ estimatedAnnualReturn() }}% per year</strong>.
