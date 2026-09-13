@@ -55,7 +55,7 @@ describe('HeaderComponent', () => {
       }
     });
 
-    // Name, three links and the theme toggle don't fit 360px; phones scroll instead.
+    // Name and three links don't fit 360px; phones scroll instead.
     it('hides below the sm breakpoint', () => {
       expect(nav()?.classList.contains('hidden')).toBe(true);
       expect(nav()?.classList.contains('sm:flex')).toBe(true);
@@ -77,18 +77,11 @@ describe('HeaderComponent', () => {
     expect(brandLink?.classList.contains('min-h-11')).toBe(true);
   });
 
-  // Found by the Playwright design check: nav links and the toggle sat 4px apart.
-  it('should keep 8px between the nav links and the theme toggle', () => {
+  // Found by the Playwright design check: nav links sat too close together.
+  it('should keep 8px between the nav links', () => {
     const nav = (fixture.nativeElement as HTMLElement).querySelector('nav');
 
     expect(nav?.classList.contains('gap-2')).toBe(true);
-    expect(nav?.parentElement?.classList.contains('gap-2')).toBe(true);
-  });
-
-  it('should render the theme toggle', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    expect(compiled.querySelector('app-theme-toggle')).not.toBeNull();
   });
 
   // Header, <main> and the footer share one content column; a wider header made

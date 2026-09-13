@@ -17,6 +17,13 @@
   animation: card-rise 0.5s ease forwards;
 }
 
+// One accent, on one card: the primary-action surface (Ask AI Ling) gets a
+// gold top rule, mirroring to-top.ch's single persistent CTA accent. No other
+// card carries it.
+.surface-card--accent {
+  border-top: 3px solid var(--mat-sys-tertiary);
+}
+
 .surface-chip {
   background-color: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);

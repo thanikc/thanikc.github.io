@@ -2,8 +2,8 @@
   <title id="logoTitle">Thanik Cheowtirakul logo</title>
   <defs>
     <linearGradient id="devInfoGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1565c0" />
-      <stop offset="100%" stop-color="#0091ea" />
+      <stop offset="0%" stop-color="#284d46" />
+      <stop offset="100%" stop-color="#597e76" />
     </linearGradient>
   </defs>
   <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#devInfoGradient)" />

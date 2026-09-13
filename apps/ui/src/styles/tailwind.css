@@ -1,22 +1,5 @@
 @import 'tailwindcss';
 
-/* By default `dark:` keys off the OS `prefers-color-scheme`, which ignores the
-   theme toggle's `data-theme` override and leaves Tailwind-coloured text
-   fighting token-coloured backgrounds. Mirror the resolution used for the
-   surface tokens in material.scss: an explicit override wins, otherwise fall
-   back to the OS preference. */
-@custom-variant dark {
-  &:where([data-theme='dark'], [data-theme='dark'] *) {
-    @slot;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    &:where(:root:not([data-theme='light']) *, :root:not([data-theme='light'])) {
-      @slot;
-    }
-  }
-}
-
 /* Set while the chat sheet is open (see ChatWidgetComponent), so scrolling the
    transcript can't also scroll the page behind it. `position: fixed` (not just
    `overflow: hidden`) is what actually holds the page still on iOS Safari,

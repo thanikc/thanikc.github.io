@@ -18,17 +18,13 @@
         <span>Thanik Cheowtirakul</span>
       </a>
 
-      <div class="flex items-center gap-2">
-        <nav aria-label="Primary" class="hidden items-center gap-2 sm:flex">
-          @for (link of navLinks; track link.fragment) {
-            <a matButton class="min-h-11" routerLink="/" [fragment]="link.fragment">
-              {{ link.label }}
-            </a>
-          }
-        </nav>
-
-        <app-theme-toggle />
-      </div>
+      <nav aria-label="Primary" class="hidden items-center gap-2 sm:flex">
+        @for (link of navLinks; track link.fragment) {
+          <a matButton class="min-h-11" routerLink="/" [fragment]="link.fragment">
+            {{ link.label }}
+          </a>
+        }
+      </nav>
     </div>
   </mat-toolbar>
 </header>

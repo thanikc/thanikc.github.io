@@ -1,4 +1,5 @@
 @use '@angular/material' as mat;
+@use './theme-colors' as brand;
 
 // Metric-matched local fallback for Roboto (see index.html: the Google Fonts
 // link uses display=swap). Overrides computed from real font metrics
@@ -16,14 +17,28 @@
   size-adjust: 99.7809%;
 }
 
+// Same technique for the Fraunces headline face (see index.html for the
+// display=swap link). Overrides computed from @capsizecss/metrics: Fraunces
+// (2000 unitsPerEm) vs Georgia (2048 unitsPerEm), the local fallback it swaps
+// from — headings are short and few per page, so the CLS risk is far lower
+// than the Roboto body-text case above, but the same fix removes it entirely.
+@font-face {
+  font-family: 'Fraunces Fallback';
+  src: local('Georgia');
+  ascent-override: 92.9623%;
+  descent-override: 24.2386%;
+  line-gap-override: 0%;
+  size-adjust: 105.2039%;
+}
+
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: brand.$primary-palette,
+        tertiary: brand.$tertiary-palette,
       ),
       typography: '"Roboto", "Roboto Fallback", Arial, sans-serif',
       density: 0,
@@ -43,70 +58,53 @@ body {
   font: var(--mat-sys-body-medium);
 }
 
-// The theme toggle sets [data-theme="light"|"dark"] on <html> to override the
-// OS preference; leaving the attribute off falls back to the system theme.
-:root[data-theme='light'] {
-  color-scheme: light;
+h1,
+h2 {
+  font-family: 'Fraunces', 'Fraunces Fallback', Georgia, serif;
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
+// Echoes to-top.ch's decorative line motif under section headings.
+h2::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  margin-top: 8px;
+  background: linear-gradient(90deg, var(--mat-sys-tertiary), transparent);
 }
 
 // M3 has no success/warning role. These are app-specific semantic tokens for
-// data-provenance chips (e.g. "live" vs "baseline" data); centralised here,
-// following `light-dark()`, so no component hard-codes its own hex pair.
-// Page vs. card surfaces. M3 has no single token that reads as "raised" in both
-// themes: in light the lightest container is white, in dark the lowest container is
-// the darkest. So the page sits on `base` and cards on `raised`, and raised is always
-// the lighter of the two — white cards on a tinted page in light, lighter navy cards
-// on the navy page in dark.
+// data-provenance chips (e.g. "live" vs "baseline" data); centralised here so
+// no component hard-codes its own hex pair.
+// Page vs. card surfaces: the page sits on `base` and cards on the lighter
+// `raised` surface so cards read as raised above the page.
 //
 // The gap is deliberately wider than a bare contrast-ratio minimum would require:
-// `surface-container` in light and `surface-container` in dark both measured as
-// visibly "no card at all" in review (fill contrast ~1.2, distinguishable only by
-// the 1px border, if you looked for it). `surface-dim` / `surface-container-highest`
-// give fill contrast ~1.4-1.7, so the card reads as a surface at a glance, not just
-// on close inspection. The Playwright design check's surfaceSeparation() enforces a
-// floor above the old numbers so this can't quietly regress.
+// `surface-container` measured as visibly "no card at all" in review (fill
+// contrast ~1.2, distinguishable only by the 1px border, if you looked for it).
+// `surface-dim` / `surface-container-lowest` give fill contrast ~1.4-1.7, so the
+// card reads as a surface at a glance, not just on close inspection. The
+// Playwright design check's surfaceSeparation() enforces a floor above the old
+// numbers so this can't quietly regress.
 :root {
-  --app-surface-base: light-dark(var(--mat-sys-surface-dim), var(--mat-sys-surface));
-  --app-surface-raised: light-dark(
-    var(--mat-sys-surface-container-lowest),
-    var(--mat-sys-surface-container-low)
-  );
+  // M3's generated neutral palette caps chroma very low regardless of the seed
+  // hue, so the auto-derived surface-dim (#dadad8) reads as plain cool grey
+  // rather than the warm cream to-top.ch is built around. A literal cream as
+  // light as to-top's own (#faf5f1) sits too close to the near-white
+  // surface-container-lowest cards render on (#ffffff) to clear this app's own
+  // surface-separation floor (fill contrast >= 1.3, e2e/design.e2e.ts) — cards
+  // would blend into the page. This keeps the same lightness tier as the
+  // original grey (so the fill-contrast margin against white cards is
+  // unchanged) but shifts it warm instead of widening the neutral seed's
+  // chroma, which pushed every neutral tone (chips, borders, dividers) toward
+  // a distracting tan.
+  --app-surface-base: #dad6ce;
+  --app-surface-raised: var(--mat-sys-surface-container-lowest);
 }
 
 :root {
-  --app-sys-success-container: light-dark(#d1fae5, #05271c);
-  --app-sys-on-success-container: light-dark(#04543c, #6ee7b7);
-  --app-sys-warning-container: light-dark(#fef3c7, #2e1a03);
-  --app-sys-on-warning-container: light-dark(#7a350c, #fcd34d);
-}
-
-// The generated M3 neutral palette is fairly desaturated, which makes the
-// dark theme read as near-black. Override the dark-mode surfaces with a
-// fixed dark-navy scale (tinted towards the primary hue) so it feels like a
-// deep blue rather than plain black/grey. Applies whenever dark actually
-// renders: OS preference (unless overridden to light) or an explicit
-// dark override.
-@mixin dark-surface-overrides {
-  --mat-sys-surface: #10182b;
-  --mat-sys-surface-dim: #10182b;
-  --mat-sys-surface-bright: #37415a;
-  --mat-sys-surface-container-lowest: #0b1120;
-  --mat-sys-surface-container-low: #182234;
-  --mat-sys-surface-container: #1e293f;
-  --mat-sys-surface-container-high: #29344a;
-  --mat-sys-surface-container-highest: #343f56;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    @include dark-surface-overrides;
-  }
-}
-
-:root[data-theme='dark'] {
-  @include dark-surface-overrides;
+  --app-sys-success-container: #d1fae5;
+  --app-sys-on-success-container: #04543c;
+  --app-sys-warning-container: #fef3c7;
+  --app-sys-on-warning-container: #7a350c;
 }

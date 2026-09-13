@@ -5,46 +5,32 @@ import { Browser, Page, expect, test } from '@playwright/test';
 
 /**
  * Design compliance across the matrix in .agents/rules/DESIGN-VERIFICATION.md:
- * 3 routes × 4 theme states × 3 widths, plus keyboard, motion and theme-token checks.
- * Measurements are written to tmp/design-check/measure/ for the report.
+ * 3 routes × 3 widths (the app is light-only — no theme toggle), plus keyboard and
+ * motion checks. Measurements are written to tmp/design-check/measure/ for the report.
  */
 
 const ROUTES = ['/', '/calculator', '/privacy-policy'] as const;
 const WIDTHS = [360, 768, 1440] as const;
 const HEIGHT: Record<number, number> = { 360: 800, 768: 1024, 1440: 900 };
 
-/** Explicit modes run against the opposite OS preference, so the toggle must win. */
-const THEMES = {
-  light: { stored: 'light', os: 'dark' },
-  dark: { stored: 'dark', os: 'light' },
-  'system-light': { stored: null, os: 'light' },
-  'system-dark': { stored: null, os: 'dark' },
-} as const;
-type ThemeName = keyof typeof THEMES;
-
 const OUT = join(__dirname, '../../../tmp/design-check');
 const MIN_TARGET = 44;
 const MIN_GAP = 8;
 
 interface PageOptions {
-  theme: ThemeName;
   width: number;
   reducedMotion?: 'reduce' | 'no-preference';
 }
 
 async function openPage(browser: Browser, route: string, options: PageOptions): Promise<Page> {
-  const { stored, os } = THEMES[options.theme];
   const context = await browser.newContext({
     viewport: { width: options.width, height: HEIGHT[options.width] },
-    colorScheme: os,
     reducedMotion: options.reducedMotion ?? 'no-preference',
   });
   const page = await context.newPage();
 
-  await page.addInitScript(storedMode => {
+  await page.addInitScript(() => {
     localStorage.setItem('cookie-consent', 'rejected');
-    if (storedMode) localStorage.setItem('theme-mode', storedMode);
-    else localStorage.removeItem('theme-mode');
 
     // Layout shift, with what moved, so a failure points at its cause.
     type Shift = { value: number; hadRecentInput: boolean; sources?: { node?: Node }[] };
@@ -69,7 +55,7 @@ async function openPage(browser: Browser, route: string, options: PageOptions): 
         });
       }
     }).observe({ type: 'layout-shift', buffered: true });
-  }, stored);
+  });
 
   // Deterministic and free: no live providers, no analytics, no live World Bank data.
   // Both APIs are cross-origin, so the stubs must answer CORS (and the chat preflight).
@@ -259,8 +245,8 @@ async function structure(page: Page, width: number) {
 
 /**
  * Non-text contrast, which axe does not check: a card must stand apart from the page.
- * Its border needs 3:1 against the page (UX-UI.md), its fill must visibly differ from
- * the page, and in dark mode a raised surface must be lighter than the page, not a hole.
+ * Its border needs 3:1 against the page (UX-UI.md), and its fill must visibly differ
+ * from the page.
  *
  * The fill floor (1.3) is set above the ratio a hairline border alone can compensate
  * for: at 1.1-1.22 (measured on this app before the fix) a card was only findable by
@@ -325,90 +311,77 @@ async function surfaceSeparation(page: Page) {
 }
 
 for (const route of ROUTES) {
-  for (const theme of Object.keys(THEMES) as ThemeName[]) {
-    for (const width of WIDTHS) {
-      const name = `${slug(route)}-${theme}-${width}`;
+  for (const width of WIDTHS) {
+    const name = `${slug(route)}-${width}`;
 
-      test(`design: ${route} · ${theme} · ${width}px`, async ({ browser }) => {
-        const page = await openPage(browser, route, { theme, width });
+    test(`design: ${route} · ${width}px`, async ({ browser }) => {
+      const page = await openPage(browser, route, { width });
 
-        const axe = await new AxeBuilder({ page }).analyze();
-        const contrast = axe.violations
-          .filter(v => v.id === 'color-contrast')
-          .flatMap(v => v.nodes.map(n => `${n.target.join(' ')}: ${n.any[0]?.message ?? ''}`));
-        const serious = axe.violations
-          .filter(
-            v => v.id !== 'color-contrast' && ['serious', 'critical'].includes(v.impact ?? ''),
-          )
-          .map(v => `${v.id} (${v.impact}) ×${v.nodes.length}: ${v.nodes[0]?.target.join(' ')}`);
-        // Nodes axe could not measure (text over the hero photo, gradients, overlaps):
-        // these need a visual judgement, so keep where they are and why.
-        const incompleteNodes = axe.incomplete
-          .filter(v => v.id === 'color-contrast')
-          .flatMap(v => v.nodes);
-        const contrastUnverifiable = incompleteNodes.length;
-        const contrastUnverifiableSample = incompleteNodes
-          .slice(0, 20)
-          .map(n => `${n.target.join(' ')}: ${n.any[0]?.message ?? ''}`);
+      const axe = await new AxeBuilder({ page }).analyze();
+      const contrast = axe.violations
+        .filter(v => v.id === 'color-contrast')
+        .flatMap(v => v.nodes.map(n => `${n.target.join(' ')}: ${n.any[0]?.message ?? ''}`));
+      const serious = axe.violations
+        .filter(v => v.id !== 'color-contrast' && ['serious', 'critical'].includes(v.impact ?? ''))
+        .map(v => `${v.id} (${v.impact}) ×${v.nodes.length}: ${v.nodes[0]?.target.join(' ')}`);
+      // Nodes axe could not measure (text over the hero photo, gradients, overlaps):
+      // these need a visual judgement, so keep where they are and why.
+      const incompleteNodes = axe.incomplete
+        .filter(v => v.id === 'color-contrast')
+        .flatMap(v => v.nodes);
+      const contrastUnverifiable = incompleteNodes.length;
+      const contrastUnverifiableSample = incompleteNodes
+        .slice(0, 20)
+        .map(n => `${n.target.join(' ')}: ${n.any[0]?.message ?? ''}`);
 
-        const targets = await targetViolations(page);
-        const shape = await structure(page, width);
-        const surfaces = await surfaceSeparation(page);
-        const dark = theme === 'dark' || theme === 'system-dark';
-        const weakSurfaces = surfaces
-          .filter(
-            s =>
-              'error' in s ||
-              s.borderRatio < 3 ||
-              s.fillRatio < 1.3 ||
-              (dark && !s.raisedIsLighter),
-          )
-          .map(s => JSON.stringify(s));
+      const targets = await targetViolations(page);
+      const shape = await structure(page, width);
+      const surfaces = await surfaceSeparation(page);
+      const weakSurfaces = surfaces
+        .filter(s => 'error' in s || s.borderRatio < 3 || s.fillRatio < 1.3)
+        .map(s => JSON.stringify(s));
 
-        mkdirSync(join(OUT, 'screens'), { recursive: true });
-        await page.screenshot({ path: join(OUT, 'screens', `${name}.png`), fullPage: true });
-        record(name, {
-          route,
-          theme,
-          width,
-          contrast,
-          contrastUnverifiable,
-          contrastUnverifiableSample,
-          serious,
-          targets,
-          surfaces,
-          ...shape,
-        });
-
-        expect.soft(contrast, 'contrast (axe)').toEqual([]);
-        expect.soft(serious, 'serious/critical axe violations').toEqual([]);
-        expect.soft(targets.small, 'targets under 44px').toEqual([]);
-        expect.soft(targets.crowded, 'targets closer than 8px').toEqual([]);
-        expect.soft(shape.h1, 'exactly one h1').toBe(1);
-        expect.soft(shape.skips, 'heading level skips').toEqual([]);
-        expect.soft(shape.landmarks, 'landmarks').toEqual({
-          banner: true,
-          main: true,
-          contentinfo: true,
-          navigation: true,
-        });
-        expect.soft(shape.images, 'image alt/size').toEqual([]);
-        expect.soft(shape.horizontalScroll, 'horizontal page scroll (px)').toBeLessThanOrEqual(0);
-        expect.soft(shape.clipped, 'clipped text').toEqual([]);
-        expect.soft(shape.cls, 'cumulative layout shift').toBeLessThan(0.1);
-        expect.soft(weakSurfaces, 'cards stand apart from the page').toEqual([]);
-        expect.soft(shape.rhythm, 'section header → content gap ≥ 16px').toEqual([]);
-
-        await page.context().close();
+      mkdirSync(join(OUT, 'screens'), { recursive: true });
+      await page.screenshot({ path: join(OUT, 'screens', `${name}.png`), fullPage: true });
+      record(name, {
+        route,
+        width,
+        contrast,
+        contrastUnverifiable,
+        contrastUnverifiableSample,
+        serious,
+        targets,
+        surfaces,
+        ...shape,
       });
-    }
+
+      expect.soft(contrast, 'contrast (axe)').toEqual([]);
+      expect.soft(serious, 'serious/critical axe violations').toEqual([]);
+      expect.soft(targets.small, 'targets under 44px').toEqual([]);
+      expect.soft(targets.crowded, 'targets closer than 8px').toEqual([]);
+      expect.soft(shape.h1, 'exactly one h1').toBe(1);
+      expect.soft(shape.skips, 'heading level skips').toEqual([]);
+      expect.soft(shape.landmarks, 'landmarks').toEqual({
+        banner: true,
+        main: true,
+        contentinfo: true,
+        navigation: true,
+      });
+      expect.soft(shape.images, 'image alt/size').toEqual([]);
+      expect.soft(shape.horizontalScroll, 'horizontal page scroll (px)').toBeLessThanOrEqual(0);
+      expect.soft(shape.clipped, 'clipped text').toEqual([]);
+      expect.soft(shape.cls, 'cumulative layout shift').toBeLessThan(0.1);
+      expect.soft(weakSurfaces, 'cards stand apart from the page').toEqual([]);
+      expect.soft(shape.rhythm, 'section header → content gap ≥ 16px').toEqual([]);
+
+      await page.context().close();
+    });
   }
 }
 
 for (const route of ROUTES) {
   test(`motion: ${route} settles under reduced motion`, async ({ browser }) => {
     const page = await openPage(browser, route, {
-      theme: 'light',
       width: 360,
       reducedMotion: 'reduce',
     });
@@ -428,68 +401,28 @@ for (const route of ROUTES) {
   });
 }
 
-for (const width of WIDTHS) {
-  test(`theme tokens: / follows the theme at ${width}px`, async ({ browser }) => {
-    const selectors = [
-      'body',
-      'h1',
-      'mat-toolbar',
-      'footer',
-      '.surface-card',
-      '.surface-chip',
-      '.hero-card',
-    ];
-    const sample = async (theme: ThemeName) => {
-      const page = await openPage(browser, '/', { theme, width });
-      const styles = await page.evaluate(
-        list =>
-          Object.fromEntries(
-            list.map(sel => {
-              const el = document.querySelector(sel);
-              const s = el ? getComputedStyle(el) : null;
-              // background-image too: the h1 is gradient text (color: transparent).
-              return [sel, s ? `${s.color} / ${s.backgroundColor} / ${s.backgroundImage}` : null];
-            }),
-          ),
-        selectors,
-      );
-      await page.context().close();
-      return styles;
-    };
+// The launcher tip is hover-only text; measure it fully shown.
+test('contrast: chat launcher tip is readable on hover', async ({ browser }) => {
+  const page = await openPage(browser, '/', { width: 1440, reducedMotion: 'reduce' });
+  await page.locator('button.chat-fab').hover();
+  await expect(page.locator('#chat-fab-tip')).toHaveCSS('opacity', '1');
 
-    const light = await sample('light');
-    const dark = await sample('dark');
-    const unchanged = selectors.filter(sel => light[sel] !== null && light[sel] === dark[sel]);
-    record(`tokens-${width}`, { width, light, dark, unchanged });
+  const axe = await new AxeBuilder({ page })
+    .include('#chat-fab-tip')
+    .withRules(['color-contrast'])
+    .analyze();
+  const contrast = axe.violations.flatMap(v => v.nodes.map(n => n.any[0]?.message ?? ''));
+  record('tip', { contrast, passes: axe.passes.length });
 
-    expect(unchanged, 'elements identical in light and dark').toEqual([]);
-  });
-}
-
-// The launcher tip is hover-only text; measure it fully shown, in both themes.
-for (const theme of ['light', 'dark'] as const) {
-  test(`contrast: chat launcher tip is readable on hover (${theme})`, async ({ browser }) => {
-    const page = await openPage(browser, '/', { theme, width: 1440, reducedMotion: 'reduce' });
-    await page.locator('button.chat-fab').hover();
-    await expect(page.locator('#chat-fab-tip')).toHaveCSS('opacity', '1');
-
-    const axe = await new AxeBuilder({ page })
-      .include('#chat-fab-tip')
-      .withRules(['color-contrast'])
-      .analyze();
-    const contrast = axe.violations.flatMap(v => v.nodes.map(n => n.any[0]?.message ?? ''));
-    record(`tip-${theme}`, { theme, contrast, passes: axe.passes.length });
-
-    expect(contrast).toEqual([]);
-    await page.context().close();
-  });
-}
+  expect(contrast).toEqual([]);
+  await page.context().close();
+});
 
 test.describe('keyboard', () => {
   for (const width of [360, 1440] as const) {
     test(`keyboard: / is fully operable at ${width}px`, async ({ browser }) => {
       // Reduced motion collapses focus transitions, so styles are read in their end state.
-      const page = await openPage(browser, '/', { theme: 'light', width, reducedMotion: 'reduce' });
+      const page = await openPage(browser, '/', { width, reducedMotion: 'reduce' });
       // :focus / :focus-visible only match in a document with system focus; with many
       // contexts in parallel that is not a given. Without it, focus can't be judged.
       await page.bringToFront();

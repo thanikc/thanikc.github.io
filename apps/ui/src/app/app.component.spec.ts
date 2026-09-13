@@ -2,10 +2,11 @@ import { ComponentFixture, DeferBlockBehavior, TestBed } from '@angular/core/tes
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
 
-// Tailwind palette utilities are frozen to one hex value and ignore the theme
-// toggle; themed colour must come from the `--mat-sys-*` tokens instead.
+// Tailwind palette utilities are frozen to one hex value; themed colour must
+// come from the `--mat-sys-*` tokens instead so it stays in step with the
+// generated theme.
 const PALETTE_CLASS =
-  /^(?:(?:hover|focus|focus-visible|active|dark|sm|md|lg):)*(?:bg|text|border|ring|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?$/;
+  /^(?:(?:hover|focus|focus-visible|active|sm|md|lg):)*(?:bg|text|border|ring|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?$/;
 
 const paletteClassesIn = (root: Element): string[] =>
   [root, ...root.querySelectorAll('*')].flatMap(el =>
@@ -49,12 +50,9 @@ describe('AppComponent', () => {
     expect(compiled.querySelector('router-outlet')).not.toBeNull();
   });
 
-  // Tailwind's `dark:` variant keys off the OS `prefers-color-scheme`, while the
-  // theme toggle keys off `data-theme`. A hardcoded text colour on the shell
-  // therefore follows the OS while the background follows the toggle, and the two
-  // collapse to the same tone when they disagree. Inherit the theme-aware
-  // `--mat-sys-on-surface` from `body` instead.
-  it('should not pin the shell text colour to a palette that ignores the theme toggle', () => {
+  // A hardcoded Tailwind palette colour on the shell would drift from the
+  // generated M3 theme. Inherit `--mat-sys-on-surface` from `body` instead.
+  it('should not pin the shell text colour to a palette that ignores the theme tokens', () => {
     const shell = (fixture.nativeElement as HTMLElement).querySelector('.app-shell');
     const classes = Array.from(shell!.classList);
 

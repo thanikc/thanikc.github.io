@@ -40,6 +40,8 @@ $hero-scrim: linear-gradient(
 // (capped at max-w-2xl) to clear it. Below 1024px the text spans the whole
 // card, so the photo would sit directly behind every line -- and because the
 // element is `display: none` there, no variant is fetched on small screens.
+// Photo: Evan Krause on Unsplash — Phi Phi Island, Thailand (Unsplash License,
+// free to use). https://unsplash.com/photos/BU6lABNbTpA
 .hero-photo {
   display: none;
   position: absolute;
@@ -50,13 +52,13 @@ $hero-scrim: linear-gradient(
   // `image-set()` is the right knob. The plain-url declaration below is the
   // fallback for engines without `image-set()`/`type()`, which drop the whole
   // declaration rather than the unsupported entry.
-  background-image: $hero-scrim, url('/img/hero-lagoon.jpg');
+  background-image: $hero-scrim, url('/img/hero-thailand.jpg');
   background-image:
     $hero-scrim,
     image-set(
-      url('/img/hero-lagoon.avif') type('image/avif'),
-      url('/img/hero-lagoon.webp') type('image/webp'),
-      url('/img/hero-lagoon.jpg') type('image/jpeg')
+      url('/img/hero-thailand.avif') type('image/avif'),
+      url('/img/hero-thailand.webp') type('image/webp'),
+      url('/img/hero-thailand.jpg') type('image/jpeg')
     );
   background-size: cover, cover;
   background-position: center, center;

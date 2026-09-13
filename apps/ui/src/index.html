@@ -44,7 +44,7 @@
     <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <meta name="theme-color" content="#1565c0" />
+    <meta name="theme-color" content="#0d352e" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!--
@@ -59,20 +59,18 @@
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
+    <!--
+      Headline serif, paired with a metric-matched "Fraunces Fallback"
+      @font-face (styles/material.scss) for the same reason as Roboto above.
+    -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block"
       rel="stylesheet"
     />
-    <script>
-      (function () {
-        try {
-          var mode = localStorage.getItem('theme-mode');
-          if (mode === 'light' || mode === 'dark') {
-            document.documentElement.setAttribute('data-theme', mode);
-          }
-        } catch (e) {}
-      })();
-    </script>
     <!--
       Consent Mode v2 defaults must be queued before gtag.js/adsbygoogle load so
       those scripts see "denied" on first read. The cookie consent banner

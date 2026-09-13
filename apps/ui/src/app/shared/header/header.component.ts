@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { ThemeToggleComponent } from '../theme/theme-toggle.component';
 
 interface NavLink {
   readonly label: string;
@@ -18,7 +17,7 @@ const NAV_LINKS: readonly NavLink[] = [
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, MatButtonModule, MatToolbarModule, ThemeToggleComponent],
+  imports: [RouterLink, MatButtonModule, MatToolbarModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
