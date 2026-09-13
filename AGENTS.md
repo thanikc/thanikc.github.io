@@ -65,6 +65,18 @@ change how you work:
   redirect (`index.html`, `404.html`) plus the root-only files.
 - `ng serve` and `ng test` run the English build only (`localize: ["en"]`).
 
+## Privacy Policy
+
+`apps/ui/src/app/domains/privacy/privacy-policy.component.html` is a factual
+inventory of what the site stores and sends, not boilerplate — it names specific
+storage keys (e.g. `cookie-consent`), third-party processors, and legal bases.
+Any change that adds, removes, or repurposes a cookie/local-storage key, an
+outgoing request to a new third party, or a new category of data processing
+**must** be checked against this file, and updated (with matching entries in
+`messages.de.json` and `messages.th.json`, per the i18n rules above) if it's now
+out of date. Pure styling/markup/refactor changes with no new data flow don't need
+an update — but check before assuming that's the case.
+
 ## Plan Mode Directives (For Planning Agent)
 
 When generating plans, avoid generic summaries. Outputs **must** strictly include:
