@@ -1,5 +1,21 @@
 @use '@angular/material' as mat;
 
+// Metric-matched local fallback for Roboto (see index.html: the Google Fonts
+// link uses display=swap). Overrides computed from real font metrics
+// (@capsizecss/metrics: Roboto vs Arial, both 2048 unitsPerEm) so the
+// fallback occupies the same line height and width as Roboto — the browser
+// paints text immediately in this face and swaps to Roboto with ~0 reflow,
+// instead of the CLS 0.14 regression a bare display=swap caused before this
+// face existed (see design-e2e-card-fill-baseline-failure memory context).
+@font-face {
+  font-family: 'Roboto Fallback';
+  src: local('Arial'), local('Liberation Sans'), local('Helvetica');
+  ascent-override: 92.9771%;
+  descent-override: 24.4677%;
+  line-gap-override: 0%;
+  size-adjust: 99.7809%;
+}
+
 :root {
   color-scheme: light dark;
 
@@ -9,7 +25,7 @@
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Roboto,
+      typography: '"Roboto", "Roboto Fallback", Arial, sans-serif',
       density: 0,
     )
   );

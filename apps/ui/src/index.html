@@ -48,13 +48,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!--
-      display=optional, not swap: a swap re-flows every line when Roboto lands after
-      first paint. The Playwright design check measured CLS 0.14 on /privacy-policy
-      from that alone (0.00 with the font blocked). Optional keeps the fallback for
-      that page view instead; cached visits get Roboto from the first frame.
+      display=swap paired with a metric-matched "Roboto Fallback" @font-face
+      (styles/material.scss) that occupies the same box as Roboto. A bare
+      swap previously measured CLS 0.14 on /privacy-policy because the
+      generic sans-serif fallback is a different size than Roboto; swapping
+      into a same-sized local face removes that reflow instead of blocking
+      Roboto on every uncached page view.
     -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=optional"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <link
