@@ -37,7 +37,7 @@ describe('ProfileHeroComponent', () => {
     expect(positioning).toContain('Angular and Spring Boot');
     expect(positioning).toContain('German online banking');
     expect(positioning).toContain('AI');
-    expect(positioning).toContain('reshaping');
+    expect(positioning).toContain('changing the way we build serious software');
   });
 
   // Owner's decisions: industry only, no company names, no credential line.
