@@ -15,7 +15,7 @@ export class PrivacyPolicyComponent {
 
   // Static legal content: no reactivity needed. A Date, not a string: the template
   // formats it with the date pipe so each locale prints the date its own way.
-  readonly lastUpdated = new Date(2026, 8, 11);
+  readonly lastUpdated = new Date(2026, 8, 13);
   readonly contactEmail = 'thanikc@gmail.com';
 
   reopenCookieBanner(): void {
