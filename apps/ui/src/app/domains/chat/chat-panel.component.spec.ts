@@ -577,6 +577,15 @@ describe('ChatPanelComponent', () => {
 
       expect(node.scrollTop).toBe(100);
     });
+
+    // On iOS Safari, `scrollTop =` honours `scroll-behavior: smooth` from CSS just
+    // like `scrollTo` does. An animated jump-to-bottom racing the panel's own mount
+    // reflow (the fixed-position sheet + scroll-locked body appearing the same
+    // frame) leaves the touch scroll gesture stuck until an unrelated reflow, e.g.
+    // focusing the composer, unsticks it. Keeping this instant avoids that race.
+    it('never marks the transcript for CSS-animated scrolling', () => {
+      expect(transcript().classList.contains('scroll-smooth')).toBe(false);
+    });
   });
 
   describe('closing', () => {

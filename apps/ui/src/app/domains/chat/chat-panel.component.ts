@@ -88,6 +88,11 @@ export class ChatPanelComponent {
       this.error();
       if (!this.following) return;
 
+      // Deliberately instant: with `scroll-behavior: smooth` in CSS, this same
+      // assignment animates instead, and on iOS Safari an animated jump that races
+      // the panel's own mount reflow (fixed-position sheet + scroll-locked body
+      // appearing the same frame) leaves the touch scroll gesture stuck until an
+      // unrelated reflow — e.g. focusing the composer — unsticks it.
       const el = this.transcript().nativeElement;
       el.scrollTop = el.scrollHeight;
     });
