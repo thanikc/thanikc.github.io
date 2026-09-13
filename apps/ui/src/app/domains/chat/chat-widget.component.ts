@@ -72,11 +72,35 @@ export class ChatWidgetComponent {
     // screens; either way, scrolling inside it shouldn't also scroll the page
     // behind it. Locked via a body class rather than the effect above since it
     // has nothing to do with focus, and needs its own teardown.
+    //
+    // `overflow: hidden` alone doesn't stop it: iOS Safari still lets a touch
+    // drag scroll (and rubber-band bounce) the body underneath a `fixed`
+    // backdrop, which is especially visible once the virtual keyboard shifts
+    // the layout viewport. Pinning the body itself with `position: fixed` —
+    // recording and restoring the scroll offset around it — is what actually
+    // holds it still there.
     effect(() => {
-      this.document.body.classList.toggle('chat-scroll-lock', this.chat.isOpen());
+      const body = this.document.body;
+      const view = this.document.defaultView;
+
+      if (this.chat.isOpen()) {
+        this.lockedScrollY = view?.scrollY ?? 0;
+        body.style.top = `-${this.lockedScrollY}px`;
+        body.classList.add('chat-scroll-lock');
+      } else if (body.classList.contains('chat-scroll-lock')) {
+        body.classList.remove('chat-scroll-lock');
+        body.style.top = '';
+        view?.scrollTo(0, this.lockedScrollY);
+      }
     });
-    inject(DestroyRef).onDestroy(() => this.document.body.classList.remove('chat-scroll-lock'));
+    inject(DestroyRef).onDestroy(() => {
+      this.document.body.classList.remove('chat-scroll-lock');
+      this.document.body.style.top = '';
+    });
   }
+
+  /** Page scroll offset at the moment the lock engaged; restored when it lifts. */
+  private lockedScrollY = 0;
 
   protected launch(): void {
     this.chat.open();

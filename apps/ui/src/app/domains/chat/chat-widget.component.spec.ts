@@ -44,6 +44,9 @@ describe('ChatWidgetComponent', () => {
   // test-environment artifact, not a real accessibility bug. Let any other
   // warning through so this doesn't hide something real.
   let warnSpy: ReturnType<typeof vi.spyOn>;
+  // jsdom doesn't implement scrollTo/scrollY; stub it out like ScrollToTopComponent's
+  // spec does, rather than letting jsdom log "not implemented" for every call.
+  let scrollToSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(async () => {
     turns.set([]);
@@ -54,6 +57,7 @@ describe('ChatWidgetComponent', () => {
     mockChatService.retry.mockClear();
     mockChatService.open.mockClear();
     mockChatService.close.mockClear();
+    scrollToSpy = vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
 
     const originalWarn = console.warn.bind(console);
     warnSpy = vi.spyOn(console, 'warn').mockImplementation((...args: unknown[]) => {
@@ -76,6 +80,7 @@ describe('ChatWidgetComponent', () => {
   afterEach(() => {
     fixture.nativeElement.remove();
     warnSpy.mockRestore();
+    scrollToSpy.mockRestore();
   });
 
   describe('launcher', () => {
@@ -189,14 +194,22 @@ describe('ChatWidgetComponent', () => {
     });
 
     it('locks page scroll while the panel is open, and unlocks it on close', () => {
+      // Object.defineProperty because jsdom's `window.scrollY` is read-only.
+      Object.defineProperty(window, 'scrollY', { value: 240, configurable: true });
       expect(document.body.classList.contains('chat-scroll-lock')).toBe(false);
 
       openPanel();
+      // `position: fixed` (not just `overflow: hidden`) is what actually stops
+      // iOS Safari from scrolling the body under the backdrop; `top` carries the
+      // scroll offset so the page doesn't visually jump to 0 while pinned.
       expect(document.body.classList.contains('chat-scroll-lock')).toBe(true);
+      expect(document.body.style.top).toBe('-240px');
 
       panelInstance().close.emit();
       fixture.detectChanges();
       expect(document.body.classList.contains('chat-scroll-lock')).toBe(false);
+      expect(document.body.style.top).toBe('');
+      expect(scrollToSpy).toHaveBeenCalledWith(0, 240);
     });
   });
 

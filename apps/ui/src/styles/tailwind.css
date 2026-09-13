@@ -18,7 +18,13 @@
 }
 
 /* Set while the chat sheet is open (see ChatWidgetComponent), so scrolling the
-   transcript can't also scroll the page behind it. */
+   transcript can't also scroll the page behind it. `position: fixed` (not just
+   `overflow: hidden`) is what actually holds the page still on iOS Safari,
+   which otherwise lets a touch drag scroll the body under the backdrop. The
+   component sets `top` inline to the negative scroll offset so the page
+   doesn't visually jump to 0 while locked. */
 body.chat-scroll-lock {
+  position: fixed;
+  inset-inline: 0;
   overflow: hidden;
 }
