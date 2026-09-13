@@ -4,7 +4,9 @@
 }
 
 .chat-panel {
-  background-color: var(--mat-sys-surface-container-low);
+  // Deliberately kept on the site's previous (pre-re-theme) page background
+  // rather than following it to dark green — see --app-surface-chat.
+  background-color: var(--app-surface-chat);
   color: var(--mat-sys-on-surface);
 }
 
@@ -64,8 +66,10 @@
     margin: 0.125rem 0;
   }
 
+  // on-primary-container, not primary: primary measures 4.47:1 against the
+  // panel's beige background (--app-surface-chat), just under the 4.5:1 floor.
   a {
-    color: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary-container);
     text-decoration: underline;
   }
 

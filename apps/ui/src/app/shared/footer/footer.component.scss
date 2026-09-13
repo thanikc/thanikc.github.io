@@ -3,24 +3,27 @@
   width: 14px;
   height: 14px;
   line-height: 14px;
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-base-muted);
 }
 
+// The footer sits directly on the page (dark green), not a raised card, so it
+// uses the page-text tokens rather than on-surface-variant/primary — see
+// --app-on-base-muted/--app-accent-on-base in material.scss.
 .footer-link {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-base-muted);
 
   &:hover {
-    color: var(--mat-sys-primary);
+    color: var(--app-accent-on-base);
   }
 }
 
 .social-link {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--app-on-base-muted);
   transition:
     color 0.2s ease,
     transform 0.2s ease;
 
   &:hover {
-    color: var(--mat-sys-primary);
+    color: var(--app-accent-on-base);
   }
 }

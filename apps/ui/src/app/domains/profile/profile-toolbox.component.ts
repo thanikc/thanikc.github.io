@@ -28,7 +28,7 @@ import { ToolGroup } from './profile.content';
           }
         </dl>
       } @else {
-        <p class="surface-muted text-sm">Nothing to show yet.</p>
+        <p class="page-muted text-sm">Nothing to show yet.</p>
       }
     </section>
   `,

@@ -19,9 +19,11 @@
 
 // One accent, on one card: the primary-action surface (Ask AI Ling) gets a
 // gold top rule, mirroring to-top.ch's single persistent CTA accent. No other
-// card carries it.
+// card carries it. Uses --app-accent-on-base, not --mat-sys-tertiary: the
+// border sits right at the page edge, and tertiary itself (tuned for text on
+// a light page) measures only 2:1 against the dark-green page base.
 .surface-card--accent {
-  border-top: 3px solid var(--mat-sys-tertiary);
+  border-top: 3px solid var(--app-accent-on-base);
 }
 
 .surface-chip {
@@ -31,6 +33,18 @@
 
 .surface-muted {
   color: var(--mat-sys-on-surface-variant);
+}
+
+// Mirrors .surface-card's on-surface pairing, but for text/icons that sit
+// directly on --app-surface-base (the page, now dark green) rather than a
+// raised card — e.g. section headings, the footer, un-carded empty states.
+// Using .surface-muted's dark tone there would be illegible.
+.page-heading {
+  color: var(--app-on-base);
+}
+
+.page-muted {
+  color: var(--app-on-base-muted);
 }
 
 // Icon tile at the top of a card.
@@ -66,6 +80,11 @@
   }
 
   .surface-muted {
+    color: #000;
+  }
+
+  .page-heading,
+  .page-muted {
     color: #000;
   }
 }

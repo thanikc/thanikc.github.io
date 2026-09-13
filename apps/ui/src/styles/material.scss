@@ -58,48 +58,71 @@ body {
   font: var(--mat-sys-body-medium);
 }
 
+// Resume-style printout (surfaces.scss): a dark-green page background would
+// otherwise print as a heavy ink fill behind the flattened black-on-white cards.
+@media print {
+  body {
+    background: none;
+  }
+}
+
 h1,
 h2 {
   font-family: 'Fraunces', 'Fraunces Fallback', Georgia, serif;
 }
 
-// Echoes to-top.ch's decorative line motif under section headings.
+// Echoes to-top.ch's decorative line motif under section headings. Tertiary
+// itself (#795900-ish, tuned for text on a light page) is too dark to read
+// against the dark-green page base, so the underline uses the light
+// tertiary-container tone instead — see --app-accent-on-base below.
 h2::after {
   content: '';
   display: block;
   width: 48px;
   height: 3px;
   margin-top: 8px;
-  background: linear-gradient(90deg, var(--mat-sys-tertiary), transparent);
+  background: linear-gradient(90deg, var(--app-accent-on-base), transparent);
 }
 
-// M3 has no success/warning role. These are app-specific semantic tokens for
-// data-provenance chips (e.g. "live" vs "baseline" data); centralised here so
-// no component hard-codes its own hex pair.
-// Page vs. card surfaces: the page sits on `base` and cards on the lighter
-// `raised` surface so cards read as raised above the page.
-//
-// The gap is deliberately wider than a bare contrast-ratio minimum would require:
-// `surface-container` measured as visibly "no card at all" in review (fill
-// contrast ~1.2, distinguishable only by the 1px border, if you looked for it).
-// `surface-dim` / `surface-container-lowest` give fill contrast ~1.4-1.7, so the
-// card reads as a surface at a glance, not just on close inspection. The
-// Playwright design check's surfaceSeparation() enforces a floor above the old
-// numbers so this can't quietly regress.
+// Page vs. card surfaces: the page sits on `base` (dark green) and cards on
+// the much lighter `raised` beige, so cards read as clearly raised above the
+// page. e2e/design.e2e.ts's surfaceSeparation() enforces a fill-contrast
+// floor (1.3) and a border-contrast floor (3:1) between the two so this can't
+// quietly regress into cards blending into the page again.
 :root {
-  // M3's generated neutral palette caps chroma very low regardless of the seed
-  // hue, so the auto-derived surface-dim (#dadad8) reads as plain cool grey
-  // rather than the warm cream to-top.ch is built around. A literal cream as
-  // light as to-top's own (#faf5f1) sits too close to the near-white
-  // surface-container-lowest cards render on (#ffffff) to clear this app's own
-  // surface-separation floor (fill contrast >= 1.3, e2e/design.e2e.ts) — cards
-  // would blend into the page. This keeps the same lightness tier as the
-  // original grey (so the fill-contrast margin against white cards is
-  // unchanged) but shifts it warm instead of widening the neutral seed's
-  // chroma, which pushed every neutral tone (chips, borders, dividers) toward
-  // a distracting tan.
-  --app-surface-base: #dad6ce;
-  --app-surface-raised: var(--mat-sys-surface-container-lowest);
+  --app-surface-base: #0d352e;
+  --app-surface-raised: #dad6ce;
+  // The chat panel keeps that same beige rather than following the page to
+  // dark green — a deliberate choice, not an oversight.
+  --app-surface-chat: var(--app-surface-raised);
+
+  // Text/icons sitting directly on --app-surface-base (not inside a raised
+  // card) need their own light pair: --mat-sys-on-surface stays dark (correct
+  // for the *cards*, which are still near-white), so anything outside a card
+  // must opt into these instead. See .page-heading/.page-muted in
+  // surfaces.scss. on-primary is white and built for exactly this — text on a
+  // primary-ish colour — and measures 13.4:1 against the base above.
+  --app-on-base: var(--mat-sys-on-primary);
+  --app-on-base-muted: color-mix(in srgb, var(--mat-sys-on-primary) 72%, transparent);
+  // Primary and tertiary are themselves too close in lightness to the dark
+  // base to read as links/accents on it (measured ~2:1); tertiary-container
+  // (a light gold, ~10:1 against the base) stands in for both roles wherever
+  // an accent sits directly on the page rather than on a card.
+  --app-accent-on-base: var(--mat-sys-tertiary-container);
+
+  // Angular Material's outlined and text buttons both default their label to
+  // --mat-sys-primary (measured 4.47:1 against the beige card fill, just
+  // under the 4.5:1 text floor). Every such button on the site lives on a
+  // card (the Ask-AI-Ling links, project links, cookie-preferences button),
+  // so retinting these two shared tokens fixes all of them at once — style
+  // via Material's own theming tokens rather than each button's internal DOM
+  // (AGENTS.md / UX-UI.md). Going darker than primary can only ever improve
+  // contrast on the light card fill, so this is also safe for the header's
+  // plain-text nav links, the one place a text button sits outside a card.
+  // Don't reuse this for anything that might sit directly on the dark-green
+  // page instead: on-primary-container measures only 1.4:1 there.
+  --mat-button-outlined-label-text-color: var(--mat-sys-on-primary-container);
+  --mat-button-text-label-text-color: var(--mat-sys-on-primary-container);
 }
 
 :root {

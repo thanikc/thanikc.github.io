@@ -34,11 +34,13 @@ describe('SectionHeaderComponent', () => {
     expect(el().querySelector('h2')?.classList.contains('scroll-mt-24')).toBe(true);
   });
 
+  // This component sits directly on the page background, not a raised card, so
+  // its text uses the page-muted token pairing rather than surface-muted.
   it('renders the subtitle as muted text', () => {
     const subtitle = el().querySelector('p');
 
     expect(subtitle?.textContent?.trim()).toBe('The problems I spend my days on');
-    expect(subtitle?.classList.contains('surface-muted')).toBe(true);
+    expect(subtitle?.classList.contains('page-muted')).toBe(true);
   });
 
   it('draws its divider in the outline token colour', () => {

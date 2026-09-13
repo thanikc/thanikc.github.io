@@ -11,8 +11,13 @@
   color: var(--mat-sys-on-surface);
 }
 
+// An inline link needs a non-colour signal too (axe: link-in-text-block) —
+// never rely on primary-vs-body-text contrast alone to mark it as a link.
+// on-primary-container, not primary: primary itself measures 4.47:1 against
+// the beige card fill, just under the 4.5:1 text floor.
 .policy-link {
-  color: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary-container);
+  text-decoration: underline;
 
   &:hover {
     text-decoration-thickness: 2px;

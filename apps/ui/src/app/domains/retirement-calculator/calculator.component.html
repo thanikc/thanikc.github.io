@@ -1,7 +1,10 @@
 <section>
-  <h1 class="text-2xl font-bold mb-6">Retirement Calculator</h1>
+  <h1 class="page-heading text-2xl font-bold mb-6">Retirement Calculator</h1>
 
-  <form class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <!-- A raised card, not the bare page: mat-form-field's outline appearance has no
+       fill of its own, so its label/input text (Material's own on-surface tokens,
+       tuned dark for a light surface) needs a light surface underneath it. -->
+  <form class="surface-card grid grid-cols-1 md:grid-cols-3 gap-4 rounded-2xl p-4 mb-6 sm:p-6">
     <mat-form-field appearance="outline" class="w-full">
       <mat-label>Current Net Worth</mat-label>
       <span matPrefix class="px-2">$</span>
