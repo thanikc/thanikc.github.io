@@ -60,15 +60,15 @@ export async function retrieve(query: string, env: Env, topK = 5): Promise<Retri
 
 /**
  * Languages the site is published in (see the `i18n` block in `apps/ui/angular.json`).
- * English needs no instruction — it is the language of the knowledge base and of the
- * prompt itself.
+ * Used only as the fallback language when the visitor's own message doesn't clearly
+ * indicate one — the model otherwise always mirrors the language the visitor writes in.
  */
 const ANSWER_LANGUAGES: Record<string, string> = {
   de: 'German',
   th: 'Thai',
 };
 
-/** The language the answer must come back in, or null for English. */
+/** The fallback answer language for a given site locale, or null for English. */
 export function answerLanguage(locale: unknown): string | null {
   return typeof locale === 'string' ? (ANSWER_LANGUAGES[locale] ?? null) : null;
 }
@@ -110,16 +110,16 @@ export function buildMessages(
     context || '(no relevant context found)',
   ];
 
-  const language = answerLanguage(locale);
-  if (language) {
-    // Placed after the context so it is the last thing the model reads about form.
-    system.push(
-      '',
-      `Language: answer in ${language}, however the visitor writes. The context is in English —`,
-      'translate what you need from it rather than quoting it untranslated. Keep names,',
-      'technologies and product names as they are.',
-    );
-  }
+  const defaultLanguage = answerLanguage(locale) ?? 'English';
+  // Placed after the context so it is the last thing the model reads about form.
+  system.push(
+    '',
+    'Language: reply in whichever language the visitor writes their message in, even if it',
+    `switches partway through the conversation. If a message is ambiguous or too short to tell`,
+    `(a greeting, an emoji, "ok"), fall back to ${defaultLanguage}. The context is in English —`,
+    'translate what you need from it rather than quoting it untranslated. Keep names,',
+    'technologies and product names as they are.',
+  );
 
   const systemPrompt = system.join('\n');
 

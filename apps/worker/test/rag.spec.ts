@@ -58,24 +58,25 @@ describe('buildMessages', () => {
     expect(lower).toMatch(/ignore.*instructions|override|jailbreak/);
   });
 
-  // The site is published in English, German and Thai; the knowledge base is
-  // English, so the language of the answer is decided here, not by the context.
-  it('asks for the answer in the language the visitor is reading', () => {
-    const german = buildMessages('Was hat er gebaut?', [], [], 'de')[0]?.content ?? '';
-    const thai = buildMessages('เขาสร้างอะไร?', [], [], 'th')[0]?.content ?? '';
+  // The chatbot should mirror whatever language the visitor actually types in,
+  // not the language of the site build they happen to be on.
+  it('tells the model to reply in whichever language the visitor writes in', () => {
+    const system = buildMessages('Was hat er gebaut?', [])[0]?.content ?? '';
 
-    expect(german).toContain('German');
-    expect(german).toContain('context is in English');
-    expect(thai).toContain('Thai');
-    expect(thai).not.toContain('German');
+    expect(system.toLowerCase()).toContain('reply in whichever language the visitor writes');
+    expect(system).toContain('context is in English');
   });
 
-  it('answers in English by default, without a language instruction', () => {
-    const fallback = buildMessages('What did he build?', [])[0]?.content ?? '';
-    const english = buildMessages('What did he build?', [], [], 'en')[0]?.content ?? '';
+  it('falls back to the site locale language when the visitor message is ambiguous', () => {
+    const german = buildMessages('ok', [], [], 'de')[0]?.content ?? '';
+    const thai = buildMessages('ok', [], [], 'th')[0]?.content ?? '';
+    const fallback = buildMessages('ok', [])[0]?.content ?? '';
+    const english = buildMessages('ok', [], [], 'en')[0]?.content ?? '';
 
-    expect(fallback).not.toContain('Answer in');
-    expect(english).not.toContain('Answer in');
+    expect(german).toContain('fall back to German');
+    expect(thai).toContain('fall back to Thai');
+    expect(fallback).toContain('fall back to English');
+    expect(english).toContain('fall back to English');
   });
 
   it('keeps prior history between the system prompt and the new question', () => {
