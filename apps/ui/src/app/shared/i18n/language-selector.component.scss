@@ -1,0 +1,79 @@
+:host {
+  display: inline-flex;
+}
+
+.language-selector {
+  color: var(--mat-sys-on-surface);
+
+  &--disabled {
+    opacity: 0.6;
+  }
+}
+
+.language-flag {
+  display: flex;
+  flex: none;
+  width: 1.25rem;
+  height: 0.875rem;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--mat-sys-outline) 70%, transparent);
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.language-label {
+  font: var(--mat-sys-label-large);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.language-caret {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  transition: color 0.2s ease;
+}
+
+.language-selector:hover .language-caret {
+  color: var(--mat-sys-on-surface);
+}
+
+// Layered exactly over the flag/label/caret: real control on top, invisible, so its
+// focus ring, native picker and hit target are the ones a visitor actually gets.
+.language-select {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: transparent;
+  cursor: pointer;
+
+  // 'color' is inherited, so the line above also blanked every <option> in the
+  // native popup — invisible except when the OS's own highlight colour took over a
+  // focused row. The popup isn't styled by this component (the OS draws it), so
+  // give its text back a real colour without undoing the closed control's.
+  option {
+    color: var(--mat-sys-on-surface);
+  }
+
+  // The ring sits on the control itself, not on the content around it: a focus state
+  // has to be visible in the computed style of the focused element
+  // (e2e/design.e2e.ts checks exactly that). The 'color: transparent' above hides
+  // the native text without touching this — outline is never part of 'color'.
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 3px;
+    border-radius: var(--mat-sys-corner-extra-small);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}

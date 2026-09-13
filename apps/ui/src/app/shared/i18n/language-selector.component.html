@@ -1,0 +1,55 @@
+<span
+  class="language-selector relative inline-flex h-11 items-center gap-1.5 pr-2 pl-2.5 sm:pr-2.5"
+  [class.language-selector--disabled]="!locale.canSwitchLocale"
+>
+  <span class="language-flag" aria-hidden="true">
+    @switch (countryOf(locale.currentOption.regionTag)) {
+      @case ('US') {
+        <svg viewBox="0 0 20 14">
+          <rect width="20" height="14" fill="#B22234" />
+          <rect y="1.08" width="20" height="1.08" fill="#fff" />
+          <rect y="3.23" width="20" height="1.08" fill="#fff" />
+          <rect y="5.38" width="20" height="1.08" fill="#fff" />
+          <rect y="7.54" width="20" height="1.08" fill="#fff" />
+          <rect y="9.69" width="20" height="1.08" fill="#fff" />
+          <rect y="11.85" width="20" height="1.08" fill="#fff" />
+          <rect width="8" height="7.54" fill="#3C3B6E" />
+        </svg>
+      }
+      @case ('DE') {
+        <svg viewBox="0 0 20 14">
+          <rect width="20" height="4.67" fill="#000" />
+          <rect y="4.67" width="20" height="4.67" fill="#DD0000" />
+          <rect y="9.33" width="20" height="4.67" fill="#FFCE00" />
+        </svg>
+      }
+      @case ('TH') {
+        <svg viewBox="0 0 20 14">
+          <rect width="20" height="14" fill="#A51931" />
+          <rect y="2.33" width="20" height="9.33" fill="#F4F5F8" />
+          <rect y="4.67" width="20" height="4.67" fill="#2D2A4A" />
+        </svg>
+      }
+    }
+  </span>
+  <span class="language-label hidden sm:inline">{{ locale.currentOption.label }}</span>
+  <mat-icon class="language-caret pointer-events-none" aria-hidden="true">expand_more</mat-icon>
+
+  <select
+    class="language-select"
+    i18n-aria-label="Name of the language picker@@i18n.selector.ariaLabel"
+    aria-label="Language"
+    [disabled]="!locale.canSwitchLocale"
+    (change)="onChange($event)"
+  >
+    @for (option of locale.options; track option.code) {
+      <option
+        [value]="option.code"
+        [attr.lang]="option.regionTag"
+        [attr.selected]="isCurrent(option.code)"
+      >
+        {{ option.label }}
+      </option>
+    }
+  </select>
+</span>
