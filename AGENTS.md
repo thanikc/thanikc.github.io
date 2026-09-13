@@ -46,6 +46,10 @@ change how you work:
   verifies every message is translated and its placeholders match). A message with a
   missing or mismatched translation falls back to English in a build that otherwise
   looks fine, so treat that check as part of green.
+- **Editing existing copy updates every locale, in the same change.** If you change
+  the English text (or any locale's text) for an id that already has translations,
+  update `messages.de.json` and `messages.th.json` for that id too — never leave one
+  language stale while the others move on.
 - **Keep out of i18n:** proper nouns and product names (Angular, CrashDash, AI Ling),
   technology chips, and `SocialLink.label` — that one doubles as the analytics CTA
   label and must stay stable across locales.
