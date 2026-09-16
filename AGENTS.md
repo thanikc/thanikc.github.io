@@ -47,6 +47,13 @@ change how you work:
   verifies every message is translated and its placeholders match). A message with a
   missing or mismatched translation falls back to English in a build that otherwise
   looks fine, so treat that check as part of green.
+- **Translate for meaning, not word-for-word.** Read the English sentence, then write
+  how a native speaker would actually say it — don't mirror its clause order,
+  sentence-splitting, or idioms. A literal translation is a bug even when every word
+  is correct: e.g. English's "as curious about X as about Y" doesn't map onto a
+  German relative clause without producing an unnatural back-to-back "wie...wie".
+  Prefer active voice over a carried-over passive, and restructure sentences that
+  read stilted once translated.
 - **Editing existing copy updates every locale, in the same change.** If you change
   the English text (or any locale's text) for an id that already has translations,
   update `messages.de.json` and `messages.th.json` for that id too — never leave one
