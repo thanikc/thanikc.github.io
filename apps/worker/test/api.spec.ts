@@ -3,7 +3,7 @@ import app from '../src/index';
 
 const VARS = {
   ALLOWED_ORIGIN: 'https://thanikc.github.io',
-  EMBEDDING_MODEL: '@cf/baai/bge-base-en-v1.5',
+  EMBEDDING_MODEL: '@cf/baai/bge-m3',
   GROQ_MODEL: 'groq-m',
   GOOGLE_MODEL: 'google-m',
   OPENROUTER_MODEL: 'or-m',

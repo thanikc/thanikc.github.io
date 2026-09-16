@@ -3,7 +3,7 @@
 Cloudflare Worker API backing AI Ling, the assistant that answers about Thanik and
 his work. It runs RAG over a
 [Vectorize](https://developers.cloudflare.com/vectorize/) index of content
-(embedded with Workers AI `@cf/baai/bge-base-en-v1.5`) and generates answers through
+(embedded with Workers AI `@cf/baai/bge-m3`) and generates answers through
 an OpenAI-compatible provider chain: **Groq** primary, **Google AI** and
 **OpenRouter** as fallbacks.
 
@@ -29,14 +29,13 @@ the system prompt for `de` and `th`, and English needs none. It is visitor input
 anything other than a language the site is published in is ignored rather than
 reaching the prompt.
 
-The knowledge base in `content/` stays English and so does retrieval: the embedding
-model (`@cf/baai/bge-base-en-v1.5`) is English-only, so a question typed in German or
-Thai embeds poorly against English chunks and can retrieve the wrong context — the
-answer then comes back in the right language but with less to work with. Moving
-`EMBEDDING_MODEL` to a multilingual model (e.g. `@cf/baai/bge-m3`) fixes that, and
+The knowledge base in `content/` stays English, but retrieval doesn't need it to
+match: the embedding model (`@cf/baai/bge-m3`) is multilingual, so a question typed
+in German or Thai embeds into the same space as the English chunks and retrieves
+comparably to an English question. Switching `EMBEDDING_MODEL` to a different model
 needs the Vectorize index recreated at the new dimension and every document
-re-ingested (`pnpm ingest:deployed`), so it is a deliberate migration, not a config
-tweak.
+re-ingested (`pnpm ingest:deployed`), so treat that as a deliberate migration, not a
+config tweak.
 
 `/api/chat` returns the full answer in one response rather than streaming tokens.
 This is deliberate: the provider chain in `chat/client.ts` fails over from Groq to
@@ -60,7 +59,7 @@ Set them locally with `pnpm exec wrangler secret put <NAME>`, or in CI via the
 ## One-time setup
 
 ```bash
-pnpm exec wrangler vectorize create resume-rag --dimensions=768 --metric=cosine
+pnpm exec wrangler vectorize create resume-rag --dimensions=1024 --metric=cosine
 ```
 
 ## Knowledge base

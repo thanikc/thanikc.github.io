@@ -17,12 +17,13 @@ it says so and points to Thanik's email and LinkedIn.
 ## How AI Ling works
 
 AI Ling uses retrieval-augmented generation (RAG). Thanik's knowledge base is a
-set of Markdown documents. Each document is split into overlapping chunks of about
-800 characters, embedded with Cloudflare Workers AI (the bge-base-en-v1.5 model),
-and stored in a Cloudflare Vectorize index. For each question, the API embeds the
-question, retrieves the five closest chunks, and sends them with the last few
+set of Markdown documents, written in English. Each document is split into
+overlapping chunks of about 800 characters, embedded with Cloudflare Workers AI
+(the multilingual bge-m3 model), and stored in a Cloudflare Vectorize index. For
+each question, the API embeds the question — in whatever language the visitor
+typed it — retrieves the five closest chunks, and sends them with the last few
 turns of the conversation to a language model, which answers from that context
-only.
+only, in the visitor's language.
 
 The API is a Cloudflare Worker written with Hono. The chat widget on the website
 is part of Thanik's Angular app and loads only once the page is idle, so it never

@@ -4,7 +4,7 @@ Source of truth for AI Ling's knowledge base — Thanik and his work, not just h
 résumé. Each `*.md` file here is
 ingested as **one document** by `scripts/ingest.mjs` (`pnpm --filter @thanikc/worker ingest`):
 the worker chunks it (~800 chars, 100 overlap), embeds each chunk with
-`@cf/baai/bge-base-en-v1.5`, and upserts into the `resume-rag` Vectorize index
+`@cf/baai/bge-m3`, and upserts into the `resume-rag` Vectorize index
 with id `<filename>:<n>`.
 
 ## Format

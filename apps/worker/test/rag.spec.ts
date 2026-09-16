@@ -3,7 +3,7 @@ import { buildMessages, retrieve } from '../src/rag';
 
 function fakeEnv(overrides: Partial<Env> = {}): Env {
   return {
-    EMBEDDING_MODEL: '@cf/baai/bge-base-en-v1.5',
+    EMBEDDING_MODEL: '@cf/baai/bge-m3',
     ...overrides,
   } as unknown as Env;
 }
@@ -105,7 +105,7 @@ describe('retrieve', () => {
 
     const chunks = await retrieve('question', env, 3);
 
-    expect(run).toHaveBeenCalledWith('@cf/baai/bge-base-en-v1.5', { text: ['question'] });
+    expect(run).toHaveBeenCalledWith('@cf/baai/bge-m3', { text: ['question'] });
     expect(query).toHaveBeenCalledWith([0.1, 0.2, 0.3], { topK: 3, returnMetadata: 'all' });
     expect(chunks).toEqual([
       { text: 'chunk one', score: 0.82 },
