@@ -35,16 +35,27 @@ review and passing tests.
 ## Team AI rules at a cooperative-banking IT service provider
 
 At a German cooperative-banking IT service provider, Thanik and the tech lead
-introduced AI-assisted development to their Angular team. Together they wrote a
-binding set of AI rules that serves as an architectural guideline and minimum
-standard for the whole team. The rules cover
-architecture guidelines, coding standards, and testing requirements, so that
-AI-generated code meets the same bar as code written by hand.
+introduced AI-assisted development to their Angular team, at a time when
+agentic coding wasn't yet permitted there — AI meant assistant-style tools
+such as autocomplete and chat, and code review stayed the traditional
+line-by-line kind. Together they wrote a binding set of AI rules that serves
+as an architectural guideline and minimum standard for the whole team. The
+rules cover architecture guidelines, coding standards, and testing
+requirements, so that AI-assisted code meets the same bar as code written by
+hand.
 
-## AI rules in Thanik's own projects
+## The shift from prompting to specifying, on Thanik's own projects
 
-Thanik applies the same approach to his side projects. His website repository
-contains the rules his AI coding assistants must follow: a strict test-driven
-workflow, the architecture and coding standards, and a set of UI and
-accessibility standards. He also builds AI into products: AI Ling, the assistant
-on his website, and the AI-generated roast in his BJJ Belt Quiz.
+On his own projects, where agentic coding tools genuinely do the
+implementation, Thanik has felt the bottleneck in software engineering move.
+Typing code and converting tickets into implementation stopped being the hard
+part once agents could generate functional code faster than a human can read
+it. What got harder instead: writing specifications precise enough that an
+agent can't misinterpret them, reviewing for architectural intent and
+edge-case coverage before or during generation rather than line-by-line
+afterward, and treating the test suite itself as the specification an agent
+must satisfy so it can refactor safely. His website repository contains the
+rules his AI coding assistants must follow under this approach: a strict
+test-driven workflow, the architecture and coding standards, and a set of UI
+and accessibility standards. He also builds AI into products: AI Ling, the
+assistant on his website, and the AI-generated roast in his BJJ Belt Quiz.
