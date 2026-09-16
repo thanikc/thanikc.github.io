@@ -11,6 +11,6 @@ export const CHAT_ERROR_MESSAGE = $localize`:Shown when the chat request fails@@
 export const CHAT_SUGGESTIONS: readonly string[] = [
   $localize`:Starter question offered in the empty chat@@chat.suggestion.complexSystem:What's the most complex system Thanik has worked on?`,
   $localize`:Starter question offered in the empty chat@@chat.suggestion.builtFromScratch:What has Thanik built from scratch?`,
-  $localize`:Starter question offered in the empty chat@@chat.suggestion.aiInTeam:How does Thanik use AI in a team?`,
+  $localize`:Starter question offered in the empty chat@@chat.suggestion.aiParadigmShift:What's Thanik's take on building software with AI?`,
   $localize`:Starter question offered in the empty chat@@chat.suggestion.howAiLingWorks:How does AI Ling work?`,
 ];

@@ -24,7 +24,7 @@ describe('EVAL_QUESTIONS', () => {
       expect.arrayContaining([
         "What's the most complex system Thanik has worked on?",
         'What has Thanik built from scratch?',
-        'How does Thanik use AI in a team?',
+        "What's Thanik's take on building software with AI?",
         'How does AI Ling work?',
       ]),
     );
