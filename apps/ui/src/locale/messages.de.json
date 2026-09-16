@@ -31,7 +31,7 @@
     "chat.error": "Entschuldige, ich konnte gerade keine Antwort holen. Bitte versuche es noch einmal.",
     "chat.suggestion.complexSystem": "Was ist das komplexeste System, an dem Thanik gearbeitet hat?",
     "chat.suggestion.builtFromScratch": "Was hat Thanik von Grund auf gebaut?",
-    "chat.suggestion.aiParadigmShift": "Wie sieht Thanik die Softwareentwicklung mit KI?",
+    "chat.suggestion.aiDevCriteria": "Worauf würde Thanik bei einem Entwickler achten, der KI nutzt?",
     "chat.suggestion.howAiLingWorks": "Wie funktioniert AI Ling?",
     "privacy.pageTitle": "Datenschutzerklärung",
     "privacy.lastUpdated": "Zuletzt aktualisiert: {$INTERPOLATION}",

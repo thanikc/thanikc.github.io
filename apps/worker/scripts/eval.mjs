@@ -22,8 +22,8 @@ export const EVAL_QUESTIONS = [
     expectAny: ['ground-up', 'from scratch', 'investment', 'portal'],
   },
   {
-    question: "What's Thanik's take on building software with AI?",
-    expectAny: ['specif', 'agent', 'test'],
+    question: 'What would Thanik look for in a developer using AI?',
+    expectAny: ['specif', 'review', 'test'],
   },
   { question: 'How does AI Ling work?', expectAny: ['Vectorize', 'retriev', 'knowledge base'] },
   {

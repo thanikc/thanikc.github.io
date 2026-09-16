@@ -59,3 +59,13 @@ rules his AI coding assistants must follow under this approach: a strict
 test-driven workflow, the architecture and coding standards, and a set of UI
 and accessibility standards. He also builds AI into products: AI Ling, the
 assistant on his website, and the AI-generated roast in his BJJ Belt Quiz.
+
+## What Thanik looks for in a developer using AI
+
+When Thanik evaluates a developer who uses AI, speed of output isn't what he's
+looking for. He wants to see them write specifications precise enough that an
+agent can't misinterpret them, review AI-generated code for architectural
+intent and edge-case coverage rather than skim a green build, treat the test
+suite as the real specification instead of an afterthought, and know when to
+challenge an agent's answer rather than trust it by default. Someone who can
+only prompt and accept isn't enough — the judgment still has to be theirs.

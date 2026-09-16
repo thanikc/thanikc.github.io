@@ -31,7 +31,7 @@
     "chat.error": "ขออภัย ตอนนี้ยังหาคำตอบไม่ได้ กรุณาลองอีกครั้ง",
     "chat.suggestion.complexSystem": "ระบบที่ซับซ้อนที่สุดที่ Thanik เคยทำคืออะไร?",
     "chat.suggestion.builtFromScratch": "Thanik สร้างอะไรขึ้นมาเองตั้งแต่ต้นบ้าง?",
-    "chat.suggestion.aiParadigmShift": "Thanik มองการพัฒนาซอฟต์แวร์ด้วย AI อย่างไร?",
+    "chat.suggestion.aiDevCriteria": "Thanik จะดูอะไรในตัวนักพัฒนาที่ใช้ AI?",
     "chat.suggestion.howAiLingWorks": "AI Ling ทำงานอย่างไร?",
     "privacy.pageTitle": "นโยบายความเป็นส่วนตัว",
     "privacy.lastUpdated": "อัปเดตล่าสุด: {$INTERPOLATION}",
