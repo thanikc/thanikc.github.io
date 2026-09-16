@@ -38,7 +38,7 @@ export function vectorize(env: Env): VectorizeLike {
   return env.VECTORIZE as unknown as VectorizeLike;
 }
 
-/** Embeds the query and returns the top matching resume chunks. */
+/** Embeds the query and returns the top matching content chunks. */
 export async function retrieve(query: string, env: Env, topK = 5): Promise<RetrievedChunk[]> {
   const vector = await embed(query, env);
   const { matches } = await vectorize(env).query(vector, { topK, returnMetadata: 'all' });

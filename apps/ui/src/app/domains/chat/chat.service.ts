@@ -18,7 +18,7 @@ const titlesOf = (sources: ChatSource[] = []): string[] => [
   ...new Set(sources.flatMap(source => (source.title ? [source.title] : []))),
 ];
 
-/** Conversation state for the résumé chatbot, backed by the worker's `/api/chat`. */
+/** Conversation state for AI Ling, backed by the worker's `/api/chat`. */
 @Injectable({
   providedIn: 'root',
 })

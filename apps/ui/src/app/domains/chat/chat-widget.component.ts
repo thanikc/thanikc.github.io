@@ -18,7 +18,7 @@ import { ChatPanelComponent } from './chat-panel.component';
 import { ChatService } from './chat.service';
 
 /**
- * Floating launcher for the résumé chatbot. The launcher and the panel are mutually
+ * Floating launcher for AI Ling. The launcher and the panel are mutually
  * exclusive — opening swaps the button out for the panel, closing swaps it back and
  * returns focus. The conversation lives in `ChatService` and survives closing.
  *

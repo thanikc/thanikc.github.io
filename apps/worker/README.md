@@ -1,7 +1,8 @@
 # @thanikc/worker
 
-Cloudflare Worker API backing the resume chatbot. It runs RAG over a
-[Vectorize](https://developers.cloudflare.com/vectorize/) index of résumé content
+Cloudflare Worker API backing AI Ling, the assistant that answers about Thanik and
+his work. It runs RAG over a
+[Vectorize](https://developers.cloudflare.com/vectorize/) index of content
 (embedded with Workers AI `@cf/baai/bge-base-en-v1.5`) and generates answers through
 an OpenAI-compatible provider chain: **Groq** primary, **Google AI** and
 **OpenRouter** as fallbacks.
@@ -64,7 +65,7 @@ pnpm exec wrangler vectorize create resume-rag --dimensions=768 --metric=cosine
 
 ## Knowledge base
 
-`content/*.md` holds the résumé content the chatbot answers from — one file per
+`content/*.md` holds the content AI Ling answers from — one file per
 document. Pushing content does **not** re-ingest it; after editing, re-ingest by hand:
 
 ```bash

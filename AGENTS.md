@@ -8,8 +8,9 @@ tooling (prettier, husky, lint-staged).
 - `apps/ui` — the Angular site (`@thanikc/ui`). All rules in this doc apply here.
   Run commands with `pnpm --filter @thanikc/ui <script>` (e.g. `… test`, `… build`,
   `… start`).
-- `apps/worker` — Cloudflare Worker API (`@thanikc/worker`) for the resume chatbot
-  (Hono + Vectorize RAG + Groq/Google/OpenRouter). TDD still applies: write
+- `apps/worker` — Cloudflare Worker API (`@thanikc/worker`) for AI Ling, the assistant
+  that answers about Thanik and his work (Hono + Vectorize RAG + Groq/Google/OpenRouter).
+  TDD still applies: write
   `test/*.spec.ts` first with `vitest` under `@cloudflare/vitest-plugin`, stub the
   `AI` / `VECTORIZE` bindings and global `fetch` per-test, and drive endpoints via
   `app.request(url, init, env)`. Run `pnpm --filter @thanikc/worker test`.
