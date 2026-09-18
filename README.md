@@ -84,7 +84,7 @@ https://thanikc.github.io/th/         → Thai
 - **Deploying:** `build:pages`, not `build` — the localized build leaves the
   deployment root empty, and `apps/ui/scripts/emit-pages-root.mjs` fills it in with the
   redirect pages and the files that only work at the root of a domain (`robots.txt`,
-  `sitemap.xml`, `ads.txt`, `llms.txt`, `favicon.ico`).
+  `sitemap.xml`, `llms.txt`, `favicon.ico`).
 
 ## Key Features & Standards
 

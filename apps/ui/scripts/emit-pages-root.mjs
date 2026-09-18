@@ -11,7 +11,7 @@
  *    (`/calculator`, `/privacy-policy`) and any shared deep link still land on the
  *    right page in the right language.
  *  - the files that only work at the root of a domain: robots.txt, sitemap.xml,
- *    ads.txt, llms.txt and the bare /favicon.ico request.
+ *    llms.txt and the bare /favicon.ico request.
  *
  * The language logic is duplicated here as inline JavaScript on purpose: it has to
  * run before any bundle is fetched, and the root has no bundle of its own. Only the
@@ -33,7 +33,7 @@ const publicDir = join(appRoot, 'public');
 const localesFile = join(appRoot, 'src/app/shared/i18n/locales.ts');
 
 /** Files a crawler, an ad network or a browser only ever looks for at the root. */
-const ROOT_FILES = ['robots.txt', 'sitemap.xml', 'ads.txt', 'llms.txt', 'favicon.ico'];
+const ROOT_FILES = ['robots.txt', 'sitemap.xml', 'llms.txt', 'favicon.ico'];
 
 function fail(message) {
   throw new Error(`emit-pages-root: ${message}`);
