@@ -15,7 +15,7 @@
       (close)="close()"
     />
   </div>
-} @else {
+} @else if (!consentBannerShowing()) {
   <div class="chat-launcher absolute right-4 bottom-4">
     <button
       #fab

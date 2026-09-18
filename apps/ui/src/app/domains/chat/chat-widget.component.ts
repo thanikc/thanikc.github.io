@@ -15,12 +15,15 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { ChatPanelComponent } from './chat-panel.component';
+import { CookieConsentService } from '../../shared/cookie-consent/cookie-consent.service';
 import { ChatService } from './chat.service';
 
 /**
  * Floating launcher for AI Ling. The launcher and the panel are mutually
  * exclusive — opening swaps the button out for the panel, closing swaps it back and
- * returns focus. The conversation lives in `ChatService` and survives closing.
+ * returns focus. The conversation lives in `ChatService` and survives closing. The
+ * launcher stays hidden while the cookie consent banner is showing: both claim the
+ * bottom-right corner, and the banner's Accept/Reject buttons must never be covered.
  *
  * The panel is a hand-rolled `cdkTrapFocus` sheet rather than `MatDialog` on purpose:
  * `MatDialog` is built on `@angular/cdk/overlay`, and with `cli.cache.enabled: false`
@@ -39,6 +42,7 @@ import { ChatService } from './chat.service';
 })
 export class ChatWidgetComponent {
   protected readonly chat = inject(ChatService);
+  protected readonly consentBannerShowing = inject(CookieConsentService).showBanner;
   protected readonly panelId = 'chat-dialog';
 
   /**

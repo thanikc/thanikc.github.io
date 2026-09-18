@@ -7,6 +7,7 @@ import { ChatWidgetComponent } from './chat-widget.component';
 import { ChatPanelComponent } from './chat-panel.component';
 import { ChatService } from './chat.service';
 import { ChatTurn } from './chat.models';
+import { CookieConsentService } from '../../shared/cookie-consent/cookie-consent.service';
 import { paletteClassesIn } from '../../shared/testing/palette-classes';
 
 describe('ChatWidgetComponent', () => {
@@ -16,6 +17,7 @@ describe('ChatWidgetComponent', () => {
   const pending = signal(false);
   const error = signal<string | null>(null);
   const isOpen = signal(false);
+  const showBanner = signal(false);
   const mockChatService = {
     turns,
     pending,
@@ -53,6 +55,7 @@ describe('ChatWidgetComponent', () => {
     pending.set(false);
     error.set(null);
     isOpen.set(false);
+    showBanner.set(false);
     mockChatService.send.mockClear();
     mockChatService.retry.mockClear();
     mockChatService.open.mockClear();
@@ -69,7 +72,10 @@ describe('ChatWidgetComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [ChatWidgetComponent],
-      providers: [{ provide: ChatService, useValue: mockChatService }],
+      providers: [
+        { provide: ChatService, useValue: mockChatService },
+        { provide: CookieConsentService, useValue: { showBanner } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatWidgetComponent);
@@ -95,6 +101,16 @@ describe('ChatWidgetComponent', () => {
       expect(img.getAttribute('src')).toContain('chat_avatar_352x432.png');
       expect(img.getAttribute('width')).toBeTruthy();
       expect(img.getAttribute('height')).toBeTruthy();
+    });
+
+    it('hides the launcher while the cookie consent banner is showing, and restores it after', () => {
+      showBanner.set(true);
+      fixture.detectChanges();
+      expect(fab()).toBeNull();
+
+      showBanner.set(false);
+      fixture.detectChanges();
+      expect(fab()).not.toBeNull();
     });
 
     it('overlays the FAB with a decorative AI star badge', () => {
