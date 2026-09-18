@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+
+.experience-section {
+  // Full-bleed breakout, same technique as the hero and work-theme panels:
+  // viewport-relative maths rather than depending on the ancestor's padding.
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  color: var(--mat-sys-on-surface);
+  background-color: var(--mat-sys-surface-container-low);
+}
+
+.experience-number {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media print {
+  .experience-section {
+    width: auto;
+    margin: 0;
+    background: none;
+    color: #000;
+  }
+
+  .experience-number {
+    color: #000;
+  }
+}

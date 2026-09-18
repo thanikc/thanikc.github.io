@@ -1,34 +1,17 @@
 @use '@angular/material' as mat;
 @use './theme-colors' as brand;
 
-// Metric-matched local fallback for Roboto (see index.html: the Google Fonts
-// link uses display=swap). Overrides computed from real font metrics
-// (@capsizecss/metrics: Roboto vs Arial, both 2048 unitsPerEm) so the
-// fallback occupies the same line height and width as Roboto — the browser
-// paints text immediately in this face and swaps to Roboto with ~0 reflow,
-// instead of the CLS 0.14 regression a bare display=swap caused before this
-// face existed (see design-e2e-card-fill-baseline-failure memory context).
+// Metric-matched local fallback for Manrope, the site-wide face (index.html: the
+// Google Fonts link uses display=swap). Overrides computed from @capsizecss/metrics:
+// Manrope (2000 unitsPerEm) vs Arial, the local fallback it swaps from, so the
+// swap causes ~0 reflow.
 @font-face {
-  font-family: 'Roboto Fallback';
+  font-family: 'Manrope Fallback';
   src: local('Arial'), local('Liberation Sans'), local('Helvetica');
-  ascent-override: 92.9771%;
-  descent-override: 24.4677%;
+  ascent-override: 103.3095%;
+  descent-override: 29.074%;
   line-gap-override: 0%;
-  size-adjust: 99.7809%;
-}
-
-// Same technique for the Fraunces headline face (see index.html for the
-// display=swap link). Overrides computed from @capsizecss/metrics: Fraunces
-// (2000 unitsPerEm) vs Georgia (2048 unitsPerEm), the local fallback it swaps
-// from — headings are short and few per page, so the CLS risk is far lower
-// than the Roboto body-text case above, but the same fix removes it entirely.
-@font-face {
-  font-family: 'Fraunces Fallback';
-  src: local('Georgia');
-  ascent-override: 92.9623%;
-  descent-override: 24.2386%;
-  line-gap-override: 0%;
-  size-adjust: 105.2039%;
+  size-adjust: 103.1851%;
 }
 
 :root {
@@ -40,9 +23,9 @@
         primary: brand.$primary-palette,
         tertiary: brand.$tertiary-palette,
       ),
-      // "Noto Sans Thai" covers what Roboto has no glyphs for; the browser picks per
-      // glyph, so Latin still comes from Roboto in every locale (see index.html).
-      typography: '"Roboto", "Noto Sans Thai", "Roboto Fallback", Arial, sans-serif',
+      // "Noto Sans Thai" covers what Manrope has no glyphs for; the browser picks per
+      // glyph, so Latin still comes from Manrope in every locale (see index.html).
+      typography: '"Manrope", "Noto Sans Thai", "Manrope Fallback", Arial, sans-serif',
       density: 0,
     )
   );
@@ -54,25 +37,31 @@ body {
   margin: 0;
 }
 
+// The full-bleed bands use 100vw, which includes the classic vertical
+// scrollbar's width and so overflows the page sideways on desktop. clip (not
+// hidden) trims that without making a scroll container, so sticky still works.
+html {
+  overflow-x: clip;
+}
+
 body {
   background-color: var(--app-surface-base);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
 }
 
-// Resume-style printout (surfaces.scss): a dark-green page background would
-// otherwise print as a heavy ink fill behind the flattened black-on-white cards.
+// Resume-style printout (surfaces.scss): the page base's own colour would
+// otherwise print behind the flattened black-on-white cards.
 @media print {
   body {
     background: none;
   }
 }
 
-h1,
-h2 {
-  // Thai has no established serif display face here, and Fraunces has no Thai
-  // glyphs: Thai headings are set in the same sans as Thai body copy.
-  font-family: 'Fraunces', 'Noto Sans Thai', 'Fraunces Fallback', Georgia, serif;
+// Display face for hero/section headline scale: a
+// class so the specific headings that opt into the huge Manrope treatment can.
+.font-display {
+  font-family: var(--app-font-display);
 }
 
 // The site is published in English, German and Thai from one layout, and German
@@ -93,10 +82,8 @@ code {
   hyphens: auto;
 }
 
-// Echoes to-top.ch's decorative line motif under section headings. Tertiary
-// itself (#795900-ish, tuned for text on a light page) is too dark to read
-// against the dark-green page base, so the underline uses the light
-// tertiary-container tone instead — see --app-accent-on-base below.
+// Echoes to-top.ch's decorative line motif under section headings — see
+// --app-accent-on-base above for which tone and why.
 h2::after {
   content: '';
   display: block;
@@ -106,43 +93,56 @@ h2::after {
   background: linear-gradient(90deg, var(--app-accent-on-base), transparent);
 }
 
-// Page vs. card surfaces: the page sits on `base` (dark green) and cards on
-// the much lighter `raised` beige, so cards read as clearly raised above the
-// page. e2e/design.e2e.ts's surfaceSeparation() enforces a fill-contrast
-// floor (1.3) and a border-contrast floor (3:1) between the two so this can't
-// quietly regress into cards blending into the page again.
+// Page vs. card surfaces: the page's own default ("base") is a light tone, with
+// only specific narrative sections (hero, work-theme panels, footer) as
+// deliberate dark full-bleed breakouts, so the page alternates light/dark
+// rather than reading as uniformly dark. Hero/work-themes/
+// footer are untouched: they already set their own `inverse-surface`/
+// `inverse-on-surface` pair explicitly rather than relying on `base`.
+// e2e/design.e2e.ts's surfaceSeparation() enforces a fill-contrast floor
+// (1.3) and a border-contrast floor (3:1) between a raised card and the page
+// so cards can't quietly blend into it, on either colour.
 :root {
-  --app-surface-base: #0d352e;
+  // Headline face, consumed at
+  // hero/section scale — the "Manrope Fallback" face above
+  // applies here, so text paints immediately and swaps with ~0 reflow.
+  --app-font-display: 'Manrope', 'Noto Sans Thai', 'Manrope Fallback', Arial, sans-serif;
+
+  // Light section bg — neutral-96 is
+  // already an exact hex match (#f4f4f2), so this reuses the M3 role rather
+  // than a new hand-picked colour.
+  --app-surface-base: var(--mat-sys-surface-container-low);
   --app-surface-raised: #dad6ce;
-  // The chat panel keeps that same beige rather than following the page to
-  // dark green — a deliberate choice, not an oversight.
+  // The chat panel keeps that same beige rather than following the page —
+  // a deliberate choice, not an oversight (both are light now, but distinct
+  // tones so the panel still reads as its own surface).
   --app-surface-chat: var(--app-surface-raised);
 
   // Text/icons sitting directly on --app-surface-base (not inside a raised
-  // card) need their own light pair: --mat-sys-on-surface stays dark (correct
-  // for the *cards*, which are still near-white), so anything outside a card
-  // must opt into these instead. See .page-heading/.page-muted in
-  // surfaces.scss. on-primary is white and built for exactly this — text on a
-  // primary-ish colour — and measures 13.4:1 against the base above.
-  --app-on-base: var(--mat-sys-on-primary);
-  --app-on-base-muted: color-mix(in srgb, var(--mat-sys-on-primary) 72%, transparent);
-  // Primary and tertiary are themselves too close in lightness to the dark
-  // base to read as links/accents on it (measured ~2:1); tertiary-container
-  // (a light gold, ~10:1 against the base) stands in for both roles wherever
-  // an accent sits directly on the page rather than on a card.
-  --app-accent-on-base: var(--mat-sys-tertiary-container);
+  // card) need a pair tuned for it. Now that `base` is light, that's just
+  // the ordinary on-surface pair — same tone the cards themselves use, since
+  // page and card are both light surfaces now. See .page-heading/.page-muted
+  // in surfaces.scss.
+  --app-on-base: var(--mat-sys-on-surface);
+  --app-on-base-muted: var(--mat-sys-on-surface-variant);
+  // Tertiary itself (~#795900, tuned for text on a light page) reads fine as
+  // an accent directly on the now-light base — tertiary-container (the light
+  // gold used here when `base` was dark) would be too close in lightness to
+  // this light base to read as an accent.
+  --app-accent-on-base: var(--mat-sys-tertiary);
 
   // Angular Material's outlined and text buttons both default their label to
   // --mat-sys-primary (measured 4.47:1 against the beige card fill, just
-  // under the 4.5:1 text floor). Every such button on the site lives on a
-  // card (the Ask-AI-Ling links, project links, cookie-preferences button),
-  // so retinting these two shared tokens fixes all of them at once — style
-  // via Material's own theming tokens rather than each button's internal DOM
-  // (AGENTS.md / UX-UI.md). Going darker than primary can only ever improve
-  // contrast on the light card fill, so this is also safe for the header's
-  // plain-text nav links, the one place a text button sits outside a card.
-  // Don't reuse this for anything that might sit directly on the dark-green
-  // page instead: on-primary-container measures only 1.4:1 there.
+  // under the 4.5:1 text floor). Retinting these two shared tokens fixes
+  // every such button at once — style via Material's own theming tokens
+  // rather than each button's internal DOM (AGENTS.md / UX-UI.md). Going
+  // darker than primary can only ever improve contrast on a light fill, so
+  // this is safe both on a card and directly on the now-light `base` page
+  // (the Ask-AI-Ling links, project links, evidence links, cookie-
+  // preferences button, header's plain-text nav links). Don't reuse this for
+  // anything that sits on one of the dark full-bleed sections instead
+  // (hero/work-themes/footer) — those retint locally against
+  // `inverse-on-surface`, see e.g. header.component.scss's own override.
   --mat-button-outlined-label-text-color: var(--mat-sys-on-primary-container);
   --mat-button-text-label-text-color: var(--mat-sys-on-primary-container);
 }

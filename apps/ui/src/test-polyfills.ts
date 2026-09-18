@@ -11,6 +11,19 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
   globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 }
 
+// jsdom has no IntersectionObserver either (used by ScrollSceneComponent to pause
+// offscreen); same reasoning as ResizeObserver above.
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+  class IntersectionObserverStub {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  }
+
+  globalThis.IntersectionObserver =
+    IntersectionObserverStub as unknown as typeof IntersectionObserver;
+}
+
 // jsdom has no matchMedia either. Default to "no preference" so `prefers-reduced-motion`
 // checks behave like a real browser without that setting; individual specs can still
 // `vi.spyOn(window, 'matchMedia')` to simulate the opposite.

@@ -3,46 +3,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { SectionHeaderComponent } from './section-header.component';
 import { Interest } from './profile.content';
 
+/** Panel fills cycled across the row, so no two neighbours share one. */
+const TONES = ['tone-accent', 'tone-dark', 'tone-light'] as const;
+
 /**
  * "Beyond the Code": the personality that keeps the page from reading like a CV.
- * Deliberately lighter than the work sections — compact cards, no shadow — and last.
+ * One full-bleed band of alternating-fill panels, each numbered — the same
+ * reference family as the work-theme panels, at a quieter scale — and last.
  */
 @Component({
   selector: 'app-profile-interests',
   imports: [MatIconModule, SectionHeaderComponent],
-  template: `
-    <section class="space-y-6 mb-4" [attr.aria-labelledby]="headingId">
-      <app-section-header
-        i18n-heading="Heading of the interests section@@interests.heading"
-        heading="Beyond the Code"
-        [headingId]="headingId"
-        i18n-subtitle="Subtitle of the interests section@@interests.subtitle"
-        subtitle="How I stay physical, sharp, and curious away from the keyboard"
-      />
-
-      @if (interests().length > 0) {
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          @for (interest of interests(); track interest.name) {
-            <article class="interest-card surface-card flex flex-col gap-2 rounded-xl p-4">
-              <div class="flex items-center gap-3">
-                <div class="surface-avatar flex items-center justify-center rounded-lg p-2">
-                  <mat-icon aria-hidden="true">{{ interest.icon }}</mat-icon>
-                </div>
-                <h3 class="text-base font-bold">{{ interest.name }}</h3>
-              </div>
-              <p class="surface-muted text-sm">{{ interest.description }}</p>
-            </article>
-          }
-        </div>
-      } @else {
-        <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
-      }
-    </section>
-  `,
+  templateUrl: './profile-interests.component.html',
+  styleUrl: './profile-interests.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileInterestsComponent {
   readonly interests = input.required<readonly Interest[]>();
 
   protected readonly headingId = 'interests-heading';
+  protected readonly toneFor = (index: number): string => TONES[index % TONES.length];
+  protected readonly counterFor = (index: number): string =>
+    String(index + 1).padStart(2, '0') + '.';
 }

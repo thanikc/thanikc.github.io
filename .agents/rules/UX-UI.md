@@ -24,7 +24,10 @@ Design principles that outrank personal preference:
 These are defects, not preferences. Never ship a change that violates them.
 
 1. **Contrast:** body text ≥ 4.5:1, large text and meaningful UI/graphical boundaries ≥ 3:1 —
-   in **both** light and dark themes. Check both before declaring done.
+   against **every fixed background the element can actually sit on**. This app has no theme
+   toggle, but a page can still mix a dark full-bleed section (e.g. a hero or narrative section
+   on `inverse-surface`) with light content sections — check contrast on each background
+   separately, not just once.
 2. **Keyboard:** every interactive element is reachable and operable by keyboard, in a logical
    tab order, with a visible focus indicator. Never `outline: none` without a replacement.
 3. **Touch targets:** ≥ 44×44 px effective hit area, with ≥ 8 px between adjacent targets.
@@ -61,11 +64,13 @@ The stack is Angular 22 + Angular Material (M3) + Tailwind v4. Respect how it is
   (`surface`, `surface-container*`, `on-surface`, `primary`, `outline`) defined in
   [material.scss](../../src/styles/material.scss). Do **not** hard-code hex values or use
   Tailwind palette colours (`bg-slate-900`, `text-gray-500`) for themed surfaces or text —
-  they do not follow the theme toggle and will fight the token colours.
-- **Dark mode resolves two ways:** the toggle sets `[data-theme='light'|'dark']` on `<html>`,
-  otherwise the OS preference wins. Tailwind's `dark:` variant is redefined in
-  [tailwind.css](../../src/styles/tailwind.css) to mirror that. Any new themed style must work
-  under all three states: explicit light, explicit dark, and system default.
+  they won't move if the palette changes and will fight the token colours.
+- **The app is light-only — there is no theme toggle** (removed in the to-top.ch re-theme; see
+  [DESIGN-VERIFICATION.md](DESIGN-VERIFICATION.md)). Don't reintroduce `[data-theme]`/`dark:`
+  branching. A fixed dark *section* (hero, full-bleed narrative block, footer) is still allowed
+  as a structural design choice — build it from `--mat-sys-inverse-surface` /
+  `inverse-on-surface` (or another real token), not a hand-picked hex, so it stays theme-aware
+  if the palette ever changes. It's a section-level background, not a mode the user can toggle.
 - **Motion lives in [motion.scss](../../src/styles/motion.scss).** Reuse the shared keyframes
   (`page-fade`, `card-rise`, `hero-drift`, `shine`) instead of declaring new ones per
   component — Angular copies a scoped `@keyframes` block into every component that declares
@@ -79,6 +84,35 @@ The stack is Angular 22 + Angular Material (M3) + Tailwind v4. Respect how it is
   form field that Material already provides. Style via tokens and density, not by overriding
   internal Material DOM.
 - **Control flow:** `@if` / `@for` with `track`. Every list has a designed empty state.
+
+## Scroll-Driven & Canvas Sections
+
+A pinned section whose visual (illustration, particle field, 3D scene) advances with scroll
+progress is allowed as a storytelling device — it earns its place the same way any pattern
+does: it must serve the content it sits next to, not run everywhere on principle. Build it as:
+
+- **Sticky, not hijacked.** Pin with CSS `position: sticky` over an intrinsically taller
+  wrapper; map scroll position within that wrapper to a progress value. Never call
+  `preventDefault` on `wheel`/`touch`/`scroll`, never override scroll speed or snap the
+  viewport programmatically. Keyboard scrolling (`PageDown`, `Space`, arrows), trackpad, and
+  screen-reader virtual cursor navigation must all move through the page exactly as they would
+  without the effect.
+- **Decorative only.** The canvas/illustration never carries information the surrounding real
+  DOM doesn't also state — a screen-reader user or a `prefers-reduced-motion` user gets the
+  full content with a static (or absent) visual, never a degraded message.
+- **`prefers-reduced-motion` gets a static frame**, not a slower version of the same animation:
+  no scroll-linked transform, no render loop running at all.
+- **Pause what's off-screen.** Gate any render loop on `IntersectionObserver`; stop it the
+  moment the section leaves the viewport, and dispose the context/resources on component
+  destroy — don't let inactive scenes keep costing a frame budget or a WebGL context slot.
+- **Keep it out of the critical path.** Defer-load the engine and the scene behind
+  `@defer (on viewport)`; a prerendered/SSR response should ship a static placeholder (poster
+  image or gradient, sized to avoid layout shift), never the canvas element itself pre-hydrated
+  with fallback content in its place.
+- **Budget it.** A visual dependency (e.g. a WebGL library) is justified when the effect
+  genuinely needs it — check the production bundle-size budget after adding one, and give
+  lower-end devices a cheaper variant (fewer particles, no shadows) rather than skipping the
+  effect for them entirely or blocking the thread until it's ready.
 
 ## Responsive
 
@@ -95,12 +129,15 @@ The stack is Angular 22 + Angular Material (M3) + Tailwind v4. Respect how it is
 
 Before reporting a UX/UI change complete, confirm:
 
-- [ ] Looks correct in light theme, dark theme, and system-default.
+- [ ] Looks correct against every fixed background it appears on (light content sections and
+      any dark full-bleed section).
 - [ ] Readable and usable at 360 px and at 1440 px.
 - [ ] Keyboard-navigable with a visible focus state; tab order is sane.
-- [ ] Contrast checked on the actual token colours used.
+- [ ] Contrast checked on the actual token colours used, per background.
 - [ ] No new layout shift, no new horizontal scroll, no orphaned `@keyframes`.
-- [ ] Reduced-motion honoured.
+- [ ] Reduced-motion honoured — including a static fallback for any scroll-driven/canvas scene.
+- [ ] Any scroll-pinned section: keyboard and trackpad scroll behave normally, no
+      `preventDefault` on scroll input; no canvas/3D dependency shipped in prerendered HTML.
 - [ ] Existing specs still pass (`ng test --watch=false`).
 
 Verify these in a browser with Playwright as described in

@@ -1,29 +1,36 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
-  <app-section-header
-    i18n-heading="Heading of the projects section@@projects.heading"
-    heading="Things I’ve built"
-    [headingId]="headingId"
-    i18n-subtitle="Subtitle of the projects section@@projects.subtitle"
-    subtitle="Complete products I build independently, from data model to deployment"
-  />
+  <!-- Bespoke header, not <app-section-header>: the headline
+       mixes weight/tone — the claim reads full-strength,
+       the scope detail recedes — which the shared component's plain-string heading can't
+       express. Same copy as before, just which words carry the emphasis. -->
+  <div class="space-y-3">
+    <p
+      class="page-muted font-mono text-xs tracking-widest uppercase"
+      i18n="Heading of the projects section@@projects.heading"
+    >
+      Things I’ve built
+    </p>
+    <h2
+      [id]="headingId"
+      class="section-heading page-muted font-display scroll-mt-24 text-3xl font-normal tracking-tight sm:text-4xl"
+      i18n="Subtitle of the projects section@@projects.subtitle"
+    >
+      <strong class="page-heading font-semibold">Complete products I build independently,</strong>
+      from data model to deployment
+    </h2>
+  </div>
 
-  @if (featured().length > 0) {
-    <div class="projects-featured grid grid-cols-1 gap-6 md:grid-cols-2">
-      @for (project of featured(); track project.name) {
-        <app-project-card [project]="project" />
+  @if (ordered().length > 0) {
+    <!-- One row: the hovered/expanded tile
+         claims more width, the rest yield — see :host's flex rule in
+         project-card.component.ts. Mobile stacks single-column; a horizontal
+         expand has no meaning at 360px width anyway. -->
+    <div class="projects-row flex flex-col gap-6 md:flex-row md:items-stretch">
+      @for (project of ordered(); track project.name; let i = $index) {
+        <app-project-card [project]="project" [index]="i" />
       }
     </div>
-  }
-
-  @if (more().length > 0) {
-    <div class="projects-more grid grid-cols-1 gap-6 md:grid-cols-2">
-      @for (project of more(); track project.name) {
-        <app-project-card [project]="project" />
-      }
-    </div>
-  }
-
-  @if (projects().length === 0) {
+  } @else {
     <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
   }
 </section>

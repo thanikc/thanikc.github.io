@@ -45,17 +45,28 @@ describe('ProfilePrinciplesComponent', () => {
     render(PRINCIPLES);
   });
 
-  it('is a section labelled "How I work"', () => {
+  it('is a section labelled by its headline', () => {
     const labelId = el().querySelector('section')?.getAttribute('aria-labelledby');
 
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe('How I work');
+    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+      'Four habits, each with the evidence behind it',
+    );
   });
 
   it('lists each principle in order with its title and detail', () => {
     expect(items()).toHaveLength(2);
     expect(items()[0].querySelector('h3')?.textContent?.trim()).toBe('Find out why first');
     expect(items()[0].textContent).toContain('Trace the bug to its root.');
-    expect(items()[0].classList.contains('surface-card')).toBe(true);
+  });
+
+  // Redesign: flat on the page, no boxed card at all.
+  it('carries no card chrome — flat on the page, not boxed', () => {
+    for (const item of items()) {
+      expect(item.classList.contains('surface-card')).toBe(false);
+      expect([...item.classList]).not.toEqual(
+        expect.arrayContaining([expect.stringMatching(/^(rounded|shadow)-/)]),
+      );
+    }
   });
 
   // Evidence over adjectives: every principle points at something checkable.

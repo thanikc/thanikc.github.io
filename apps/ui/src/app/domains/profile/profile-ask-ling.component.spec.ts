@@ -31,13 +31,20 @@ describe('ProfileAskLingComponent', () => {
     render(PROMPTS);
   });
 
-  it('is a section that frames AI Ling as a way to explore the page', () => {
-    const section = el().querySelector('section');
-    const labelId = section?.getAttribute('aria-labelledby');
-
-    expect(labelId).toBeTruthy();
-    expect(el().querySelector(`#${labelId}`)?.textContent).toBeTruthy();
+  // Redesign: folded into the hero, so this no longer owns
+  // its own landmark or card — the hero's own <section> is the landmark now.
+  it('frames AI Ling as a way to explore the page, without its own landmark or card', () => {
+    expect(el().querySelector('section')).toBeNull();
+    expect(el().querySelector('h2')?.textContent).toBeTruthy();
     expect(el().textContent).toContain('Ask AI Ling');
+  });
+
+  it('carries no card chrome of its own', () => {
+    const html = el().innerHTML;
+
+    expect(html).not.toContain('surface-card');
+    expect(el().querySelector('[class*="rounded-"]')).toBeNull();
+    expect(el().querySelector('[class*="shadow-"]')).toBeNull();
   });
 
   it('renders one outlined hook per prompt, asking that exact question', () => {

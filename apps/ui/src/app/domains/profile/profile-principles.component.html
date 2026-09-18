@@ -1,18 +1,18 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
   <app-section-header
-    i18n-heading="Heading of the working-principles section@@principles.heading"
-    heading="How I work"
+    i18n-eyebrow="Heading of the working-principles section@@principles.heading"
+    eyebrow="How I work"
     [headingId]="headingId"
-    i18n-subtitle="Subtitle of the working-principles section@@principles.subtitle"
-    subtitle="Four habits, each with the evidence behind it"
+    i18n-heading="Subtitle of the working-principles section@@principles.subtitle"
+    heading="Four habits, each with the evidence behind it"
   />
 
   @if (principles().length > 0) {
-    <ol class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <ol class="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-2">
       @for (principle of principles(); track principle.title) {
-        <li class="surface-card flex flex-col gap-3 rounded-xl p-6 shadow-sm">
-          <h3 class="text-lg font-bold">{{ principle.title }}</h3>
-          <p class="surface-muted text-sm leading-relaxed">{{ principle.detail }}</p>
+        <li class="flex flex-col gap-3">
+          <h3 class="page-heading text-lg font-bold">{{ principle.title }}</h3>
+          <p class="page-muted text-sm leading-relaxed">{{ principle.detail }}</p>
 
           <!-- -ml-3 cancels the text button's inner padding so its label lines up
                with the copy; mt-auto keeps evidence aligned across a row. -->

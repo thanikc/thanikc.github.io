@@ -16,13 +16,11 @@ describe('FooterComponent', () => {
   let component: FooterComponent;
   let fixture: ComponentFixture<FooterComponent>;
 
-  const links = () => [
-    ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLAnchorElement>(
-      'footer a.social-link',
-    ),
-  ];
+  const el = () => fixture.nativeElement as HTMLElement;
+  const footer = () => el().querySelector('footer')!;
+  const contactLinks = () => [...footer().querySelectorAll<HTMLAnchorElement>('.footer-contact a')];
   const linkFor = (label: string) =>
-    links().find(link => link.getAttribute('data-cta-tracking') === label);
+    contactLinks().find(link => link.getAttribute('data-cta-tracking') === label);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -41,145 +39,156 @@ describe('FooterComponent', () => {
 
   // The header's "Contact" link jumps to the footer, clear of the sticky header.
   it('is the #contact target for the header navigation', () => {
-    const footer = (fixture.nativeElement as HTMLElement).querySelector('footer');
-
-    expect(footer?.id).toBe('contact');
-    expect(footer?.classList.contains('scroll-mt-24')).toBe(true);
+    expect(footer().id).toBe('contact');
+    expect(footer().classList.contains('scroll-mt-24')).toBe(true);
   });
 
-  it('should render a <footer> element', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('footer')).not.toBeNull();
+  // Dark full-bleed section closing on the giant brand wordmark
+  // (the same drawn svg as the header, named for a11y by its own aria-label).
+  describe('dark full-bleed section', () => {
+    it('is a full-bleed dark section', () => {
+      expect(footer().classList.contains('footer-section')).toBe(true);
+    });
+
+    it('closes on the giant brand wordmark, drawn as svg not an image', () => {
+      const wordmark = footer().querySelector('.footer-wordmark');
+      const svg = wordmark?.querySelector('svg');
+
+      expect(wordmark?.tagName).toBe('APP-BRAND-MARK');
+      expect(footer().querySelector('img')).toBeNull();
+      expect(svg?.getAttribute('aria-label')).toBe('thanikc');
+    });
   });
 
-  it('should match the horizontal padding and max-width of <main>', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const footer = compiled.querySelector('footer');
+  // Closing statement + CTA button, reusing existing copy —
+  // the note already said this; nothing new is invented.
+  describe('closing statement and CTA', () => {
+    it('states in one line how the site is built', () => {
+      const note = footer().querySelector('.footer-note');
 
-    expect(footer?.classList.contains('container')).toBe(true);
-    expect(footer?.classList.contains('mx-auto')).toBe(true);
-    expect(footer?.classList.contains('px-4')).toBe(true);
-    expect(footer?.classList.contains('max-w-6xl')).toBe(true);
+      expect(note?.textContent).toContain('real but low-stakes');
+      expect(note?.textContent).toContain('test-first');
+    });
+
+    it('offers a primary CTA that emails Thanik', () => {
+      const cta = footer().querySelector<HTMLAnchorElement>('.footer-cta');
+
+      expect(cta?.getAttribute('href')).toBe('mailto:thanikc@gmail.com');
+      expect(cta?.classList.contains('min-h-11')).toBe(true);
+    });
   });
 
-  // `sm:ml-auto` on the content group (not `justify-between` on the footer) pushes
-  // it to the right from the sm breakpoint up, so it stays right-aligned even with
-  // the ad toggle hidden; below sm the footer stacks in a column instead.
-  it('should keep the content group right-aligned regardless of whether the ad toggle renders', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const contentGroup = compiled.querySelector(
-      'footer a[routerLink="/privacy-policy"]',
-    )?.parentElement;
+  // 3-column nav — about / site nav / contact — reusing the
+  // header's own nav links and the existing social/contact links.
+  describe('three-column nav', () => {
+    it('names the site in the first column', () => {
+      const about = footer().querySelector('.footer-about');
 
-    expect(contentGroup?.classList.contains('sm:ml-auto')).toBe(true);
+      expect(about?.textContent).toContain('Thanik Cheowtirakul');
+    });
+
+    it('summarises the page in one sentence under the name', () => {
+      const summary = footer().querySelector('.footer-about-summary');
+
+      expect(summary?.textContent).toContain('full-stack engineer');
+      expect(summary?.textContent?.match(/[.!?]/g)).toHaveLength(1);
+    });
+
+    it('reuses the header’s nav links, minus Contact (the footer is its target), plus Privacy Policy in the nav column', () => {
+      const links = [...footer().querySelectorAll<HTMLAnchorElement>('.footer-nav a')].map(a =>
+        a.textContent?.trim(),
+      );
+
+      expect(links).toEqual(['Work', 'Projects', 'Privacy Policy']);
+    });
+
+    it('links Work and Projects to their sections on the home page', () => {
+      const links = [...footer().querySelectorAll<HTMLAnchorElement>('.footer-nav a')];
+
+      expect(links.slice(0, 2).map(a => a.getAttribute('href'))).toEqual([
+        '/#work-heading',
+        '/#projects-heading',
+      ]);
+    });
+
+    it('links to the privacy policy as an in-app route', () => {
+      const privacyLink = [...footer().querySelectorAll<HTMLAnchorElement>('.footer-nav a')].find(
+        link => link.textContent?.trim() === 'Privacy Policy',
+      );
+
+      expect(privacyLink?.getAttribute('href')).toBe('/privacy-policy');
+      expect(privacyLink?.getAttribute('target')).toBeNull();
+    });
+
+    // Icons alone made visitors guess; each link now says where it goes.
+    it('renders exactly one tracked, labelled contact link each for Email, GitHub, and LinkedIn', () => {
+      expect(contactLinks().length).toBe(3);
+
+      for (const [label, text] of [
+        ['Email', 'Email'],
+        ['GitHub Repository', 'GitHub'],
+        ['LinkedIn', 'LinkedIn'],
+      ]) {
+        const link = linkFor(label);
+        expect(link, `expected a link tracked as "${label}"`).toBeDefined();
+        expect(link!.textContent?.trim()).toBe(text);
+        expect(link!.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+      }
+    });
+
+    // WCAG 2.5.3 Label in Name: the accessible name must contain the visible text.
+    it('keeps each visible contact-link label inside its accessible name', () => {
+      for (const link of contactLinks()) {
+        expect(link.getAttribute('aria-label')).toContain(link.textContent!.trim());
+      }
+    });
+
+    it('links Email to a mailto address with no target attribute', () => {
+      const link = linkFor('Email');
+
+      expect(link?.getAttribute('href')).toBe('mailto:thanikc@gmail.com');
+      expect(link?.getAttribute('target')).toBeNull();
+    });
+
+    it('opens GitHub and LinkedIn in a new tab with secure rel attributes', () => {
+      for (const label of ['GitHub Repository', 'LinkedIn']) {
+        const link = linkFor(label);
+
+        expect(link?.getAttribute('target')).toBe('_blank');
+        expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
+      }
+    });
+
+    it('links GitHub Repository to the repo and LinkedIn to the profile', () => {
+      expect(linkFor('GitHub Repository')?.getAttribute('href')).toBe(
+        'https://github.com/thanikc/thanikc.github.io',
+      );
+      expect(linkFor('LinkedIn')?.getAttribute('href')).toBe(
+        'https://de.linkedin.com/in/thanik-cheowtirakul-7a259526',
+      );
+    });
+
+    it('gives every nav and contact link a 44px minimum hit area', () => {
+      for (const link of [
+        ...footer().querySelectorAll<HTMLAnchorElement>('.footer-nav a'),
+        ...contactLinks(),
+      ]) {
+        expect(link.classList.contains('min-h-11')).toBe(true);
+      }
+    });
+  });
+
+  it('should carry the footer note as plain text, without an icon', () => {
+    expect(footer().querySelector('.footer-note mat-icon')).toBeNull();
   });
 
   // Ads are currently deactivated site-wide (AdBannerService.adsEnabled); a
   // toggle for a feature that's globally off would just confuse visitors.
   it('should not render the ad banner toggle while ads are globally disabled', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-
-    expect(compiled.querySelector('footer app-ad-banner-toggle')).toBeNull();
+    expect(footer().querySelector('app-ad-banner-toggle')).toBeNull();
   });
 
-  // Icons alone made visitors guess; each link now says where it goes.
-  it('should render exactly one tracked, labelled link each for Email, GitHub, and LinkedIn', () => {
-    expect(links().length).toBe(3);
-
-    for (const [label, text] of [
-      ['Email', 'Email'],
-      ['GitHub Repository', 'GitHub'],
-      ['LinkedIn', 'LinkedIn'],
-    ]) {
-      const link = linkFor(label);
-      expect(link, `expected a link tracked as "${label}"`).toBeDefined();
-      expect(link!.textContent?.trim()).toBe(text);
-      expect(link!.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
-    }
-  });
-
-  // WCAG 2.5.3 Label in Name: the accessible name must contain the visible text.
-  it('should keep each visible label inside the link’s accessible name', () => {
-    for (const link of links()) {
-      expect(link.getAttribute('aria-label')).toContain(link.textContent!.trim());
-    }
-  });
-
-  // Replaces the old "sandbox … in production" line: experimentation, stated safely.
-  it('should say in one line how the site is built', () => {
-    const note = (fixture.nativeElement as HTMLElement).querySelector('footer .footer-note');
-
-    expect(note?.textContent).toContain('real but low-stakes');
-    expect(note?.textContent).toContain('test-first');
-    expect(note?.textContent).not.toMatch(/in production/i);
-  });
-
-  it('should lead the footer note with a decorative info icon', () => {
-    const note = (fixture.nativeElement as HTMLElement).querySelector('footer .footer-note');
-    const icon = note?.querySelector('mat-icon');
-
-    expect(icon?.textContent?.trim()).toBe('info');
-    expect(icon?.getAttribute('aria-hidden')).toBe('true');
-    expect(note?.firstElementChild).toBe(icon);
-  });
-
-  it('should link Email to a mailto address with no target attribute', () => {
-    const link = linkFor('Email');
-
-    expect(link?.getAttribute('href')).toBe('mailto:thanikc@gmail.com');
-    expect(link?.getAttribute('target')).toBeNull();
-  });
-
-  it('should open GitHub and LinkedIn in a new tab with secure rel attributes', () => {
-    for (const label of ['GitHub Repository', 'LinkedIn']) {
-      const link = linkFor(label);
-
-      expect(link?.getAttribute('target')).toBe('_blank');
-      expect(link?.getAttribute('rel')).toBe('noopener noreferrer');
-    }
-  });
-
-  it('should link GitHub Repository to the repo and LinkedIn to the profile', () => {
-    expect(linkFor('GitHub Repository')?.getAttribute('href')).toBe(
-      'https://github.com/thanikc/thanikc.github.io',
-    );
-    expect(linkFor('LinkedIn')?.getAttribute('href')).toBe(
-      'https://de.linkedin.com/in/thanik-cheowtirakul-7a259526',
-    );
-  });
-
-  // Icon-only links wrapped nothing but a 20px SVG, so the tap target was 20px.
-  it('should give every social link a 44px minimum hit area', () => {
-    for (const link of links()) {
-      expect(link.classList.contains('min-h-11')).toBe(true);
-      expect(link.classList.contains('min-w-11')).toBe(true);
-      expect(link.classList.contains('justify-center')).toBe(true);
-    }
-  });
-
-  it('should colour the social links from theme tokens, not the Tailwind palette', () => {
-    for (const link of links()) {
-      expect(paletteClassesIn(link)).toEqual([]);
-    }
-  });
-
-  it('should link to the privacy policy as an in-app route', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const privacyLink = [...compiled.querySelectorAll<HTMLAnchorElement>('footer a')].find(
-      link => link.textContent?.trim() === 'Privacy Policy',
-    );
-
-    expect(privacyLink).toBeDefined();
-    expect(privacyLink?.getAttribute('href')).toBe('/privacy-policy');
-    expect(privacyLink?.getAttribute('target')).toBeNull();
-  });
-
-  it('should colour the privacy policy link from theme tokens, not the Tailwind palette', () => {
-    const compiled = fixture.nativeElement as HTMLElement;
-    const privacyLink = [...compiled.querySelectorAll<HTMLAnchorElement>('footer a')].find(
-      link => link.textContent?.trim() === 'Privacy Policy',
-    );
-
-    expect(paletteClassesIn(privacyLink!)).toEqual([]);
+  it('should colour itself from theme tokens, not the Tailwind palette', () => {
+    expect(paletteClassesIn(footer())).toEqual([]);
   });
 });

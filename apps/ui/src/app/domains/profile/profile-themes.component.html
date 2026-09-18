@@ -1,39 +1,67 @@
-<section class="space-y-6" [attr.aria-labelledby]="headingId">
-  <app-section-header
-    i18n-heading="Heading of the work-themes section@@themes.heading"
-    heading="What I work on"
-    [headingId]="headingId"
-    i18n-subtitle="Subtitle of the work-themes section@@themes.subtitle"
-    subtitle="The kinds of problems I spend my days on"
-  />
+<section class="theme-section" [attr.aria-labelledby]="headingId">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+    <app-section-header
+      i18n-eyebrow="Heading of the work-themes section@@themes.heading"
+      eyebrow="What I work on"
+      [headingId]="headingId"
+      i18n-heading="Subtitle of the work-themes section@@themes.subtitle"
+      heading="The kinds of problems I spend my days on"
+    />
+  </div>
 
-  <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+  <div class="theme-panels relative flex flex-col" #panels>
     @for (theme of themes(); track theme.title; let i = $index) {
-      <article
-        class="theme-card surface-card surface-card-enter flex flex-col gap-3 rounded-xl p-6 shadow-sm"
-        [style.animation-delay.ms]="i * 80"
-      >
-        <h3 class="text-lg font-bold">{{ theme.title }}</h3>
-        <p class="surface-muted text-sm leading-relaxed">{{ theme.summary }}</p>
-        <ul
-          class="flex flex-wrap gap-2"
-          i18n-aria-label="Name of the technology chip list on a card@@common.technologies"
-          aria-label="Technologies"
-        >
-          @for (chip of theme.chips; track chip) {
-            <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ chip }}</li>
+      <article class="theme-panel relative" [attr.aria-label]="theme.title">
+        <div class="theme-scene absolute inset-0" aria-hidden="true">
+          @defer (on viewport) {
+            <app-scroll-scene
+              [scene]="sceneFor(i)"
+              (progress)="onSceneProgress(i, $event)"
+              class="block h-full w-full"
+            />
+          } @placeholder {
+            <div class="theme-scene-poster h-full w-full"></div>
           }
-        </ul>
-        <!-- -ml-3 cancels the text button's inner padding so its label lines up
-             with the card copy; mt-auto keeps hooks aligned across a row. -->
-        <app-ask-ling-link
-          class="mt-auto -ml-3 self-start"
-          [question]="theme.question"
-          [label]="theme.hookLabel"
-        />
+        </div>
+
+        <div
+          class="theme-content sticky top-0 z-10 mx-auto flex h-screen max-w-6xl flex-col justify-center gap-3 px-4"
+        >
+          <span class="theme-counter text-sm font-bold tracking-widest">{{ counterFor(i) }}</span>
+          <h3 class="theme-title font-display text-4xl font-normal tracking-tight sm:text-6xl">
+            {{ theme.title }}
+          </h3>
+          <p class="theme-summary max-w-2xl text-lg leading-relaxed">{{ theme.summary }}</p>
+          <ul
+            class="flex flex-wrap gap-2"
+            i18n-aria-label="Name of the technology chip list on a card@@common.technologies"
+            aria-label="Technologies"
+          >
+            @for (chip of theme.chips; track chip) {
+              <li class="theme-chip surface-chip rounded-full px-3 py-1 text-xs font-semibold">
+                {{ chip }}
+              </li>
+            }
+          </ul>
+          <app-ask-ling-link
+            class="theme-hook -ml-3 self-start"
+            [question]="theme.question"
+            [label]="theme.hookLabel"
+          />
+        </div>
       </article>
     } @empty {
       <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
     }
+
+    <div
+      class="theme-progress fixed top-1/2 right-4 z-20 flex -translate-y-1/2 flex-col gap-3"
+      [class.visible]="showProgress()"
+      aria-hidden="true"
+    >
+      @for (theme of themes(); track theme.title; let i = $index) {
+        <span class="theme-dot" [class.active]="activeIndex() === i"></span>
+      }
+    </div>
   </div>
 </section>

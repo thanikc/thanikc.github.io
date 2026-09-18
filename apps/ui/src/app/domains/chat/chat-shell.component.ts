@@ -19,10 +19,9 @@ import { ChatWidgetComponent } from './chat-widget.component';
  * still learn the assistant exists, even though its launcher button doesn't
  * render until the deferred widget loads.
  *
- * The host is a zero-height `position: sticky` anchor sitting just above the footer:
- * the launcher inside it floats near the viewport bottom while scrolling, then comes
- * to rest above the footer instead of covering it. `mt-auto` (set in the template)
- * keeps that rest position pinned to the footer on short pages too.
+ * The host is a zero-height `position: sticky` anchor placed after the footer, so the
+ * launcher inside it floats at the viewport bottom throughout the page and is allowed
+ * to overlap the footer once the page bottom scrolls into view.
  *
  * `position: sticky` plus a non-auto `z-index` makes this host a stacking context, so
  * everything painted inside it — including the open panel's `fixed inset-0 z-50` sheet —

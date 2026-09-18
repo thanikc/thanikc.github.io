@@ -1,29 +1,50 @@
-.footer-note-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-  line-height: 14px;
-  color: var(--app-on-base-muted);
+// Full-bleed dark section, same technique and token as the hero and other
+// redesigned sections (viewport-relative maths, --mat-sys-inverse-surface —
+// not the app-shell's own (now light) `base`, for a consistent "dark
+// section" role regardless of what the page's own default is).
+.footer-section {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  color: var(--mat-sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-surface);
+
+  // Root retints (material.scss) are calibrated for a light card/page fill;
+  // this section sits directly on inverse-surface instead.
+  --mat-button-filled-container-color: var(--mat-sys-tertiary-container);
+  --mat-button-filled-label-text-color: var(--mat-sys-on-tertiary-container);
 }
 
-// The footer sits directly on the page (dark green), not a raised card, so it
-// uses the page-text tokens rather than on-surface-variant/primary — see
-// --app-on-base-muted/--app-accent-on-base in material.scss.
+.footer-about {
+  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+
+  // The name stays the brightest thing in the column; the summary is the quiet line.
+  > .font-bold {
+    color: var(--mat-sys-inverse-on-surface);
+  }
+}
+
 .footer-link {
-  color: var(--app-on-base-muted);
+  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  transition: color 0.2s ease;
 
   &:hover {
-    color: var(--app-accent-on-base);
+    color: var(--mat-sys-inverse-on-surface);
   }
 }
 
-.social-link {
-  color: var(--app-on-base-muted);
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
+.footer-wordmark {
+  // Width-driven, capped so it stays a closing flourish rather than a wall;
+  // aspect-ratio on the mark supplies the height.
+  width: min(100%, 28rem);
+  margin-inline: auto;
+  color: var(--mat-sys-inverse-on-surface);
+}
 
-  &:hover {
-    color: var(--app-accent-on-base);
-  }
+// Not `.surface-rule` (surfaces.scss): that global class targets
+// --mat-sys-outline-variant, calibrated for a light card, and a component
+// style block overriding a global class by name is a same-specificity race
+// decided by stylesheet load order — this divider gets its own class instead.
+.footer-statement {
+  border-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 24%, transparent);
 }

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { AdBannerComponent } from '../ads/ad-banner.component';
 import { AdBannerService } from '../ads/ad-banner.service';
 import { CHAT_SUGGESTIONS } from '../chat/chat.constants';
-import { ProfileAskLingComponent } from './profile-ask-ling.component';
 import { ProfileExperienceComponent } from './profile-experience.component';
 import { ProfileHeroComponent } from './profile-hero.component';
 import { ProfileInterestsComponent } from './profile-interests.component';
@@ -29,7 +28,6 @@ import {
   imports: [
     AdBannerComponent,
     ProfileHeroComponent,
-    ProfileAskLingComponent,
     ProfilePrinciplesComponent,
     ProfileExperienceComponent,
     ProfileThemesComponent,

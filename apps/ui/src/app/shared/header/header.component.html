@@ -1,21 +1,10 @@
-<header class="sticky top-0 z-50 block">
+<header [class.scrolled]="scrolled()">
   <mat-toolbar class="app-header">
     <div
       class="header-container mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4"
     >
-      <a
-        routerLink="/"
-        class="brand-link flex min-h-11 items-center gap-2 text-lg font-bold no-underline"
-      >
-        <img
-          src="img/logo.svg"
-          alt=""
-          aria-hidden="true"
-          class="brand-logo"
-          width="28"
-          height="28"
-        />
-        <span>Thanik Cheowtirakul</span>
+      <a routerLink="/" class="brand-link flex min-h-11 items-center no-underline">
+        <app-brand-mark class="brand-mark" />
       </a>
 
       <div class="flex items-center gap-2 sm:gap-3">
@@ -25,7 +14,12 @@
           class="hidden items-center gap-2 sm:flex"
         >
           @for (link of navLinks; track link.fragment) {
-            <a matButton class="min-h-11" routerLink="/" [fragment]="link.fragment">
+            <a
+              matButton
+              class="min-h-11 uppercase tracking-widest text-xs"
+              routerLink="/"
+              [fragment]="link.fragment"
+            >
               {{ link.label }}
             </a>
           }

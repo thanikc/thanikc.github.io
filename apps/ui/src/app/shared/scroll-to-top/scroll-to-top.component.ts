@@ -20,10 +20,9 @@ const SCROLL_VISIBILITY_THRESHOLD_PX = 400;
  * showing rather than trying to sit above it — the banner spans the full width of the
  * same corner, and its height varies with viewport width and content.
  *
- * The host is a zero-height `position: sticky` anchor placed just above the footer
- * (mirroring `ChatShellComponent`): the button floats near the viewport bottom while
- * scrolling, then comes to rest above the footer instead of covering it once the page
- * bottom scrolls into view.
+ * The host is a zero-height `position: sticky` anchor placed after the footer
+ * (mirroring `ChatShellComponent`): the button floats at the viewport bottom and is
+ * allowed to overlap the footer once the page bottom scrolls into view.
  */
 @Component({
   selector: 'app-scroll-to-top',

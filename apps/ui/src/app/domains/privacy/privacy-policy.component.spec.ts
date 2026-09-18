@@ -114,6 +114,18 @@ describe('PrivacyPolicyComponent', () => {
     expect(page?.classList.contains('max-w-6xl')).toBe(false);
   });
 
+  it('is styled like the profile: no card, display-face headings without the h2 rule', () => {
+    const page = compiled().querySelector('.policy-page')!;
+
+    expect(page.classList.contains('surface-card')).toBe(false);
+    for (const heading of page.querySelectorAll('h1, h2')) {
+      expect(heading.classList.contains('font-display')).toBe(true);
+    }
+    for (const h2 of page.querySelectorAll('h2')) {
+      expect(h2.classList.contains('section-heading')).toBe(true);
+    }
+  });
+
   it('colours the page from theme tokens, not the Tailwind palette', () => {
     expect(paletteClassesIn(compiled())).toEqual([]);
   });

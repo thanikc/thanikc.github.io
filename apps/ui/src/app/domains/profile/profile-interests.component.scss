@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+.interest-section {
+  // Full-bleed breakout, same viewport maths as the hero and the work-theme
+  // panels (profile-themes.component.scss) rather than depending on the
+  // ancestor's padding. The section is the band, so the header sits on it.
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  background-color: var(--mat-sys-surface-container-low);
+  color: var(--mat-sys-on-surface);
+}
+
+.interest-panel {
+  // min-width over flex-basis: equal panels that still let long words wrap
+  // instead of pushing the row wider than the viewport.
+  min-width: 0;
+}
+
+// The tall portrait proportion is what makes the row read like the reference —
+// but stacked on a phone the same height is four screens of dead space, so the
+// panels only grow once they're side by side.
+@media (min-width: 640px) {
+  .interest-panel {
+    min-height: 22rem;
+  }
+}
+
+// Three fills cycled across the row, each with its own paired on-colour, so
+// text contrast follows the fill (and the theme toggle) automatically.
+.tone-accent {
+  // The `fixed` pair, not `primary-container`: container is a pale mint that
+  // barely reads as a distinct panel next to the light one, and darkening it by
+  // hand (color-mix toward `primary`) drops its paired on-colour to 4.4:1 in
+  // light and 3.2:1 in dark. `primary-fixed-dim` is M3's own mid teal, holds the
+  // same value in both schemes, and pairs with `on-primary-fixed` at ~9.9:1.
+  background-color: var(--mat-sys-primary-fixed-dim);
+  color: var(--mat-sys-on-primary-fixed);
+}
+
+.tone-dark {
+  background-color: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
+}
+
+.tone-light {
+  background-color: var(--app-surface-raised);
+  color: var(--app-on-base);
+}
+
+.interest-icon {
+  // Material's own tokens size mat-icon at 24px; the reference glyph sits
+  // larger and unboxed, tinted by whatever the panel's on-colour is.
+  --mat-icon-color: currentColor;
+
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 2.5rem;
+}
+
+// Decorative counter: dimmed against its panel, never below the panel's own
+// on-colour enough to matter (it carries no information — aria-hidden).
+.interest-index {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+}
+
+@media print {
+  // The global decorative rule under every h2 (material.scss) is what the
+  // reference's opener doesn't have — the band below carries the boundary instead.
+  .interest-heading::after {
+    content: none;
+  }
+
+  .interest-section {
+    width: auto;
+    margin: 0;
+    background: none;
+    color: #000;
+  }
+
+  .interest-panel {
+    min-height: 0;
+    background: none;
+    color: #000;
+    border: 1px solid #000;
+    break-inside: avoid;
+  }
+}

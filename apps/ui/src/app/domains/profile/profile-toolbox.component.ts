@@ -10,28 +10,39 @@ import { ToolGroup } from './profile.content';
   selector: 'app-profile-toolbox',
   imports: [SectionHeaderComponent],
   template: `
-    <section class="space-y-6" [attr.aria-labelledby]="headingId">
-      <app-section-header
-        i18n-heading="Heading of the toolbox section@@toolbox.heading"
-        heading="Toolbox"
-        [headingId]="headingId"
-        i18n-subtitle="Subtitle of the toolbox section@@toolbox.subtitle"
-        subtitle="The stack behind the work above"
-      />
+    <section [attr.aria-labelledby]="headingId">
+      <!-- Reference band: the opener holds its own column on the left and the
+           groups run down the right, so the section reads as two columns of
+           whitespace rather than a heading stacked on a list. One column below lg. -->
+      <div class="toolbox-band grid gap-8 lg:grid-cols-[2fr_3fr] lg:gap-16">
+        <app-section-header
+          class="lg:sticky lg:top-24 lg:self-start"
+          i18n-eyebrow="Heading of the toolbox section@@toolbox.heading"
+          eyebrow="Toolbox"
+          [headingId]="headingId"
+          i18n-heading="Subtitle of the toolbox section@@toolbox.subtitle"
+          heading="The stack behind the work above"
+        />
 
-      @if (groups().length > 0) {
-        <!-- Two columns from sm up: group names size to the longest, tools take the rest. -->
-        <dl
-          class="surface-card grid grid-cols-1 gap-x-6 gap-y-1 rounded-xl p-6 text-sm shadow-sm sm:grid-cols-[max-content_1fr] sm:gap-y-3"
-        >
-          @for (group of groups(); track group.name) {
-            <dt class="font-semibold">{{ group.name }}</dt>
-            <dd class="surface-muted mb-2 sm:mb-0">{{ group.tools.join(' · ') }}</dd>
-          }
-        </dl>
-      } @else {
-        <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
-      }
+        @if (groups().length > 0) {
+          <!-- Flat on the page, no boxed card: one hairline-ruled
+               row per group, mono label above the tools it covers. -->
+          <dl>
+            @for (group of groups(); track group.name) {
+              <div class="surface-rule space-y-2 border-t py-5">
+                <dt class="page-muted font-mono text-xs tracking-widest uppercase">
+                  {{ group.name }}
+                </dt>
+                <dd class="page-heading font-display text-lg leading-snug sm:text-xl">
+                  {{ group.tools.join(' · ') }}
+                </dd>
+              </div>
+            }
+          </dl>
+        } @else {
+          <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
+        }
+      </div>
     </section>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

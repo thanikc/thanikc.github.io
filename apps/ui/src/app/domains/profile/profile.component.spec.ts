@@ -55,10 +55,10 @@ describe('ProfileComponent', () => {
     expect(page?.firstElementChild?.tagName).toBe('APP-PROFILE-HERO');
   });
 
-  it('follows the hero with the Ask AI Ling invitation', () => {
-    const page = el().querySelector('.profile-page');
-
-    expect(page?.children[1]?.tagName).toBe('APP-PROFILE-ASK-LING');
+  // Redesign: folded into the hero rather than its own
+  // section right below it.
+  it('renders the Ask AI Ling invitation inside the hero', () => {
+    expect(el().querySelector('app-profile-hero app-profile-ask-ling')).not.toBeNull();
   });
 
   // Judgment, then experience, then evidence, then the tech list: the brief's hierarchy.
@@ -157,15 +157,15 @@ describe('ProfileComponent', () => {
     });
   });
 
-  it('renders a "Beyond the Code" section with one card per interest', () => {
+  it('renders a "Beyond the Code" section with one panel per interest', () => {
     const sections = [...el().querySelectorAll('section')];
     const interestsSection = sections.find(section =>
-      section.querySelector('h2')?.textContent?.includes('Beyond the Code'),
+      section.querySelector('p')?.textContent?.includes('Beyond the Code'),
     );
 
     expect(interestsSection).toBeDefined();
     expect(component.interests.length).toBeGreaterThan(0);
-    expect(interestsSection!.querySelectorAll('.interest-card').length).toBe(
+    expect(interestsSection!.querySelectorAll('.interest-panel').length).toBe(
       component.interests.length,
     );
   });
@@ -318,11 +318,14 @@ describe('ProfileComponent', () => {
   });
 
   it('keeps at least a 2rem gap between the last section and the ad slot', () => {
-    // mb-8 = 2rem, applied as a fixed margin so it survives even when the
-    // ad slot's mt-auto collapses to 0 on a short page.
-    const lastSection = el().querySelector('.ad-slot')?.previousElementSibling;
+    // The gap is padding on the ad slot itself (pt-11 = 2.75rem), not a margin on
+    // the section above it: `display: none` takes the padding with it, so a hidden
+    // ad leaves the last section flush against the footer.
+    const adSlot = el().querySelector('.ad-slot');
+    const lastSection = adSlot?.previousElementSibling;
 
-    expect(lastSection?.classList.contains('mb-8')).toBe(true);
+    expect(adSlot?.classList.contains('pt-11')).toBe(true);
+    expect(lastSection?.classList.contains('mb-8')).toBe(false);
   });
 
   it('should display the ad banner when showBanner signal is true', () => {

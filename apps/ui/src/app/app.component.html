@@ -12,13 +12,16 @@
   <main
     id="main-content"
     tabindex="-1"
-    class="flex-grow container mx-auto px-4 py-8 max-w-6xl scroll-mt-24"
+    class="flex-grow container mx-auto px-4 pt-8 max-w-6xl scroll-mt-24"
   >
     <router-outlet />
   </main>
 
-  <app-chat-shell class="mt-auto" />
-  <app-scroll-to-top />
   <app-footer />
+
+  <!-- After the footer: the sticky anchors then rest at the page bottom, so both
+       floating buttons stay over the footer instead of stopping above it. -->
+  <app-chat-shell />
+  <app-scroll-to-top />
   <app-cookie-consent-banner />
 </div>

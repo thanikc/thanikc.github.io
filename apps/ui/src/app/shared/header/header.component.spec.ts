@@ -21,14 +21,17 @@ describe('HeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // The page is about a person: the header names him, not a generic "Dev Info".
-  it('should render the brand link to the home route with the name', () => {
+  // The brand is a drawn wordmark, so its glyphs are paths, not text: the
+  // accessible name has to come from the SVG's own role/label.
+  it('should render the brand link to the home route as a "thanikc" wordmark', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const brandLink = compiled.querySelector('.brand-link');
+    const mark = brandLink?.querySelector('app-brand-mark svg');
 
     expect(brandLink?.getAttribute('href')).toBe('/');
-    expect(brandLink?.textContent).toContain('Thanik Cheowtirakul');
-    expect(brandLink?.textContent).not.toContain('Dev Info');
+    expect(mark?.getAttribute('role')).toBe('img');
+    expect(mark?.getAttribute('aria-label')).toBe('thanikc');
+    expect(brandLink?.querySelector('img')).toBeNull();
   });
 
   describe('primary navigation', () => {
@@ -59,6 +62,56 @@ describe('HeaderComponent', () => {
     it('hides below the sm breakpoint', () => {
       expect(nav()?.classList.contains('hidden')).toBe(true);
       expect(nav()?.classList.contains('sm:flex')).toBe(true);
+    });
+
+    // Nav typography: small uppercase letterspaced labels.
+    it('sets every link in uppercase, letterspaced, small type', () => {
+      for (const link of links()) {
+        expect(link.classList.contains('uppercase')).toBe(true);
+        expect(link.classList.contains('tracking-widest')).toBe(true);
+        expect(link.classList.contains('text-xs')).toBe(true);
+      }
+    });
+
+    it('styles every link alike, Contact included', () => {
+      const [work, ...others] = links();
+
+      for (const link of others) {
+        expect(link.className).toBe(work.className);
+      }
+    });
+  });
+
+  describe('scroll state', () => {
+    const header = () => (fixture.nativeElement as HTMLElement).querySelector('header');
+
+    const setScrollY = (value: number) => {
+      Object.defineProperty(window, 'scrollY', { configurable: true, value });
+      window.dispatchEvent(new Event('scroll'));
+      fixture.detectChanges();
+    };
+
+    afterEach(() => {
+      setScrollY(0);
+    });
+
+    // At the very top the header floats transparent over the full-bleed dark hero.
+    it('starts transparent at the top of the page', () => {
+      expect(header()?.classList.contains('scrolled')).toBe(false);
+    });
+
+    // Past the hero, content behind the fixed header needs a solid backdrop to read.
+    it('turns solid once the page scrolls down', () => {
+      setScrollY(40);
+
+      expect(header()?.classList.contains('scrolled')).toBe(true);
+    });
+
+    it('goes transparent again on scrolling back to the top', () => {
+      setScrollY(40);
+      setScrollY(0);
+
+      expect(header()?.classList.contains('scrolled')).toBe(false);
     });
   });
 

@@ -1,88 +1,113 @@
 <article
-  class="surface-card surface-card-enter flex h-full flex-col gap-4 rounded-xl p-6 shadow-sm"
+  class="project-card surface-card surface-card-enter flex h-full flex-col gap-4 p-6"
+  [class.is-expanded]="expanded()"
 >
-  <div class="flex items-center gap-4">
-    <div class="surface-avatar flex items-center justify-center rounded-lg p-3">
-      <mat-icon aria-hidden="true">{{ project().icon }}</mat-icon>
-    </div>
-    <div class="min-w-0">
-      <h3 class="text-lg font-bold">{{ project().name }}</h3>
-      <p class="project-status surface-muted flex items-center gap-1 text-xs font-semibold">
-        <mat-icon class="project-status-icon" aria-hidden="true">{{
-          project().status.icon
-        }}</mat-icon>
-        {{ project().status.label }}
-      </p>
-    </div>
-  </div>
-
-  <p class="project-tagline text-sm leading-relaxed">{{ project().tagline }}</p>
-  @if (project().why; as why) {
-    <p class="project-why surface-muted text-sm leading-relaxed">{{ why }}</p>
-  }
-  <p class="project-decision surface-muted text-sm leading-relaxed">
-    <span
-      class="font-semibold"
-      i18n="Label before the engineering decision on a project card@@projects.decisionLabel"
-      >Decision:</span
-    >
-    {{ project().decision }}
-  </p>
-
-  @if (project().flow; as flow) {
-    <!-- The diagram is an ordered list: real text, theme tokens, and it reflows
-         to a 2×2 grid instead of shrinking. The list conveys the order, so the
-         visible step numbers are decorative. -->
-    <ol class="project-flow grid grid-cols-2 gap-2" [attr.aria-label]="flowLabel()">
-      @for (step of flow; track step.label; let i = $index) {
-        <li class="surface-rule flex flex-col rounded-lg border p-3">
-          <!-- An explicit gap: Angular drops the whitespace between the two spans. -->
-          <span class="flow-step-title flex gap-1 text-sm font-semibold">
-            <span class="surface-muted" aria-hidden="true">{{ i + 1 }}.</span>
-            <span class="flow-label">{{ step.label }}</span>
-          </span>
-          <span class="surface-muted text-xs">{{ step.detail }}</span>
-        </li>
-      }
-    </ol>
-  }
-
-  <ul
-    class="flex flex-wrap gap-2"
-    i18n-aria-label="Name of the tech-stack chip list on a project card@@projects.stack"
-    aria-label="Stack"
+  <!-- The face itself is the keyboard/touch trigger (no separate icon button):
+       hover covers mouse, this covers everything else. Tapping it while
+       expanded also collapses it again, same as moving the mouse away. -->
+  <button
+    type="button"
+    class="project-face flex w-full flex-col items-start text-left"
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="detailsId()"
+    [attr.aria-label]="detailsToggleLabel()"
+    (click)="toggle()"
   >
-    @for (tech of project().stack; track tech) {
-      <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ tech }}</li>
-    }
-  </ul>
+    <p
+      class="project-status surface-rule page-muted self-end rounded-full border px-3 py-1 text-xs font-semibold tracking-widest uppercase"
+    >
+      {{ project().status.label }}
+    </p>
 
-  <div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
-    @for (link of links(); track link.url) {
-      @if (link.external) {
-        <a
-          [matButton]="link.appearance"
-          class="min-h-11"
-          [href]="link.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          [attr.data-cta-tracking]="project().name + ': ' + link.label"
-        >
-          {{ link.label }}
-          <mat-icon iconPositionEnd aria-hidden="true">open_in_new</mat-icon>
-          <span class="sr-only" i18n="@@common.opensInNewTab">(opens in a new tab)</span>
-        </a>
-      } @else {
-        <a
-          [matButton]="link.appearance"
-          class="min-h-11"
-          [routerLink]="link.url"
-          [attr.data-cta-tracking]="project().name + ': ' + link.label"
-        >
-          {{ link.label }}
-        </a>
+    <!-- Decorative: the reference's pixel mosaic, generated per project — see
+         markCells in this component. -->
+    <svg class="project-mark my-auto" viewBox="0 0 7 7" aria-hidden="true" focusable="false">
+      @for (cell of markCells(); track cell.y * 7 + cell.x) {
+        <rect
+          [attr.x]="cell.x"
+          [attr.y]="cell.y"
+          width="0.7"
+          height="0.7"
+          [class.accent]="cell.x === 3"
+        />
       }
-    }
-    <app-ask-ling-link [question]="project().question" [label]="project().hookLabel" />
+    </svg>
+    <h3 class="page-heading mt-auto min-w-0 text-lg font-bold">{{ project().name }}</h3>
+  </button>
+
+  <!-- Minimal by default: name and status. Hover or tapping the face above reveal
+       the rest — see the .project-details rule in this component's styles. -->
+  <div [id]="detailsId()" class="project-details">
+    <!-- The reference rules the title off from the copy below it. -->
+    <div class="project-details-inner surface-rule flex flex-col gap-4 border-t pt-4">
+      <p class="project-tagline page-heading text-sm leading-relaxed">{{ project().tagline }}</p>
+      @if (project().why; as why) {
+        <p class="project-why page-muted text-sm leading-relaxed">{{ why }}</p>
+      }
+      <p class="project-decision page-muted text-sm leading-relaxed">
+        <span
+          class="font-semibold"
+          i18n="Label before the engineering decision on a project card@@projects.decisionLabel"
+          >Decision:</span
+        >
+        {{ project().decision }}
+      </p>
+
+      @if (project().flow; as flow) {
+        <!-- The diagram is an ordered list: real text, theme tokens, and it reflows
+             to a 2×2 grid instead of shrinking. The list conveys the order, so the
+             visible step numbers are decorative. -->
+        <ol class="project-flow grid grid-cols-2 gap-2" [attr.aria-label]="flowLabel()">
+          @for (step of flow; track step.label; let i = $index) {
+            <li class="surface-rule flex flex-col rounded-lg border p-3">
+              <!-- An explicit gap: Angular drops the whitespace between the two spans. -->
+              <span class="flow-step-title page-heading flex gap-1 text-sm font-semibold">
+                <span class="page-muted" aria-hidden="true">{{ i + 1 }}.</span>
+                <span class="flow-label">{{ step.label }}</span>
+              </span>
+              <span class="page-muted text-xs">{{ step.detail }}</span>
+            </li>
+          }
+        </ol>
+      }
+
+      <ul
+        class="flex flex-wrap gap-2"
+        i18n-aria-label="Name of the tech-stack chip list on a project card@@projects.stack"
+        aria-label="Stack"
+      >
+        @for (tech of project().stack; track tech) {
+          <li class="surface-chip rounded-full px-3 py-1 text-xs font-semibold">{{ tech }}</li>
+        }
+      </ul>
+
+      <div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
+        @for (link of links(); track link.url) {
+          @if (link.external) {
+            <a
+              [matButton]="link.appearance"
+              class="min-h-11"
+              [href]="link.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              [attr.data-cta-tracking]="project().name + ': ' + link.label"
+            >
+              {{ link.label }}
+              <span class="sr-only" i18n="@@common.opensInNewTab">(opens in a new tab)</span>
+            </a>
+          } @else {
+            <a
+              [matButton]="link.appearance"
+              class="min-h-11"
+              [routerLink]="link.url"
+              [attr.data-cta-tracking]="project().name + ': ' + link.label"
+            >
+              {{ link.label }}
+            </a>
+          }
+        }
+        <app-ask-ling-link [question]="project().question" [label]="project().hookLabel" />
+      </div>
+    </div>
   </div>
 </article>

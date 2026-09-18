@@ -1,24 +1,28 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-/** Heading, subtitle and divider that open each profile section. */
+/** Eyebrow label and display headline that open each profile section. */
 @Component({
   selector: 'app-section-header',
   // Block, not the custom-element default of inline: the parent section's `space-y-*`
-  // margin does nothing on an inline box, and the divider ran into the cards below.
+  // margin does nothing on an inline box, and the content ran into the cards below.
   host: { class: 'block' },
   template: `
-    <div class="surface-rule border-b pb-3">
-      <h2 [id]="headingId()" class="page-heading scroll-mt-24 text-2xl font-bold tracking-tight">
+    <div class="space-y-3">
+      <p class="page-muted font-mono text-xs tracking-widest uppercase">{{ eyebrow() }}</p>
+      <h2
+        [id]="headingId()"
+        class="section-heading page-heading font-display scroll-mt-24 text-3xl font-normal tracking-tight sm:text-4xl"
+      >
         {{ heading() }}
       </h2>
-      <p class="page-muted text-sm font-medium">{{ subtitle() }}</p>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SectionHeaderComponent {
-  readonly heading = input.required<string>();
+  /** Small tracked label above the headline, e.g. the section's short name. */
+  readonly eyebrow = input.required<string>();
   /** Lets the enclosing `<section>` point `aria-labelledby` at the heading. */
   readonly headingId = input.required<string>();
-  readonly subtitle = input.required<string>();
+  readonly heading = input.required<string>();
 }

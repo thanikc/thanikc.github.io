@@ -1,0 +1,38 @@
+<section class="interest-section" [attr.aria-labelledby]="headingId">
+  <div class="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+    <app-section-header
+      i18n-eyebrow="Heading of the interests section@@interests.heading"
+      eyebrow="Beyond the Code"
+      [headingId]="headingId"
+      i18n-heading="Subtitle of the interests section@@interests.subtitle"
+      heading="How I stay physical, sharp, and curious away from the keyboard"
+    />
+  </div>
+
+  @if (interests().length > 0) {
+    <!-- One edge-to-edge band of filled panels (same reference family as the
+         work-theme panels): no gap, no rounding, alternating fills — the fill
+         change is the only boundary between neighbours. Mobile stacks them. -->
+    <div class="interest-panels flex flex-col sm:flex-row">
+      @for (interest of interests(); track interest.name; let i = $index) {
+        <article class="interest-panel flex flex-1 flex-col p-6" [class]="toneFor(i)">
+          <div class="flex items-start justify-between gap-4">
+            <mat-icon class="interest-icon" aria-hidden="true">{{ interest.icon }}</mat-icon>
+            <span class="interest-index font-mono text-xs tracking-widest" aria-hidden="true">
+              {{ counterFor(i) }}
+            </span>
+          </div>
+
+          <div class="mt-auto space-y-2 pt-10 sm:pt-16">
+            <h3 class="font-display text-2xl font-normal tracking-tight">{{ interest.name }}</h3>
+            <p class="interest-description text-sm leading-relaxed">{{ interest.description }}</p>
+          </div>
+        </article>
+      }
+    </div>
+  } @else {
+    <p class="page-muted mx-auto max-w-6xl px-4 pb-10 text-sm" i18n="@@common.emptySection">
+      Nothing to show yet.
+    </p>
+  }
+</section>

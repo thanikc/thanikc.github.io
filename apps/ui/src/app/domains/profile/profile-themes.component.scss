@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.theme-section {
+  // Full-bleed breakout, same technique as the hero (profile-hero.component.scss):
+  // viewport-relative maths rather than depending on the ancestor's padding. The
+  // section is the band, so the header sits on the dark fill with the panels.
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  color: var(--mat-sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-surface);
+
+  // The shared header takes its colours from these; retint them for the dark fill.
+  --app-on-base: var(--mat-sys-inverse-on-surface);
+  --app-on-base-muted: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+}
+
+.theme-panel {
+  min-height: 200vh;
+  color: var(--mat-sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-surface);
+
+  // Same local retint as the hero: the root button-text tokens are
+  // calibrated for a light card fill, not a dark full-bleed section.
+  --mat-button-text-label-text-color: var(--mat-sys-inverse-on-surface);
+}
+
+.theme-scene-poster {
+  background: radial-gradient(
+    120% 140% at 0% 100%,
+    color-mix(in srgb, var(--mat-sys-tertiary) 18%, transparent) 0%,
+    transparent 60%
+  );
+}
+
+.theme-counter {
+  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+}
+
+.theme-progress {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+
+  &.visible {
+    opacity: 1;
+  }
+}
+
+.theme-dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 40%, transparent);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+
+  &.active {
+    background-color: var(--mat-sys-inverse-on-surface);
+    transform: scale(1.3);
+  }
+}
+
+@media print {
+  .theme-section {
+    width: auto;
+    margin: 0;
+    background: none;
+    color: #000;
+    --app-on-base: #000;
+    --app-on-base-muted: #000;
+  }
+
+  .theme-panel {
+    min-height: 0;
+    background: none;
+    color: #000;
+    break-inside: avoid;
+  }
+
+  .theme-scene,
+  .theme-progress {
+    display: none;
+  }
+
+  .theme-content {
+    position: static;
+    height: auto;
+  }
+
+  .theme-counter {
+    color: #000;
+  }
+}

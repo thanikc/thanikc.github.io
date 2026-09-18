@@ -1,32 +1,38 @@
-<section class="space-y-6" [attr.aria-labelledby]="headingId">
-  <app-section-header
-    i18n-heading="Heading of the experience section@@experience.heading"
-    heading="Experience"
-    [headingId]="headingId"
-    i18n-subtitle="Subtitle of the experience section@@experience.subtitle"
-    subtitle="Scale and responsibility, in specifics"
-  />
+<section
+  class="experience-section relative flex flex-col gap-10 py-10 sm:py-14"
+  [attr.aria-labelledby]="headingId"
+>
+  <div class="mx-auto w-full max-w-6xl px-4">
+    <app-section-header
+      i18n-eyebrow="Heading of the experience section@@experience.heading"
+      eyebrow="Experience"
+      [headingId]="headingId"
+      i18n-heading="Subtitle of the experience section@@experience.subtitle"
+      heading="Scale and responsibility, in specifics"
+    />
+  </div>
 
-  @if (stats().length > 0) {
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      @for (stat of stats(); track stat.headline; let i = $index) {
-        <article
-          class="experience-card surface-card surface-card-enter flex flex-col gap-3 rounded-xl p-6 shadow-sm"
-          [style.animation-delay.ms]="i * 80"
-        >
-          <h3 class="text-lg font-bold">{{ stat.headline }}</h3>
-          <p class="surface-muted text-sm leading-relaxed">{{ stat.detail }}</p>
-          <!-- -ml-3 cancels the text button's inner padding so its label lines up
-               with the card copy; mt-auto keeps hooks aligned across a row. -->
-          <app-ask-ling-link
-            class="mt-auto -ml-3 self-start"
-            [question]="stat.question"
-            [label]="stat.hookLabel"
-          />
-        </article>
-      }
-    </div>
-  } @else {
-    <p class="page-muted text-sm" i18n="@@common.emptySection">Nothing to show yet.</p>
+  @for (stat of stats(); track stat.headline; let i = $index) {
+    <article
+      class="experience-entry surface-card-enter mx-auto flex w-full max-w-6xl flex-col gap-2 px-4"
+      [style.animation-delay.ms]="i * 80"
+    >
+      <span class="experience-number text-xs font-bold tracking-widest uppercase">{{
+        numberFor(i)
+      }}</span>
+      <h3 class="font-display text-3xl font-normal tracking-tight sm:text-4xl">
+        {{ stat.headline }}
+      </h3>
+      <p class="max-w-prose text-lg leading-relaxed">{{ stat.detail }}</p>
+      <app-ask-ling-link
+        class="-ml-3 self-start"
+        [question]="stat.question"
+        [label]="stat.hookLabel"
+      />
+    </article>
+  } @empty {
+    <p class="page-muted mx-auto w-full max-w-6xl px-4 text-sm" i18n="@@common.emptySection">
+      Nothing to show yet.
+    </p>
   }
 </section>

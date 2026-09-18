@@ -434,6 +434,22 @@ test('contrast: chat launcher tip is readable on hover', async ({ browser }) => 
   await page.context().close();
 });
 
+// Regression: `position: sticky` lived on the inner <header>, whose own host
+// element is exactly as tall as itself — no room to stick, so the fixed nav
+// silently scrolled away with the page. Now on the host (see header.component.scss).
+test('header stays pinned to the top while the page scrolls', async ({ browser }) => {
+  const page = await openPage(browser, '/en/', { width: 1440 });
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(100);
+
+  const top = await page.evaluate(
+    () => document.querySelector('header')?.getBoundingClientRect().top,
+  );
+
+  expect(top).toBe(0);
+  await page.context().close();
+});
+
 test.describe('keyboard', () => {
   for (const width of [360, 1440] as const) {
     test(`keyboard: / is fully operable at ${width}px`, async ({ browser }) => {

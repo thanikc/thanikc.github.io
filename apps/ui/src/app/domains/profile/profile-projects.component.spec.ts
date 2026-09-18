@@ -7,11 +7,10 @@ import { ChatService } from '../chat/chat.service';
 
 const project = (name: string, featured: boolean): Project => ({
   name,
-  icon: 'star',
   tagline: `${name} tagline`,
   decision: `${name} decision`,
   stack: ['Angular'],
-  status: { label: 'Live', icon: 'check_circle' },
+  status: { label: 'Live' },
   featured,
   hookLabel: 'Ask',
   question: `What is ${name}?`,
@@ -39,21 +38,30 @@ describe('ProfileProjectsComponent', () => {
     render([project('A', true), project('B', false), project('C', true), project('D', false)]);
   });
 
-  it('is a section labelled "Things I’ve built"', () => {
+  it('is a section labelled by its headline', () => {
     const section = el().querySelector('section');
     const labelId = section?.getAttribute('aria-labelledby');
 
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe('Things I’ve built');
+    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+      'Complete products I build independently, from data model to deployment',
+    );
   });
 
-  // The strongest evidence gets the most room; the small tools follow.
-  it('shows featured projects first, in their own row, keeping their order', () => {
-    expect(namesIn('.projects-featured')).toEqual(['A', 'C']);
-    expect(namesIn('.projects-more')).toEqual(['B', 'D']);
+  // Editorial two-tone headline: the claim reads at
+  // full strength, the scope detail recedes to the page's muted tone — same copy, no new
+  // i18n string, just which words carry the emphasis.
+  it('emphasises the claim clause of the headline over the scope detail', () => {
+    const heading = el().querySelector('#projects-heading')!;
 
-    const featured = el().querySelector('.projects-featured')!;
-    const more = el().querySelector('.projects-more')!;
-    expect(featured.compareDocumentPosition(more) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(heading.querySelector('strong')?.textContent?.trim()).toBe(
+      'Complete products I build independently,',
+    );
+  });
+
+  // Redesign: one horizontal row — featured
+  // projects still lead, but as ordering within the row, not a separate one.
+  it('lists featured projects before the rest, in one row', () => {
+    expect(namesIn('.projects-row')).toEqual(['A', 'C', 'B', 'D']);
   });
 
   it('shows an empty state when there are no projects', () => {

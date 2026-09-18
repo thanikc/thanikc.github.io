@@ -2,124 +2,73 @@
   display: block;
 }
 
-.hero-card {
-  min-height: 320px;
-  color: var(--mat-sys-on-surface);
-  // `outline`, not `outline-variant`: the card surface is all but identical to
-  // the page surface, so the border carries the whole boundary and needs 3:1.
-  border: 1px solid var(--mat-sys-outline);
-  background:
-    radial-gradient(
-      120% 140% at 100% 0%,
-      color-mix(in srgb, var(--mat-sys-primary) 10%, transparent) 0%,
-      transparent 60%
-    ),
-    var(--app-surface-raised);
+.hero-section {
+  // Full-bleed breakout: spans the full viewport width regardless of the
+  // ancestor `<main>`'s max-width/padding, using pure viewport-relative
+  // maths rather than depending on knowing that padding's exact value.
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  min-height: 80svh;
+  color: var(--mat-sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-surface);
 
-  @media (min-width: 1024px) {
-    min-height: 420px;
-  }
+  // Angular Material's outlined button defaults its label/border to
+  // --mat-sys-primary and --mat-sys-outline, both tuned for the light card
+  // surfaces the rest of the page sits on (~1.4:1 here per material.scss's
+  // own note on the equivalent header case) — retint locally instead.
+  --mat-button-outlined-label-text-color: var(--mat-sys-inverse-on-surface);
+  --mat-button-outlined-outline-color: var(--mat-sys-inverse-on-surface);
 }
 
-.hero-badge,
-.hero-invitation {
-  color: var(--mat-sys-on-surface-variant);
+.hero-scene {
+  z-index: 0;
 }
 
-// The scrim stays near-opaque across the text column and only opens up on the
-// right: measured over the brightest part of the image, the intro paragraph
-// reads at 2.8:1 against the previous 75%-at-45% ramp.
-$hero-scrim: linear-gradient(
-  100deg,
-  color-mix(in srgb, var(--app-surface-raised) 97%, transparent) 0%,
-  color-mix(in srgb, var(--app-surface-raised) 92%, transparent) 62%,
-  color-mix(in srgb, var(--app-surface-raised) 45%, transparent) 100%
-);
-
-// The photo only appears once the hero is wide enough for the text column
-// (capped at max-w-2xl) to clear it. Below 1024px the text spans the whole
-// card, so the photo would sit directly behind every line -- and because the
-// element is `display: none` there, no variant is fetched on small screens.
-// Photo: Evan Krause on Unsplash — Phi Phi Island, Thailand (Unsplash License,
-// free to use). https://unsplash.com/photos/BU6lABNbTpA
-.hero-photo {
-  display: none;
-  position: absolute;
-  inset: 0;
-  // No `srcset`/width variants here, and none are useful: this is a background
-  // image, and `max-w-6xl` pins the card to 1120px, so the paint box is a fixed
-  // ~992-1120px at every viewport that renders it. Only the *format* varies, so
-  // `image-set()` is the right knob. The plain-url declaration below is the
-  // fallback for engines without `image-set()`/`type()`, which drop the whole
-  // declaration rather than the unsupported entry.
-  background-image: $hero-scrim, url('/img/hero-thailand.jpg');
-  background-image:
-    $hero-scrim,
-    image-set(
-      url('/img/hero-thailand.avif') type('image/avif'),
-      url('/img/hero-thailand.webp') type('image/webp'),
-      url('/img/hero-thailand.jpg') type('image/jpeg')
-    );
-  background-size: cover, cover;
-  background-position: center, center;
-
-  @media (min-width: 1024px) {
-    display: block;
-  }
-}
-
-.hero-glow {
-  position: absolute;
-  inset: -40% -20% auto auto;
-  width: 60%;
-  height: 220%;
+// Static placeholder while `@defer (on viewport)` loads the scene (and behind
+// it, three.js): a plain gradient, sized to the section already, so nothing
+// shifts when the canvas swaps in. Never the canvas itself pre-hydrated —
+// see UX-UI.md "Scroll-Driven & Canvas Sections".
+.hero-scene-poster {
   background: radial-gradient(
-    circle,
-    color-mix(in srgb, var(--mat-sys-tertiary) 22%, transparent) 0%,
-    transparent 70%
+    120% 140% at 100% 0%,
+    color-mix(in srgb, var(--mat-sys-tertiary) 18%, transparent) 0%,
+    transparent 60%
   );
-  filter: blur(10px);
-  pointer-events: none;
-  animation: hero-drift 0.9s ease-out forwards;
+}
+
+.hero-content {
+  z-index: 1;
+}
+
+.hero-badge {
+  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
 }
 
 .hero-name {
-  background: linear-gradient(
-    100deg,
-    var(--mat-sys-on-surface) 20%,
-    var(--mat-sys-primary) 50%,
-    var(--mat-sys-tertiary) 80%
-  );
-  background-size: 200% auto;
-  background-clip: text;
-  color: transparent;
-  animation: shine 1.4s ease-out forwards;
-  // drop-shadow, not text-shadow: it haloes the gradient text's alpha shape
-  // instead of painting a solid glyph over its fill.
-  filter: drop-shadow(0 0 2px var(--app-surface-raised))
-    drop-shadow(0 0 6px var(--app-surface-raised));
+  // A flat headline, no gradient/shine: a plain confident colour reads better
+  // at this size than the old card treatment's gradient.
+  color: var(--mat-sys-inverse-on-surface);
 }
 
-/** Resume-style printout: flatten decoration, drop CTAs and animation. */
+/** Resume-style printout: flatten decoration, drop the scene and CTAs. */
 @media print {
-  .hero-card {
+  .hero-section {
+    width: auto;
+    margin: 0;
+    min-height: 0;
     background: none;
     border: 1px solid #000;
-    box-shadow: none;
     color: #000;
   }
 
-  .hero-photo,
-  .hero-glow,
+  .hero-scene,
   .hero-next {
     display: none;
   }
 
   .hero-name {
-    background: none;
-    -webkit-text-fill-color: currentColor;
     color: #000;
-    animation: none;
   }
 
   .hero-badge {

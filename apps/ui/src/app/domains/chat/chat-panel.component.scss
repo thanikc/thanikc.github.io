@@ -4,8 +4,8 @@
 }
 
 .chat-panel {
-  // Deliberately kept on the site's previous (pre-re-theme) page background
-  // rather than following it to dark green — see --app-surface-chat.
+  // Deliberately kept on its own beige tone rather than following the page
+  // base (light) — see --app-surface-chat.
   background-color: var(--app-surface-chat);
   color: var(--mat-sys-on-surface);
 }

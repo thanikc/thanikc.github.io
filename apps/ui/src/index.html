@@ -48,31 +48,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!--
-      display=swap paired with a metric-matched "Roboto Fallback" @font-face
-      (styles/material.scss) that occupies the same box as Roboto. A bare
-      swap previously measured CLS 0.14 on /privacy-policy because the
-      generic sans-serif fallback is a different size than Roboto; swapping
-      into a same-sized local face removes that reflow instead of blocking
-      Roboto on every uncached page view.
-    -->
-    <!--
-      Noto Sans Thai rides along in the same request: Google's Roboto has no Thai
-      subset (latin, latin-ext, cyrillic, greek, vietnamese, math, symbols only), so
-      the Thai build would otherwise render in whatever Thai face the visitor's OS
-      happens to have — or in tofu boxes on a machine with none. Each @font-face
-      carries a unicode-range, so English and German visitors pay for the extra CSS
-      entry and never download the Thai woff2.
+      Noto Sans Thai: Manrope has no Thai glyphs, so the Thai build would otherwise render in
+      whatever Thai face the visitor's OS happens to have — or in tofu boxes on a
+      machine with none. Each @font-face carries a unicode-range, so English and
+      German visitors never download the Thai woff2.
     -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&family=Noto+Sans+Thai:wght@300;400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500&display=swap"
       rel="stylesheet"
     />
     <!--
-      Headline serif, paired with a metric-matched "Fraunces Fallback"
-      @font-face (styles/material.scss) for the same reason as Roboto above.
+      Site-wide sans (body and headlines), paired with a metric-matched "Manrope Fallback" @font-face (styles/material.scss)
+      so text paints immediately and swaps with ~0 reflow.
     -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link

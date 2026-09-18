@@ -11,10 +11,13 @@ import { ExperienceStat } from './profile.content';
   selector: 'app-profile-experience',
   imports: [SectionHeaderComponent, AskLingLinkComponent],
   templateUrl: './profile-experience.component.html',
+  styleUrl: './profile-experience.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileExperienceComponent {
   readonly stats = input.required<readonly ExperienceStat[]>();
 
   protected readonly headingId = 'experience-heading';
+  protected readonly numberFor = (index: number): string =>
+    String(index + 1).padStart(2, '0') + '.';
 }

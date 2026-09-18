@@ -1,64 +1,74 @@
 <section
-  class="hero-card relative mb-8 flex flex-col overflow-hidden rounded-2xl p-8 shadow-sm"
+  class="hero-section relative -mt-8 mb-8 flex min-h-[36rem] flex-col overflow-hidden"
   aria-labelledby="hero-name"
 >
-  <div class="hero-photo" aria-hidden="true"></div>
-  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-scene absolute inset-0" aria-hidden="true">
+    @defer (on viewport) {
+      <app-scroll-scene [scene]="heroScene" class="block h-full w-full" />
+    } @placeholder {
+      <div class="hero-scene-poster h-full w-full"></div>
+    }
+  </div>
 
-  <div class="relative flex flex-1 flex-col gap-2">
+  <div
+    class="hero-content relative mx-auto flex w-full max-w-6xl flex-1 flex-col gap-2 px-4 py-20 sm:py-28"
+  >
     <span class="hero-badge text-sm font-bold tracking-wider uppercase">{{ title }}</span>
-    <h1 id="hero-name" class="hero-name text-3xl font-bold tracking-tight sm:text-4xl">
+    <h1
+      id="hero-name"
+      class="hero-name font-display text-5xl font-normal tracking-tight sm:text-7xl"
+    >
       Thanik Cheowtirakul
     </h1>
     <p class="hero-positioning max-w-2xl text-lg leading-relaxed font-medium">
       {{ positioning }}
     </p>
 
-    <div class="hero-next mt-auto flex flex-col gap-3 pt-8">
-      <div class="flex flex-wrap items-center gap-2">
-        <a
-          matButton="outlined"
-          class="min-h-11"
-          [href]="email.href"
-          [attr.aria-label]="email.ariaLabel"
-          data-cta-tracking="Hero: Email"
-        >
-          <span class="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="size-4"
-              aria-hidden="true"
-            >
-              <path [attr.d]="email.iconPath" />
-            </svg>
-            <span i18n="Hero button that opens an email to Thanik@@hero.emailCta">Email</span>
-          </span>
-        </a>
-        <a
-          matButton="outlined"
-          class="min-h-11"
-          [href]="linkedIn.href"
-          target="_blank"
-          rel="noopener noreferrer"
-          [attr.aria-label]="linkedIn.ariaLabel"
-          data-cta-tracking="Hero: LinkedIn"
-        >
-          <span class="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              class="size-4"
-              aria-hidden="true"
-            >
-              <path [attr.d]="linkedIn.iconPath" />
-            </svg>
-            LinkedIn
-          </span>
-        </a>
-      </div>
+    <div class="hero-next mt-8 flex flex-wrap items-center gap-2">
+      <a
+        matButton="outlined"
+        class="min-h-11"
+        [href]="email.href"
+        [attr.aria-label]="email.ariaLabel"
+        data-cta-tracking="Hero: Email"
+      >
+        <span class="flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="size-4"
+            aria-hidden="true"
+          >
+            <path [attr.d]="email.iconPath" />
+          </svg>
+          <span i18n="Hero button that opens an email to Thanik@@hero.emailCta">Email</span>
+        </span>
+      </a>
+      <a
+        matButton="outlined"
+        class="min-h-11"
+        [href]="linkedIn.href"
+        target="_blank"
+        rel="noopener noreferrer"
+        [attr.aria-label]="linkedIn.ariaLabel"
+        data-cta-tracking="Hero: LinkedIn"
+      >
+        <span class="flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="size-4"
+            aria-hidden="true"
+          >
+            <path [attr.d]="linkedIn.iconPath" />
+          </svg>
+          LinkedIn
+        </span>
+      </a>
     </div>
+
+    <app-profile-ask-ling class="mt-auto block pt-8" [prompts]="askLingPrompts()" />
   </div>
 </section>

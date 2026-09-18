@@ -1,8 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DeferBlockBehavior, DeferBlockState } from '@angular/core/testing';
 import { vi } from 'vitest';
+import * as THREE from 'three';
 import { ProfileHeroComponent } from './profile-hero.component';
 import { ChatService } from '../chat/chat.service';
 import { paletteClassesIn } from '../../shared/testing/palette-classes';
+import { WEBGL_RENDERER_FACTORY } from '../../shared/scroll-scene/scroll-scene.component';
+
+// jsdom's canvas has no real WebGL context; the scroll scene is only checked
+// structurally here (see WEBGL_RENDERER_FACTORY's own doc comment) — visuals
+// are a Playwright concern, not a Vitest one.
+const stubRenderer = {
+  render: vi.fn(),
+  dispose: vi.fn(),
+  setSize: vi.fn(),
+  setPixelRatio: vi.fn(),
+} as unknown as THREE.WebGLRenderer;
+
+const ASK_LING_PROMPTS: readonly string[] = [
+  "What's the most complex system Thanik has worked on?",
+  'What has Thanik built from scratch?',
+];
 
 describe('ProfileHeroComponent', () => {
   let fixture: ComponentFixture<ProfileHeroComponent>;
@@ -15,10 +33,15 @@ describe('ProfileHeroComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ProfileHeroComponent],
-      providers: [{ provide: ChatService, useValue: { open: vi.fn() } }],
+      providers: [
+        { provide: ChatService, useValue: { open: vi.fn() } },
+        { provide: WEBGL_RENDERER_FACTORY, useValue: () => stubRenderer },
+      ],
+      deferBlockBehavior: DeferBlockBehavior.Manual,
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileHeroComponent);
+    fixture.componentRef.setInput('askLingPrompts', ASK_LING_PROMPTS);
     fixture.detectChanges();
   });
 
@@ -50,11 +73,15 @@ describe('ProfileHeroComponent', () => {
     expect(text()).not.toContain('OpenShift Solutions');
   });
 
-  // The Ask AI Ling pitch now lives in its own section right below the hero
-  // (app-profile-ask-ling); repeating it here read as saying the same thing twice.
-  it('carries no separate AI Ling invitation or button of its own', () => {
-    expect(el().querySelector('.hero-invitation')).toBeNull();
-    expect(el().querySelector('app-ask-ling-link')).toBeNull();
+  // Redesign: the Ask AI Ling pitch was its own boxed card
+  // right below the hero; that card is gone and its content now lives here,
+  // alongside the Email/LinkedIn CTAs — one continuous "who I am, talk to me
+  // two ways" block instead of a hero followed immediately by another card.
+  it('invites AI Ling exploration alongside the CTAs, one hook per prompt', () => {
+    expect(text()).toContain('Ask AI Ling');
+
+    const hooks = [...el().querySelectorAll('app-ask-ling-link')];
+    expect(hooks).toHaveLength(ASK_LING_PROMPTS.length);
   });
 
   it('offers Email and LinkedIn as its actions', () => {
@@ -79,15 +106,41 @@ describe('ProfileHeroComponent', () => {
     }
   });
 
-  it('pins the actions to the bottom of the hero card', () => {
-    const next = el().querySelector('.hero-next');
-
-    expect(el().querySelector('.hero-card')?.classList.contains('flex-col')).toBe(true);
-    expect(next?.classList.contains('mt-auto')).toBe(true);
-    expect(next?.querySelector('a')).not.toBeNull();
-  });
-
   it('colours itself from theme tokens, not the Tailwind palette', () => {
     expect(paletteClassesIn(el())).toEqual([]);
+  });
+
+  // Redesign: full-bleed dark section, not a raised card —
+  // e2e/design.e2e.ts's surfaceSeparation() only checks selectors that read as
+  // a "card"; this section deliberately isn't one, hence the renamed root class.
+  describe('full-bleed section', () => {
+    it('is a full-bleed section, not a bordered card', () => {
+      expect(el().querySelector('.hero-section')).not.toBeNull();
+      expect(el().querySelector('.hero-card')).toBeNull();
+    });
+
+    it('sets the headline in the display font at hero scale', () => {
+      const heading = el().querySelector('h1');
+
+      expect(heading?.classList.contains('font-display')).toBe(true);
+    });
+  });
+
+  // The wireframe/particle hero scene, deferred behind
+  // `on viewport` and out of the prerendered/initial bundle — same reasoning
+  // as the calculator's `@defer` (see calculator-shell-prerender memory).
+  describe('deferred hero scene', () => {
+    it('ships a static poster — no canvas/3D dependency — before the defer block completes', () => {
+      expect(el().querySelector('.hero-scene-poster')).not.toBeNull();
+      expect(el().querySelector('app-scroll-scene')).toBeNull();
+    });
+
+    it('renders the scroll scene once the defer block completes', async () => {
+      const deferBlocks = await fixture.getDeferBlocks();
+      await deferBlocks[0].render(DeferBlockState.Complete);
+
+      expect(fixture.nativeElement.querySelector('app-scroll-scene')).not.toBeNull();
+      expect(fixture.nativeElement.querySelector('.hero-scene-poster')).toBeNull();
+    });
   });
 });

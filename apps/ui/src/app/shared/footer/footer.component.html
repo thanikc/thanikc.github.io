@@ -1,52 +1,89 @@
-<footer
-  id="contact"
-  class="container mx-auto px-4 py-4 max-w-6xl flex w-full flex-col items-center gap-4 scroll-mt-24 sm:flex-row sm:flex-wrap"
->
-  @if (adsEnabled) {
-    <app-ad-banner-toggle />
-  }
-
-  <p
-    class="footer-note page-muted order-2 flex max-w-md items-start gap-1.5 text-xs font-thin sm:order-none"
-  >
-    <mat-icon class="footer-note-icon shrink-0" aria-hidden="true">info</mat-icon>
-    <span i18n="Footer note about how the site is built@@footer.note"
-      >I build this site test-first to try something real but low-stakes. The source is
-      public.</span
+<footer id="contact" class="footer-section relative scroll-mt-24">
+  <div class="mx-auto flex max-w-6xl flex-col px-4 py-16">
+    <div
+      class="footer-statement flex flex-col gap-6 border-b pb-10 sm:flex-row sm:items-center sm:justify-between"
     >
-  </p>
-
-  <div class="order-1 flex flex-wrap items-center justify-center gap-4 sm:order-none sm:ml-auto">
-    <a
-      routerLink="/privacy-policy"
-      class="footer-link order-2 inline-flex min-h-11 items-center text-sm font-medium hover:underline sm:order-none"
-      i18n="Footer link to the privacy policy page@@footer.privacyPolicy"
-    >
-      Privacy Policy
-    </a>
-
-    <div class="order-1 flex flex-wrap items-center gap-2 sm:order-none">
-      @for (link of socialLinks; track link.label) {
-        <a
-          [href]="link.href"
-          [attr.target]="link.external ? '_blank' : null"
-          [attr.rel]="link.external ? 'noopener noreferrer' : null"
-          class="social-link inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-medium transition-transform duration-200 hover:-translate-y-0.5"
-          [attr.aria-label]="link.ariaLabel"
-          [attr.data-cta-tracking]="link.label"
+      <p class="footer-note max-w-2xl text-lg leading-relaxed">
+        <span i18n="Footer note about how the site is built@@footer.note"
+          >I build this site test-first to try something real but low-stakes. The source is
+          public.</span
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            class="w-5 h-5"
-            aria-hidden="true"
-          >
-            <path [attr.d]="link.iconPath" />
-          </svg>
-          <span>{{ link.shortLabel }}</span>
-        </a>
-      }
+      </p>
+
+      <a
+        matButton="filled"
+        class="footer-cta min-h-11 shrink-0"
+        [href]="email.href"
+        [attr.aria-label]="email.ariaLabel"
+        data-cta-tracking="Footer: Email"
+      >
+        {{ email.shortLabel }}
+      </a>
     </div>
+
+    <div class="grid grid-cols-1 gap-8 py-10 sm:grid-cols-3">
+      <div class="footer-about flex flex-col gap-2">
+        <div class="text-lg font-bold">Thanik Cheowtirakul</div>
+        <p
+          class="footer-about-summary max-w-xs text-base leading-relaxed"
+          i18n="One-sentence summary of the site in the footer@@footer.about.summary"
+        >
+          The portfolio of a full-stack engineer building Angular and Spring Boot applications for
+          German online banking, with AI Ling on hand to answer questions.
+        </p>
+      </div>
+
+      <nav
+        i18n-aria-label="Name of the footer navigation landmark@@footer.nav.ariaLabel"
+        aria-label="Footer"
+        class="footer-nav flex flex-col gap-2"
+      >
+        @for (link of navLinks; track link.fragment) {
+          <a
+            routerLink="/"
+            [fragment]="link.fragment"
+            class="footer-link flex min-h-11 items-center"
+            >{{ link.label }}</a
+          >
+        }
+        <a
+          routerLink="/privacy-policy"
+          class="footer-link flex min-h-11 items-center"
+          i18n="Footer link to the privacy policy page@@footer.privacyPolicy"
+        >
+          Privacy Policy
+        </a>
+      </nav>
+
+      <div class="footer-contact flex flex-col gap-2">
+        @for (link of socialLinks; track link.label) {
+          <a
+            [href]="link.href"
+            [attr.target]="link.external ? '_blank' : null"
+            [attr.rel]="link.external ? 'noopener noreferrer' : null"
+            class="footer-link flex min-h-11 items-center gap-2"
+            [attr.aria-label]="link.ariaLabel"
+            [attr.data-cta-tracking]="link.label"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-4 shrink-0"
+              aria-hidden="true"
+            >
+              <path [attr.d]="link.iconPath" />
+            </svg>
+            <span>{{ link.shortLabel }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <app-brand-mark class="footer-wordmark" />
+
+    @if (adsEnabled) {
+      <app-ad-banner-toggle class="mt-10 self-start" />
+    }
   </div>
 </footer>

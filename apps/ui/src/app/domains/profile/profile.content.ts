@@ -55,14 +55,11 @@ export interface ProjectLink {
 
 export interface ProjectStatus {
   label: string;
-  /** Material icon ligature shown next to the label. */
-  icon: string;
 }
 
 /** Something Thanik built on his own, presented as evidence rather than a hobby. */
 export interface Project {
   name: string;
-  icon: string;
   /** What it is for. */
   tagline: string;
   /** Why it exists; omitted rather than invented when there is no stated reason. */
@@ -91,14 +88,12 @@ const REPO_URL = 'https://github.com/thanikc/thanikc.github.io';
 export const PROJECTS: readonly Project[] = [
   {
     name: 'CrashDash',
-    icon: 'trending_down',
     tagline: $localize`:Project tagline@@projects.crashdash.tagline:A dashboard that gauges the risk of a market crash from macro and market indicators.`,
     why: $localize`:Why the project exists@@projects.crashdash.why:Built for my own investing, and to build a complete Spring Boot and Angular system end to end, AI-assisted.`,
     decision: $localize`:One engineering decision on the project@@projects.crashdash.decision:Missing data stays unscored instead of counting as zero, so a gap never reads as "no risk".`,
     stack: ['Spring Boot', 'Angular', 'FRED API', 'OAuth sign-in'],
     status: {
       label: $localize`:Project availability@@projects.crashdash.status:Private — sign-in required`,
-      icon: 'lock',
     },
     featured: true,
     primary: {
@@ -111,14 +106,12 @@ export const PROJECTS: readonly Project[] = [
   },
   {
     name: 'AI Ling',
-    icon: 'forum',
     tagline: $localize`:Project tagline@@projects.ailing.tagline:The assistant on this page: it answers questions about my career from a knowledge base I wrote.`,
     why: $localize`:Why the project exists@@projects.ailing.why:So this page can stay short while the detail is one question away.`,
     decision: $localize`:One engineering decision on the project@@projects.ailing.decision:It answers only from a knowledge base I wrote, and says so when a question isn't covered.`,
     stack: ['Cloudflare Workers', 'Hono', 'Vectorize', 'RAG', 'Angular'],
     status: {
       label: $localize`:Project availability@@projects.ailing.status:Open source`,
-      icon: 'code',
     },
     featured: true,
     source: {
@@ -149,12 +142,11 @@ export const PROJECTS: readonly Project[] = [
   },
   {
     name: 'BJJ Quiz',
-    icon: 'sports_martial_arts',
     tagline: $localize`:Project tagline@@projects.bjj.tagline:Twelve questions guess the Brazilian Jiu-Jitsu belt you roll like, then AI roasts you, gently.`,
     why: $localize`:Why the project exists@@projects.bjj.why:Just for fun, and to try an AI feature and Cloudflare Workers.`,
     decision: $localize`:One engineering decision on the project@@projects.bjj.decision:Scoring happens on the server, and a canned roast steps in if the AI call fails.`,
     stack: ['Angular', 'Cloudflare Workers', 'LLM'],
-    status: { label: $localize`:Project availability@@common.statusLive:Live`, icon: 'public' },
+    status: { label: $localize`:Project availability@@common.statusLive:Live` },
     featured: false,
     primary: {
       label: $localize`:Link that opens the quiz@@projects.bjj.open:Take the quiz`,
@@ -166,11 +158,10 @@ export const PROJECTS: readonly Project[] = [
   },
   {
     name: $localize`:Name of the retirement calculator project and page@@calculator.title:Retirement Calculator`,
-    icon: 'calculate',
     tagline: $localize`:Project tagline@@projects.calculator.tagline:Projects the nest egg and monthly savings needed for a target retirement income.`,
     decision: $localize`:One engineering decision on the project@@projects.calculator.decision:Default assumptions load live from the World Bank API and fall back to fixed values when it has no data; the page prerenders as an empty shell so the static HTML never bakes in stale numbers.`,
     stack: ['Angular Signals', 'World Bank API'],
-    status: { label: $localize`:Project availability@@common.statusLive:Live`, icon: 'public' },
+    status: { label: $localize`:Project availability@@common.statusLive:Live` },
     featured: false,
     primary: {
       label: $localize`:Link that opens the calculator page@@projects.calculator.open:Open calculator`,

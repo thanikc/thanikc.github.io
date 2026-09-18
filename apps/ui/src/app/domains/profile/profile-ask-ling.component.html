@@ -1,23 +1,17 @@
-<section
-  class="ask-ling-card surface-card surface-card--accent space-y-4 rounded-2xl p-6 shadow-sm"
-  [attr.aria-labelledby]="headingId"
->
-  <div>
-    <h2
-      [id]="headingId"
-      class="scroll-mt-24 text-2xl font-bold tracking-tight"
-      i18n="Heading of the Ask AI Ling section@@askLing.heading"
-    >
-      Want the details? Ask AI Ling.
-    </h2>
-    <p
-      class="surface-muted mt-1 text-sm leading-relaxed"
-      i18n="Pitch for the AI assistant@@askLing.pitch"
-    >
-      It's the fastest way through the rest of this page: ask about a project, a technology choice,
-      or an engineering decision, and it answers from what I've actually written and built.
-    </p>
-  </div>
+<div class="ask-ling-invite space-y-3">
+  <h2
+    class="text-xl font-bold tracking-tight sm:text-2xl"
+    i18n="Heading of the Ask AI Ling invitation@@askLing.heading"
+  >
+    Want the details? Ask AI Ling.
+  </h2>
+  <p
+    class="ask-ling-pitch max-w-2xl text-sm leading-relaxed"
+    i18n="Pitch for the AI assistant@@askLing.pitch"
+  >
+    It's the fastest way through the rest of this page: ask about a project, a technology choice, or
+    an engineering decision, and it answers from what I've actually written and built.
+  </p>
 
   @if (prompts().length > 0) {
     <div class="flex flex-wrap gap-2">
@@ -26,4 +20,4 @@
       }
     </div>
   }
-</section>
+</div>
