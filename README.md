@@ -19,7 +19,6 @@ apps/
 ├── ui/
 │   ├── src/app/
 │   │   ├── domains/                 # Domain-driven feature modules
-│   │   │   ├── ads/                 # Ads domain (Google AdSense)
 │   │   │   ├── chat/                # AI Ling chat widget (calls apps/worker)
 │   │   │   ├── profile/             # Portfolio / profile domain
 │   │   │   ├── privacy/             # Privacy policy

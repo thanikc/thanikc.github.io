@@ -9,7 +9,4 @@ export const DEFAULT_ANNUAL_RETURN = 7;
 /** Trinity Study baseline safe withdrawal rate. */
 export const DEFAULT_SAFE_WITHDRAWAL_RATE = 4;
 
-/** Long-run consumer price inflation. */
-export const DEFAULT_INFLATION = 2.5;
-
 export const MONTHS_PER_YEAR = 12;

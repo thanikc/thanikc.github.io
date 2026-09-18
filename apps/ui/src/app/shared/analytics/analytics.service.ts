@@ -15,10 +15,6 @@ export interface ConsentUpdate {
   ad_personalization: ConsentState;
 }
 
-function isGtagWindow(view: unknown): view is GtagWindow {
-  return view !== null && typeof view === 'object' && 'document' in view && 'location' in view;
-}
-
 /**
  * Bootstrapping (dataLayer/gtag.js script tag) is done statically in
  * src/index.html so it is present in the prerendered HTML. This service only
@@ -31,47 +27,29 @@ export class AnalyticsService {
   private readonly document = inject(DOCUMENT);
 
   trackPageView(path: string): void {
-    const view = this.getWindow();
+    const view = this.window;
 
-    if (!view?.gtag) {
-      return;
-    }
-
-    view.gtag('event', 'page_view', {
+    this.gtag('event', 'page_view', {
       page_title: this.document.title,
       page_path: path,
-      page_location: view.location.origin + path,
+      page_location: view?.location.origin + path,
     });
   }
 
   trackEvent(name: string, params?: Record<string, unknown>): void {
-    const view = this.getWindow();
-
-    if (!view?.gtag) {
-      return;
-    }
-
-    view.gtag('event', name, params);
+    this.gtag('event', name, params);
   }
 
   /** Forwards a Consent Mode v2 update to the gtag.js queued in index.html. */
   updateConsent(consent: ConsentUpdate): void {
-    const view = this.getWindow();
-
-    if (!view?.gtag) {
-      return;
-    }
-
-    view.gtag('consent', 'update', consent);
+    this.gtag('consent', 'update', consent);
   }
 
-  private getWindow(): GtagWindow | undefined {
-    const view = this.document.defaultView;
+  private get window(): GtagWindow | null {
+    return this.document.defaultView as GtagWindow | null;
+  }
 
-    if (!isGtagWindow(view)) {
-      return undefined;
-    }
-
-    return view;
+  private gtag(...args: unknown[]): void {
+    this.window?.gtag?.(...args);
   }
 }

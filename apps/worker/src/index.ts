@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { resolveOrigin } from './cors';
 import { buildMessages, retrieve } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
@@ -9,7 +8,7 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use('/api/*', (c, next) =>
   cors({
-    origin: origin => resolveOrigin(origin || undefined, c.env.ALLOWED_ORIGIN),
+    origin: [c.env.ALLOWED_ORIGIN, 'http://localhost:4200'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86400,

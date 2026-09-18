@@ -1,16 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { paletteClassesIn } from '../testing/palette-classes';
 import { FooterComponent } from './footer.component';
-
-// Tailwind palette utilities are frozen to one hex value and ignore the theme
-// toggle; themed colour must come from the `--mat-sys-*` tokens instead.
-const PALETTE_CLASS =
-  /^(?:(?:hover|focus|focus-visible|active|dark|sm|md|lg):)*(?:bg|text|border|ring|from|via|to)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|white|black)(?:-\d{2,3})?(?:\/\d+)?$/;
-
-const paletteClassesIn = (root: Element): string[] =>
-  [root, ...root.querySelectorAll('*')].flatMap(el =>
-    [...el.classList].filter(c => PALETTE_CLASS.test(c)),
-  );
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -25,7 +16,7 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FooterComponent],
-      providers: [provideRouter([])], // Provides Router & ActivatedRoute for AdBannerService
+      providers: [provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);
@@ -188,12 +179,6 @@ describe('FooterComponent', () => {
 
   it('should carry the footer note as plain text, without an icon', () => {
     expect(footer().querySelector('.footer-note mat-icon')).toBeNull();
-  });
-
-  // Ads are currently deactivated site-wide (AdBannerService.adsEnabled); a
-  // toggle for a feature that's globally off would just confuse visitors.
-  it('should not render the ad banner toggle while ads are globally disabled', () => {
-    expect(footer().querySelector('app-ad-banner-toggle')).toBeNull();
   });
 
   it('should colour itself from theme tokens, not the Tailwind palette', () => {

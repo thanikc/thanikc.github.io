@@ -4,17 +4,3 @@
   flex: 1 1 auto;
   min-height: 0;
 }
-
-.ad-slot {
-  border: 1px dashed var(--mat-sys-outline-variant);
-}
-
-.ad-label {
-  color: var(--app-on-base-muted);
-}
-
-@media print {
-  .ad-slot {
-    display: none;
-  }
-}

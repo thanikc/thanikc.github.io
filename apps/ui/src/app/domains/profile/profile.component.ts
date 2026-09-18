@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { AdBannerComponent } from '../ads/ad-banner.component';
-import { AdBannerService } from '../ads/ad-banner.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CHAT_SUGGESTIONS } from '../chat/chat.constants';
 import { ProfileExperienceComponent } from './profile-experience.component';
 import { ProfileHeroComponent } from './profile-hero.component';
@@ -26,7 +24,6 @@ import {
 @Component({
   selector: 'app-profile',
   imports: [
-    AdBannerComponent,
     ProfileHeroComponent,
     ProfilePrinciplesComponent,
     ProfileExperienceComponent,
@@ -40,8 +37,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileComponent {
-  private readonly adBanner = inject(AdBannerService);
-
   // Static presentation content: no reactivity needed.
   readonly askLingPrompts = CHAT_SUGGESTIONS;
   readonly workThemes = WORK_THEMES;
@@ -50,7 +45,4 @@ export class ProfileComponent {
   readonly experienceStats = EXPERIENCE_STATS;
   readonly toolbox = TOOLBOX;
   readonly interests = INTERESTS;
-  readonly showBanner = computed(
-    () => this.adBanner.showBanner() && this.adBanner.routeAllowsAds(),
-  );
 }

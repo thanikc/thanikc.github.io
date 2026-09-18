@@ -56,9 +56,12 @@ describe('PrivacyPolicyComponent', () => {
     expect(h2Text).toContain('Cookies');
     expect(h2Text).toContain('Google Fonts');
     expect(h2Text).toContain('Google Analytics');
-    expect(h2Text).toContain('Google AdSense');
     expect(h2Text).toContain('International Data Transfers');
     expect(h2Text).toContain('Your Rights');
+  });
+
+  it('does not describe advertising, which the site no longer runs', () => {
+    expect(compiled().textContent).not.toMatch(/adsense|advertis/i);
   });
 
   it('lists the data subject rights guaranteed by the GDPR', () => {

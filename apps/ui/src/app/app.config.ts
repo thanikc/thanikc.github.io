@@ -3,8 +3,7 @@ import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { provideAnalytics } from './shared/analytics/analytics.provider';
-import { provideLocaleHead } from './shared/i18n/locale-head.provider';
+import { provideNavigationHooks } from './shared/navigation-hooks.provider';
 import {
   provideClientHydration,
   withEventReplay,
@@ -27,8 +26,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
     ),
     provideHttpClient(withFetch()),
-    provideAnalytics(),
-    provideLocaleHead(),
+    provideNavigationHooks(),
     // withI18nSupport: without it, hydration cannot match the translated blocks in the
     // prerendered HTML and destroys and re-renders each one instead — measured as a
     // 0.58 layout shift on the home page at 360px (e2e/design.e2e.ts).

@@ -1,4 +1,4 @@
-import { contactLink, SOCIAL_LINKS } from './contact-links';
+import { EMAIL_LINK, LINKEDIN_LINK, SOCIAL_LINKS } from './contact-links';
 
 describe('contact links', () => {
   it('offers Email, GitHub Repository and LinkedIn', () => {
@@ -13,12 +13,8 @@ describe('contact links', () => {
     expect(SOCIAL_LINKS.map(link => link.shortLabel)).toEqual(['Email', 'GitHub', 'LinkedIn']);
   });
 
-  it('looks a link up by its label', () => {
-    expect(contactLink('Email').href).toBe('mailto:thanikc@gmail.com');
-    expect(contactLink('LinkedIn').external).toBe(true);
-  });
-
-  it('fails loudly on an unknown label', () => {
-    expect(() => contactLink('Fax')).toThrowError(/Unknown contact link: Fax/);
+  it('exposes the email and LinkedIn links on their own', () => {
+    expect(EMAIL_LINK.href).toBe('mailto:thanikc@gmail.com');
+    expect(LINKEDIN_LINK.external).toBe(true);
   });
 });

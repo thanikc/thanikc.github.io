@@ -1,14 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { signal } from '@angular/core';
-import { By } from '@angular/platform-browser';
 import { expect, it, describe, beforeEach, vi } from 'vitest';
 import { ProfileComponent } from './profile.component';
 import { ChatService } from '../chat/chat.service';
 import { EXPERIENCE_STATS, PRINCIPLES, PROJECTS, TOOLBOX, WORK_THEMES } from './profile.content';
 import { CHAT_SUGGESTIONS } from '../chat/chat.constants';
-import { AdBannerService } from '../ads/ad-banner.service';
-import { AdBannerComponent } from '../ads/ad-banner.component';
 
 const COMPANIES = /attempto|Atruvia|Fiducia|Genossenschaft/i;
 
@@ -20,24 +16,10 @@ describe('ProfileComponent', () => {
   const projectsHost = () => el().querySelector('app-profile-projects');
   const project = (name: string) => PROJECTS.find(candidate => candidate.name === name)!;
 
-  const mockShowBanner = signal(true);
-  const mockRouteAllowsAds = signal(true);
-  const mockAdBannerService = {
-    showBanner: mockShowBanner,
-    routeAllowsAds: mockRouteAllowsAds,
-  };
-
   beforeEach(async () => {
-    mockShowBanner.set(true);
-    mockRouteAllowsAds.set(true);
-
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
-      providers: [
-        provideRouter([]),
-        { provide: AdBannerService, useValue: mockAdBannerService },
-        { provide: ChatService, useValue: { open: vi.fn() } },
-      ],
+      providers: [provideRouter([]), { provide: ChatService, useValue: { open: vi.fn() } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileComponent);
@@ -183,7 +165,7 @@ describe('ProfileComponent', () => {
   });
 
   // Personality stays, but after the professional story: interests close the page.
-  it('closes with the interests, after the toolbox and before the ad slot', () => {
+  it('closes with the interests, after the toolbox', () => {
     const interests = el().querySelector('app-profile-interests');
     const toolbox = el().querySelector('app-profile-toolbox')!;
 
@@ -191,7 +173,7 @@ describe('ProfileComponent', () => {
     expect(
       toolbox.compareDocumentPosition(interests!) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    expect(interests?.nextElementSibling?.classList.contains('ad-slot')).toBe(true);
+    expect(interests?.nextElementSibling).toBeNull();
   });
 
   it('keeps each interest to one short line', () => {
@@ -298,64 +280,6 @@ describe('ProfileComponent', () => {
         'Also worked with',
       ]);
     });
-  });
-
-  it('renders a labeled ad slot as the last element of the page', () => {
-    const page = el().querySelector('.profile-page');
-    const adSlot = el().querySelector('.ad-slot');
-
-    expect(page?.lastElementChild).toBe(adSlot);
-    expect(adSlot?.textContent).toContain('Advertisement');
-    expect(adSlot?.querySelector('app-ad-banner')).not.toBeNull();
-  });
-
-  it('pins the ad slot to the bottom of the page above the footer', () => {
-    const page = el().querySelector('.profile-page');
-    const adSlot = el().querySelector('.ad-slot');
-
-    expect(page?.classList.contains('flex-1')).toBe(true);
-    expect(adSlot?.classList.contains('mt-auto')).toBe(true);
-  });
-
-  it('keeps at least a 2rem gap between the last section and the ad slot', () => {
-    // The gap is padding on the ad slot itself (pt-11 = 2.75rem), not a margin on
-    // the section above it: `display: none` takes the padding with it, so a hidden
-    // ad leaves the last section flush against the footer.
-    const adSlot = el().querySelector('.ad-slot');
-    const lastSection = adSlot?.previousElementSibling;
-
-    expect(adSlot?.classList.contains('pt-11')).toBe(true);
-    expect(lastSection?.classList.contains('mb-8')).toBe(false);
-  });
-
-  it('should display the ad banner when showBanner signal is true', () => {
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(true);
-  });
-
-  it('should hide the ad banner when showBanner signal becomes false', () => {
-    mockShowBanner.set(false);
-    fixture.detectChanges();
-
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(false);
-  });
-
-  it('hides the ad banner on routes that disallow ads regardless of user preference', () => {
-    mockRouteAllowsAds.set(false);
-    fixture.detectChanges();
-
-    const bannerComponent = fixture.debugElement.query(
-      By.directive(AdBannerComponent),
-    ).componentInstance;
-
-    expect(bannerComponent.visible()).toBe(false);
   });
 
   // <main> already applies the page container, gutters and max width; repeating

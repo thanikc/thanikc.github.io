@@ -1,6 +1,8 @@
-import { renderMarkdown } from './markdown';
+import { MarkdownPipe } from './markdown.pipe';
 
-describe('renderMarkdown', () => {
+const renderMarkdown = (value: string) => new MarkdownPipe().transform(value);
+
+describe('MarkdownPipe', () => {
   it('renders inline emphasis as HTML tags', () => {
     const html = renderMarkdown('**bold** and *italic*');
 

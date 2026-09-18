@@ -8,17 +8,6 @@ describe('AssumptionDataService', () => {
   let service: AssumptionDataService;
   let httpMock: HttpTestingController;
 
-  const mockInflationResponse = [
-    {},
-    [
-      {
-        country: { id: 'US', value: 'United States' },
-        date: '2026',
-        value: 3.4, // 3.4% inflation
-      },
-    ],
-  ];
-
   const mockMarketResponse = [
     {},
     [{ country: { id: 'US', value: 'United States' }, date: '2026', value: 10 }],
@@ -75,7 +64,6 @@ describe('AssumptionDataService', () => {
 
   it('should return default fallbacks before HTTP requests resolve', () => {
     expect(service.isLive()).toBeFalsy();
-    expect(service.inflationRate()).toBe(2.5);
     expect(service.estimatedAnnualReturn()).toBe(7);
     expect(service.safeWithdrawalRate()).toBe(4.0);
   });
@@ -83,23 +71,18 @@ describe('AssumptionDataService', () => {
   it('should fetch macroeconomic data and update computed signals on success', async () => {
     TestBed.tick();
     const reqs = httpMock.match(req => true);
-    expect(reqs.length).toBe(2);
+    expect(reqs.length).toBe(1);
 
-    const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
     const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
 
-    expect(inflationReq).toBeTruthy();
     expect(marketReq).toBeTruthy();
 
-    inflationReq!.flush(mockInflationResponse);
     marketReq!.flush(mockMarketResponse);
 
     await TestBed.inject(ApplicationRef).whenStable();
 
     expect(service.isLive()).toBeTruthy();
-    expect(service.inflationRate()).toBe(3.4);
     expect(service.estimatedAnnualReturn()).toBe(10); // single valid value → average = 10
-    expect(service.realAnnualReturn()).toBe(10 - 3.4);
   });
 
   it('should gracefully handle API errors by using fallbacks', () => {
@@ -114,7 +97,6 @@ describe('AssumptionDataService', () => {
     );
 
     expect(service.isLive()).toBeFalsy();
-    expect(service.inflationRate()).toBe(2.5);
     expect(service.estimatedAnnualReturn()).toBe(7);
   });
 
@@ -122,13 +104,9 @@ describe('AssumptionDataService', () => {
     TestBed.tick();
     const reqs = httpMock.match(req => true);
 
-    // Flush inflation with a basic mock so both resources resolve
-    const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
     const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
-    expect(inflationReq).toBeTruthy();
     expect(marketReq).toBeTruthy();
 
-    inflationReq!.flush(mockInflationResponse);
     marketReq!.flush(mockMarketMultiResponse);
     await TestBed.inject(ApplicationRef).whenStable();
 
@@ -140,12 +118,9 @@ describe('AssumptionDataService', () => {
     TestBed.tick();
     const reqs = httpMock.match(req => true);
 
-    const inflationReq = reqs.find(req => req.request.url.includes('FP.CPI.TOTL.ZG'));
     const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
-    expect(inflationReq).toBeTruthy();
     expect(marketReq).toBeTruthy();
 
-    inflationReq!.flush(mockInflationResponse);
     marketReq!.flush(mockMarketAllNullResponse);
     await TestBed.inject(ApplicationRef).whenStable();
 

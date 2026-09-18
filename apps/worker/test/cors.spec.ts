@@ -1,22 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { resolveOrigin } from '../src/cors';
+import app from '../src/index';
 
-describe('resolveOrigin', () => {
-  const allowedOrigin = 'https://thanikc.dev';
+describe('CORS', () => {
+  const env = { ALLOWED_ORIGIN: 'https://thanikc.dev' } as unknown as Env;
+  const originFor = async (origin?: string) => {
+    const res = await app.request(
+      '/api/health',
+      origin ? { headers: { Origin: origin } } : {},
+      env,
+    );
+    return res.headers.get('Access-Control-Allow-Origin');
+  };
 
-  it('echoes the configured site origin back', () => {
-    expect(resolveOrigin(allowedOrigin, allowedOrigin)).toBe(allowedOrigin);
+  it('echoes the configured site origin back', async () => {
+    expect(await originFor('https://thanikc.dev')).toBe('https://thanikc.dev');
   });
 
-  it('echoes the local Angular dev server origin back', () => {
-    expect(resolveOrigin('http://localhost:4200', allowedOrigin)).toBe('http://localhost:4200');
+  it('echoes the local Angular dev server back', async () => {
+    expect(await originFor('http://localhost:4200')).toBe('http://localhost:4200');
   });
 
-  it('falls back to the configured origin for an unrecognised request origin', () => {
-    expect(resolveOrigin('https://evil.example', allowedOrigin)).toBe(allowedOrigin);
+  it('sends no allow-origin header to any other origin, so the browser blocks it', async () => {
+    expect(await originFor('https://evil.example')).toBeNull();
   });
 
-  it('falls back to the configured origin when no request origin is present', () => {
-    expect(resolveOrigin(undefined, allowedOrigin)).toBe(allowedOrigin);
+  it('sends no allow-origin header when the request has no origin', async () => {
+    expect(await originFor()).toBeNull();
   });
 });
