@@ -95,7 +95,7 @@ describe('HeaderComponent', () => {
       setScrollY(0);
     });
 
-    // At the very top the header floats transparent over the full-bleed dark hero.
+    // At the very top the header is transparent over the page base.
     it('starts transparent at the top of the page', () => {
       expect(header()?.classList.contains('scrolled')).toBe(false);
     });

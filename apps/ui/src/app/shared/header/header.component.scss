@@ -29,20 +29,12 @@ app-theme-toggle {
     border-color 0.25s ease,
     backdrop-filter 0.25s ease;
 
-  // Default: transparent, floating over the full-bleed dark hero directly
-  // beneath it — the hero's own `inverse-on-surface`/`inverse-surface` pair,
-  // not `--app-on-base` (that token now means "text on the light page base",
-  // since the page defaults to light;
-  // the header still needs light text here regardless, because the hero
-  // stays a dark full-bleed section either way).
+  // Default: transparent over the page base. The header is sticky *in flow*, so
+  // the dark hero starts below it, not behind it — the text must read on the
+  // light page base, not the hero's inverse-on-surface.
   background-color: transparent;
-  color: var(--mat-sys-inverse-on-surface);
+  color: var(--mat-sys-on-surface);
   border-bottom: 1px solid transparent;
-  // The root `--mat-button-text-label-text-color` retint is calibrated for a
-  // *light* fill (card or, now, the page base too) and measures ~1.4:1 on
-  // the dark hero — shadow it here with the token already proven to read on
-  // that surface (the hero itself uses the same pair).
-  --mat-button-text-label-text-color: var(--mat-sys-inverse-on-surface);
 
   .brand-link {
     color: inherit;
