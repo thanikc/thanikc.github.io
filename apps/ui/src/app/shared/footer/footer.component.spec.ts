@@ -76,6 +76,14 @@ describe('FooterComponent', () => {
       expect(cta?.getAttribute('href')).toBe('mailto:thanikc@gmail.com');
       expect(cta?.classList.contains('min-h-11')).toBe(true);
     });
+
+    it('invites a conversation, with a decorative right arrow', () => {
+      const cta = footer().querySelector<HTMLAnchorElement>('.footer-cta');
+
+      expect(cta?.textContent).toContain('Start a conversation');
+      expect(cta?.querySelector('mat-icon')?.textContent?.trim()).toBe('arrow_forward');
+      expect(cta?.querySelector('mat-icon')?.getAttribute('aria-hidden')).toBe('true');
+    });
   });
 
   // 3-column nav — about / site nav / contact — reusing the

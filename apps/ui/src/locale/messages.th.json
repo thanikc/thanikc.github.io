@@ -230,6 +230,8 @@
     "cookies.reject": "ปฏิเสธ",
     "cookies.accept": "ยอมรับ",
     "footer.about.summary": "พอร์ตโฟลิโอของ full-stack engineer ที่สร้างแอป Angular และ Spring Boot สำหรับออนไลน์แบงก์กิงในเยอรมนี พร้อมให้ AI Ling ช่วยตอบคำถาม",
+    "footer.cta": "เริ่มบทสนทนา",
+    "footer.cta.ariaLabel": "เริ่มบทสนทนากับ Thanik ทางอีเมล",
     "footer.note": "ผมสร้างเว็บนี้แบบเขียนเทสต์ก่อน เพื่อลองทำของจริงที่ความเสี่ยงต่ำ ซอร์สโค้ดเปิดให้ดูได้",
     "footer.privacyPolicy": "นโยบายความเป็นส่วนตัว",
     "footer.nav.ariaLabel": "เมนูท้ายหน้า",

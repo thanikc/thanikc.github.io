@@ -230,6 +230,8 @@
     "cookies.reject": "Ablehnen",
     "cookies.accept": "Annehmen",
     "footer.about.summary": "Das Portfolio eines Full-Stack-Entwicklers, der Angular- und Spring-Boot-Anwendungen für das deutsche Online-Banking baut – mit AI Ling, die Fragen beantwortet.",
+    "footer.cta": "Gespräch beginnen",
+    "footer.cta.ariaLabel": "Gespräch beginnen – E-Mail an Thanik",
     "footer.note": "Ich baue diese Seite test-first, um etwas Echtes auszuprobieren, bei dem wenig auf dem Spiel steht. Der Quellcode ist öffentlich.",
     "footer.privacyPolicy": "Datenschutzerklärung",
     "footer.nav.ariaLabel": "Fußzeilennavigation",

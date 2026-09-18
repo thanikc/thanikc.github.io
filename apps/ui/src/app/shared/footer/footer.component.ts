@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { AdBannerToggleComponent } from '../../domains/ads/ad-banner-toggle.component';
 import { AdBannerService } from '../../domains/ads/ad-banner.service';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
@@ -9,7 +10,13 @@ import { NAV_LINKS } from '../nav-links';
 
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink, AdBannerToggleComponent, BrandMarkComponent, MatButtonModule],
+  imports: [
+    RouterLink,
+    AdBannerToggleComponent,
+    BrandMarkComponent,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

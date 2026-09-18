@@ -14,10 +14,14 @@
         matButton="filled"
         class="footer-cta min-h-11 shrink-0"
         [href]="email.href"
-        [attr.aria-label]="email.ariaLabel"
+        i18n-aria-label="Accessible name of the footer email CTA@@footer.cta.ariaLabel"
+        aria-label="Start a conversation with Thanik by email"
         data-cta-tracking="Footer: Email"
       >
-        {{ email.shortLabel }}
+        <span i18n="Footer call to action that opens an email to Thanik@@footer.cta"
+          >Start a conversation</span
+        >
+        <mat-icon iconPositionEnd aria-hidden="true">arrow_forward</mat-icon>
       </a>
     </div>
 
