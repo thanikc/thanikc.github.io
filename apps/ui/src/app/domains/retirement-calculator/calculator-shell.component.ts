@@ -9,7 +9,7 @@ import { RetirementCalculatorComponent } from './calculator.component';
   // purpose: they are the heights the Playwright design check measured at each
   // breakpoint's narrowest width (360 → 1388px, 640 → 988px, 768 → 784px,
   // 1024 → 658px), rounded up. Re-measure if the calculator's layout changes.
-  host: { class: 'block min-h-[1390px] sm:min-h-[990px] md:min-h-[785px] lg:min-h-[660px]' },
+  host: { class: 'block mb-8 min-h-[1390px] sm:min-h-[990px] md:min-h-[785px] lg:min-h-[660px]' },
   template: `
     @defer (on immediate) {
       <app-retirement-calculator />
