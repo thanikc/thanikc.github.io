@@ -262,7 +262,11 @@ async function structure(page: Page, width: number) {
  * ... looks like there's no cards at all". 1.3 is not a WCAG number; it is this app's
  * own bar for "reads as a surface at a glance", calibrated against that failure.
  */
-async function surfaceSeparation(page: Page) {
+type Surface =
+  | { sel: string; error: string }
+  | { sel: string; borderRatio: number; fillRatio: number; raisedIsLighter: boolean };
+
+async function surfaceSeparation(page: Page): Promise<Surface[]> {
   return page.evaluate(() => {
     const rgb = (color: string): number[] | null => {
       const legacy = color.match(/^rgba?\(([^)]+)\)$/);
@@ -297,7 +301,7 @@ async function surfaceSeparation(page: Page) {
 
     const shell = document.querySelector('.app-shell');
     const pageColor = shell ? rgb(getComputedStyle(shell).backgroundColor) : null;
-    return ['.hero-card', '.surface-card', '.card', '.info-card'].flatMap(sel => {
+    return ['.hero-card', '.surface-card', '.card', '.info-card'].flatMap((sel): Surface[] => {
       const el = document.querySelector(sel);
       if (!el) return [];
       const s = getComputedStyle(el);
