@@ -450,6 +450,28 @@ test('header stays pinned to the top while the page scrolls', async ({ browser }
   await page.context().close();
 });
 
+// Regression: the open chat's scroll lock pins <body> with `position: fixed;
+// top: -scrollY`, and the global `body { height: 100% }` then measured against
+// the viewport instead of the content — one screen tall, shifted a full scroll
+// offset upwards, so everything (the panel included) was clipped off-screen and
+// the page went blank. Opening the chat deep down must still leave the body box
+// covering the viewport.
+test('the page stays visible when the chat opens far down the page', async ({ browser }) => {
+  const page = await openPage(browser, '/en/', { width: 768 });
+  await page.mouse.wheel(0, 3000);
+  await page.waitForTimeout(100);
+  await page.locator('button.chat-fab').click();
+  await expect(page.locator('#chat-dialog')).toBeVisible();
+
+  const covers = await page.evaluate(() => {
+    const box = document.body.getBoundingClientRect();
+    return box.top <= 0 && box.bottom >= window.innerHeight;
+  });
+
+  expect(covers).toBe(true);
+  await page.context().close();
+});
+
 test.describe('keyboard', () => {
   for (const width of [360, 1440] as const) {
     test(`keyboard: / is fully operable at ${width}px`, async ({ browser }) => {

@@ -10,4 +10,11 @@ body.chat-scroll-lock {
   position: fixed;
   inset-inline: 0;
   overflow: hidden;
+  /* Overrides the global `body { height: 100% }`, which a fixed body resolves
+     against the viewport instead of its content: the box would then be one
+     screen tall starting at `top: -scrollY`, so anyone who opened the chat more
+     than a screen down got the whole box clipped off-screen — a blank white page
+     that took WebKit's fixed-inside-overflow-hidden clip down with it, panel
+     included, leaving a reload as the only way out (seen on iPad). */
+  height: auto;
 }
