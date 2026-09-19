@@ -222,10 +222,16 @@ async function structure(page: Page, width: number) {
       .map(el => `${el.tagName.toLowerCase()} "${el.textContent?.trim().slice(0, 40)}"`);
 
     // Section rhythm: a header's divider must not run into the content below it.
+    // "Below" is the point: the toolbox band puts its header and content in two
+    // grid columns at lg, where the vertical gap is meaninglessly negative and
+    // the whitespace that matters is horizontal. Only stacked pairs are measured.
     const rhythm = [...document.querySelectorAll('app-section-header')].flatMap(header => {
       const next = header.nextElementSibling;
       if (!next || !visible(next)) return [];
-      const gap = next.getBoundingClientRect().top - header.getBoundingClientRect().bottom;
+      const above = header.getBoundingClientRect();
+      const below = next.getBoundingClientRect();
+      if (below.left >= above.right || below.right <= above.left) return [];
+      const gap = below.top - above.bottom;
       return gap < 16 ? [`"${header.textContent?.trim().slice(0, 30)}": ${Math.round(gap)}px`] : [];
     });
 
