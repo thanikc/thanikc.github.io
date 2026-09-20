@@ -37,7 +37,7 @@ describe('generate', () => {
       env({ GROQ_API_KEY: 'g', GOOGLE_AI_API_KEY: 'x', OPENROUTER_API_KEY: 'y' }),
     );
 
-    expect(result).toEqual({ answer: 'from groq', provider: 'groq' });
+    expect(result).toEqual({ answer: 'from groq', provider: 'groq', failovers: 0 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('api.groq.com');
   });
@@ -54,7 +54,7 @@ describe('generate', () => {
       env({ GROQ_API_KEY: 'g', GOOGLE_AI_API_KEY: 'x', OPENROUTER_API_KEY: 'y' }),
     );
 
-    expect(result.provider).toBe('openrouter');
+    expect(result).toMatchObject({ provider: 'openrouter', failovers: 2 });
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(String(fetchMock.mock.calls[2]?.[0])).toContain('openrouter.ai');
   });

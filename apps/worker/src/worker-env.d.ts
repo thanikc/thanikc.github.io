@@ -8,4 +8,7 @@ interface Env {
   INGEST_TOKEN?: string;
   // Declared in wrangler.jsonc; optional here because the worker runs without it.
   CHAT_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
+  ANALYTICS?: {
+    writeDataPoint(point: { blobs?: string[]; doubles?: number[]; indexes?: string[] }): void;
+  };
 }

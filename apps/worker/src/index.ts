@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
+import { record, type ChatPoint } from './telemetry';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -12,6 +13,7 @@ app.use('/api/*', (c, next) =>
     origin: [c.env.ALLOWED_ORIGIN, 'http://localhost:4200'],
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
+    exposeHeaders: ['X-Request-Id'],
     maxAge: 86400,
   })(c, next),
 );
@@ -21,6 +23,10 @@ app.get('/api/health', c => c.json({ status: 'ok' }));
 const MAX_MESSAGE_CHARS = 2000;
 
 app.post('/api/chat', async c => {
+  const started = Date.now();
+  const requestId = crypto.randomUUID();
+  c.header('X-Request-Id', requestId);
+
   // Absent binding (local dev, tests) means no limit.
   const verdict = await c.env.CHAT_LIMIT?.limit({
     key: c.req.header('cf-connecting-ip') ?? 'anon',
@@ -63,28 +69,63 @@ app.post('/api/chat', async c => {
   const cacheable = history.length === 0;
   const lang = cacheLocale(locale);
   const key = await cacheKey(message, lang);
+  const track = (p: Pick<ChatPoint, 'provider' | 'cache' | 'outcome'> & Partial<ChatPoint>) =>
+    record(c.env, {
+      requestId,
+      locale: lang,
+      latencyMs: Date.now() - started,
+      topScore: -1,
+      failovers: 0,
+      answerLength: 0,
+      ...p,
+    });
   if (cacheable) {
     const hit = await lookupExact(c.env, key);
-    if (hit) return c.json({ ...hit, cached: 'exact' });
+    if (hit) {
+      track({
+        provider: hit.provider,
+        cache: 'exact',
+        outcome: 'ok',
+        answerLength: hit.answer.length,
+      });
+      return c.json({ ...hit, cached: 'exact' });
+    }
   }
 
   // One embedding serves both the semantic lookup and retrieval.
   const vector = await embed(message, c.env);
   if (cacheable) {
     const hit = await lookupSemantic(c.env, vector, lang);
-    if (hit) return c.json({ ...hit, cached: 'semantic' });
+    if (hit) {
+      track({
+        provider: hit.provider,
+        cache: 'semantic',
+        outcome: 'ok',
+        answerLength: hit.answer.length,
+      });
+      return c.json({ ...hit, cached: 'semantic' });
+    }
   }
 
   const chunks = await search(vector, c.env);
+  const topScore = chunks[0]?.score ?? 0;
 
   // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
   // conversation, so the gate only applies to a conversation's opening message.
-  if (history.length === 0 && (chunks[0]?.score ?? 0) < MIN_SCORE) {
-    return c.json({ answer: declineAnswer(locale), provider: 'none', sources: [] });
+  if (history.length === 0 && topScore < MIN_SCORE) {
+    const answer = declineAnswer(locale);
+    track({
+      provider: 'none',
+      cache: 'none',
+      outcome: 'refused',
+      topScore,
+      answerLength: answer.length,
+    });
+    return c.json({ answer, provider: 'none', sources: [] });
   }
 
   try {
-    const { answer, provider } = await generate(
+    const { answer, provider, failovers } = await generate(
       buildMessages(message, chunks, history, locale),
       c.env,
     );
@@ -102,9 +143,24 @@ app.post('/api/chat', async c => {
         }),
       );
     }
+    track({
+      provider,
+      cache: 'none',
+      outcome: 'ok',
+      topScore,
+      failovers,
+      answerLength: answer.length,
+    });
     return c.json({ answer, provider, sources });
   } catch (err) {
     if (err instanceof ChatError) {
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'failed',
+        topScore,
+        failovers: err.attempts.length,
+      });
       return c.json({ error: err.message, attempts: err.attempts }, 502);
     }
     throw err;

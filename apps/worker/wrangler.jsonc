@@ -31,6 +31,8 @@
       "migrations_dir": "migrations",
     },
   ],
+  // One data point per chat request; query with the Analytics Engine SQL API.
+  "analytics_engine_datasets": [{ "binding": "ANALYTICS", "dataset": "ai_ling_chat" }],
   // Native rate limiter: 10 chat requests per minute per client IP.
   "ratelimits": [
     {

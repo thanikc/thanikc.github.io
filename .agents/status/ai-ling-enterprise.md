@@ -12,11 +12,11 @@ Updated: 2026-09-20
 | 02   | Groundedness gate       | done    |
 | 07   | Trim sources payload    | done    |
 | 03   | D1 answer cache         | done    |
-| 04   | Telemetry               | todo    |
+| 04   | Telemetry               | done    |
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
 
-**Next:** plan 04 (telemetry). Plans 01–03 and 07 are deployed (version 046bdcdf, 2026-09-20) and smoke-tested live: exact cache hit, gate declines off-topic.
+**Next:** deploy plan 04, then plan 05 (eval gate). Plans 01–03 and 07 are deployed (version 046bdcdf, 2026-09-20) and smoke-tested live: exact cache hit, gate declines off-topic.
 
 **Order notes:** 03 step 11 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
@@ -26,6 +26,11 @@ gate would have refused.
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
 
+- plan 04 — done (this commit), not yet deployed. Decisions beyond the plan: `generate` now returns
+  `failovers` (count of providers that failed first) so the point can carry failover depth;
+  400s and 429s record nothing (validation noise, and Workers' own metrics cover 429);
+  `X-Request-Id` is CORS-exposed; `topScore` is -1 when retrieval was skipped (exact hit).
+  Privacy policy needs no change: no question text, answer or IP is stored.
 - plan 03 — done (this commit), D1 cache with both tiers. Decisions beyond the plan: embeddings
   are base64 TEXT, not BLOB; a `provider` column replays the original provider on a hit;
   `CACHE_DB`/`CACHE_EPOCH` are read through a cast in `cache.ts` (no `worker-env.d.ts` entry,

@@ -98,6 +98,20 @@ pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once per new migrat
 After re-ingesting, bump `CACHE_EPOCH` in `wrangler.jsonc` and deploy so answers
 grounded on the old content stop being served; old rows are purged on the next write.
 
+## Telemetry (Analytics Engine)
+
+Each `/api/chat` request that passes validation writes one data point to the
+`ai_ling_chat` dataset (`ANALYTICS` binding; absent = nothing recorded) and returns an
+`X-Request-Id` header. Blobs: provider, locale, cache tier, outcome (`ok` / `refused` /
+`failed`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
+failover depth, answer length. The question, answer and IP are never recorded.
+
+```sql
+-- POST https://api.cloudflare.com/client/v4/accounts/<id>/analytics_engine/sql
+SELECT blob1 AS provider, blob4 AS outcome, count() AS n, quantileWeighted(0.95, double1, _sample_interval) AS p95_ms
+FROM ai_ling_chat WHERE timestamp > NOW() - INTERVAL '7' DAY GROUP BY provider, outcome
+```
+
 ## Commands (run from repo root or this directory)
 
 ```bash

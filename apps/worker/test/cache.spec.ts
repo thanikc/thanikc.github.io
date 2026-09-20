@@ -80,6 +80,19 @@ describe('answer cache: exact tier', () => {
     expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(1);
   });
 
+  it('records the tier a cached answer came from', async () => {
+    const writeDataPoint = vi.fn();
+    await post({ message: 'Who is Thanik?' }, { ANALYTICS: { writeDataPoint } });
+    await settle();
+
+    await post({ message: 'Who is Thanik?' }, { ANALYTICS: { writeDataPoint } });
+
+    expect(writeDataPoint.mock.calls.map(([p]) => p.blobs.slice(0, 4))).toEqual([
+      ['groq', 'en', 'none', 'ok'],
+      ['groq', 'en', 'exact', 'ok'],
+    ]);
+  });
+
   it('treats case and surrounding whitespace as the same question', async () => {
     await post({ message: 'Who is Thanik?' });
     await settle();

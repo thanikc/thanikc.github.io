@@ -8,6 +8,8 @@ export interface ChatMessage {
 export interface GenerateResult {
   answer: string;
   provider: string;
+  /** Providers that failed before this one answered. */
+  failovers: number;
 }
 
 /** Thrown when every configured provider fails (or none is configured). */
@@ -66,7 +68,7 @@ export async function generate(messages: ChatMessage[], env: Env): Promise<Gener
   for (const provider of providers) {
     try {
       const answer = await callProvider(provider, messages);
-      return { answer, provider: provider.name };
+      return { answer, provider: provider.name, failovers: attempts.length };
     } catch (err) {
       attempts.push(`${provider.name}: ${err instanceof Error ? err.message : String(err)}`);
     }
