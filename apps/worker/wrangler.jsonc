@@ -21,6 +21,15 @@
       "remote": true,
     },
   ],
+  // Answer cache. No database_id: `wrangler deploy` provisions the database by name.
+  // Apply the schema with `wrangler d1 migrations apply CACHE_DB --remote`.
+  "d1_databases": [
+    {
+      "binding": "CACHE_DB",
+      "database_name": "thanikc-cache",
+      "migrations_dir": "migrations",
+    },
+  ],
   // Native rate limiter: 10 chat requests per minute per client IP.
   "ratelimits": [
     {
@@ -35,6 +44,8 @@
     "GROQ_MODEL": "openai/gpt-oss-20b",
     "GOOGLE_MODEL": "gemini-flash-latest",
     "OPENROUTER_MODEL": "openrouter/free",
+    // Bump after re-ingesting so cached answers grounded on old content stop being served.
+    "CACHE_EPOCH": "1",
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
   //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN

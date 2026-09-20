@@ -21,6 +21,7 @@ function post(path: string, body: unknown, headers: Record<string, string> = {})
       body: JSON.stringify(body),
     },
     env,
+    { waitUntil() {}, passThroughOnException() {} } as never,
   );
 }
 

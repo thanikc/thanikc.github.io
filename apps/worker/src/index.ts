@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { buildMessages, declineAnswer, MIN_SCORE, retrieve } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
+import { cacheKey, cacheLocale, lookupExact, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -53,11 +54,20 @@ app.post('/api/chat', async c => {
       )
     : [];
 
-  const chunks = await retrieve(message, c.env);
-
   // `locale` is visitor input; buildMessages and declineAnswer only honour a language
   // the site is actually published in and ignore anything else.
   const locale = typeof body?.locale === 'string' ? body.locale : undefined;
+
+  // A follow-up's answer depends on the turns before it, so only a conversation's
+  // opening message goes through the cache.
+  const cacheable = history.length === 0;
+  const key = await cacheKey(message, cacheLocale(locale));
+  if (cacheable) {
+    const hit = await lookupExact(c.env, key);
+    if (hit) return c.json({ ...hit, cached: 'exact' });
+  }
+
+  const chunks = await retrieve(message, c.env);
 
   // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
   // conversation, so the gate only applies to a conversation's opening message.
@@ -70,11 +80,20 @@ app.post('/api/chat', async c => {
       buildMessages(message, chunks, history, locale),
       c.env,
     );
-    return c.json({
-      answer,
-      provider,
-      sources: chunks.map(({ title, score }) => ({ title, score })),
-    });
+    const sources = chunks.map(({ title, score }) => ({ title, score }));
+    if (cacheable) {
+      c.executionCtx.waitUntil(
+        store(c.env, {
+          key,
+          locale: cacheLocale(locale),
+          question: message,
+          answer,
+          provider,
+          sources,
+        }),
+      );
+    }
+    return c.json({ answer, provider, sources });
   } catch (err) {
     if (err instanceof ChatError) {
       return c.json({ error: err.message, attempts: err.attempts }, 502);
