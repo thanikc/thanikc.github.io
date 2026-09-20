@@ -18,7 +18,7 @@ Updated: 2026-09-20
 
 **Next:** plan 03. Deploy the worker first — the deployed one predates plan 02, so the gate is not live yet.
 
-**Order notes:** 03 step 8 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
+**Order notes:** 03 step 11 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
 gate would have refused.
 
