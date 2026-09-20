@@ -1,0 +1,29 @@
+name: Eval AI Ling
+
+# Hits the deployed worker and its free-tier providers, so it only runs for PRs
+# that can change answers. It grades the worker as currently deployed: merge, let
+# deploy-worker finish, then re-run (workflow_dispatch) to check the new build.
+on:
+  pull_request:
+    paths:
+      - 'apps/worker/content/**'
+      - 'apps/worker/src/**'
+      - 'apps/worker/scripts/eval.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # --delay keeps the run under the worker's 10 requests/minute CHAT_LIMIT.
+      - name: Run eval
+        run: node apps/worker/scripts/eval.mjs --url https://thanikc-worker.thanikc.workers.dev --delay 7000
