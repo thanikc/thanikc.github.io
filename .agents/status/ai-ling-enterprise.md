@@ -14,9 +14,9 @@ Updated: 2026-09-20
 | 03   | D1 answer cache         | done    |
 | 04   | Telemetry               | done    |
 | 05   | Eval gate + injection   | done    |
-| 06   | Auto re-ingest          | todo    |
+| 06   | Auto re-ingest          | done    |
 
-**Next:** deploy plan 04 (push to main), then plan 06 (auto re-ingest). Plans 01–03 and 07 are deployed (version 046bdcdf, 2026-09-20) and smoke-tested live: exact cache hit, gate declines off-topic.
+**Next:** confirm the deploy of plans 04–06 went green and the `ai_ling_chat` dataset is receiving points. All plans are then complete. Plans 01–03 and 07 are deployed (version 046bdcdf, 2026-09-20) and smoke-tested live: exact cache hit, gate declines off-topic.
 
 **Order notes:** 03 step 11 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
@@ -26,6 +26,15 @@ gate would have refused.
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
 
+- plan 06 — done (this commit), not yet deployed. Decisions beyond the plan: the hash covers text
+  *and* metadata (a title edit re-ingests); the re-ingest is a final step of `deploy-worker.yml`,
+  not a separate workflow, so it always runs against a worker that has the skip logic; it runs on
+  every worker deploy, which is fine because unchanged docs are skipped. **Orphans:** a shrunken
+  doc's tail chunks are deleted (old `totalChunks` is read from chunk 0 for free); a *removed or
+  renamed* file is accepted as a leftover and documented in the README. **Cache:** instead of
+  bumping `CACHE_EPOCH` (needs a commit + deploy), a changing ingest `DELETE`s all of
+  `answer_cache`; `CACHE_EPOCH` stays as a manual override. Caveat: answers cached in the 1–3 min
+  Vectorize lag can still reflect old content. Ingest responses gain `skipped: true` when unchanged.
 - plan 05 — done (this commit). Five injection cases (en ×3, de, th) are hard gates; `forbid`
   lists distinctive system-prompt phrases that must not appear. Runner takes `--delay` (pace under
   `CHAT_LIMIT`, CI uses 7000) and `--min-pass` (default 0.85, sized so the two known keyword misses

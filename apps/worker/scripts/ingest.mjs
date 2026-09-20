@@ -100,7 +100,8 @@ async function main() {
     const payload = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      console.log(`  ok    ${file} → id="${doc.id}", ${payload.chunks} chunk(s)`);
+      const outcome = payload.skipped ? 'unchanged, skipped' : `${payload.chunks} chunk(s)`;
+      console.log(`  ok    ${file} → id="${doc.id}", ${outcome}`);
     } else {
       failed++;
       console.error(`  FAIL  ${file} → ${res.status} ${JSON.stringify(payload)}`);

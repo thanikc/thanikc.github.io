@@ -21,6 +21,10 @@ interface VectorizeLike {
   upsert(
     vectors: Array<{ id: string; values: number[]; metadata?: Record<string, unknown> }>,
   ): Promise<unknown>;
+  getByIds(
+    ids: string[],
+  ): Promise<Array<{ id: string; metadata?: Record<string, unknown> | null }>>;
+  deleteByIds(ids: string[]): Promise<unknown>;
 }
 
 /** Embeds a single string with the configured Workers AI model. */

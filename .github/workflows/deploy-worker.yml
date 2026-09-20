@@ -58,3 +58,10 @@ jobs:
           GOOGLE_AI_API_KEY: ${{ secrets.GOOGLE_AI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}
+
+      # After the deploy so the live worker has the hash-skip: unchanged documents
+      # cost no embeddings, and a real change empties the answer cache.
+      - name: Re-ingest content
+        run: pnpm --filter @thanikc/worker ingest:deployed
+        env:
+          INGEST_TOKEN: ${{ secrets.INGEST_TOKEN }}

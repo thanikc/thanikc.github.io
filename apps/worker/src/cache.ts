@@ -147,3 +147,9 @@ export const store = (env: Env, entry: CacheEntry): Promise<void> =>
         .bind(epoch, cutoff()),
     ]);
   });
+
+/** Empties the cache: called when an ingest changed what answers are grounded on. */
+export const purgeCache = (env: Env): Promise<void> =>
+  guarded(env, undefined, async db => {
+    await db.prepare('DELETE FROM answer_cache').run();
+  });

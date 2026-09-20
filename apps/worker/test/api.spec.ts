@@ -264,7 +264,7 @@ describe('POST /api/ingest', () => {
       ...VARS,
       INGEST_TOKEN: 'secret',
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1, 0.2]] }) },
-      VECTORIZE: { upsert },
+      VECTORIZE: { upsert, getByIds: vi.fn().mockResolvedValue([]) },
     } as unknown as Env;
 
     const res = await post(

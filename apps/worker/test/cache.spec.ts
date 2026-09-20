@@ -226,3 +226,52 @@ describe('answer cache: semantic tier', () => {
     expect(res.cached).toBeUndefined();
   });
 });
+
+describe('purge on ingest', () => {
+  const db = () => (env as unknown as { CACHE_DB: D1Database }).CACHE_DB;
+
+  const ingestDoc = (vectors: { getByIds: unknown; upsert: unknown }) =>
+    app.request(
+      'https://worker.test/api/ingest',
+      {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: 'Bearer secret' },
+        body: JSON.stringify({ id: 'doc', text: 'Thanik builds things.' }),
+      },
+      {
+        ...env,
+        INGEST_TOKEN: 'secret',
+        VECTORIZE: { ...vectors, deleteByIds: vi.fn() },
+      } as unknown as Env,
+    );
+
+  const cachedRows = async () =>
+    (await db().prepare('SELECT COUNT(*) AS n FROM answer_cache').first<{ n: number }>())!.n;
+
+  const seedCache = async () => {
+    await post({ message: 'Who is Thanik?', history: [] });
+    await settle();
+    expect(await cachedRows()).toBe(1);
+  };
+
+  it('drops cached answers once an ingest changed the index', async () => {
+    await seedCache();
+
+    await ingestDoc({ getByIds: vi.fn().mockResolvedValue([]), upsert: vi.fn() });
+
+    expect(await cachedRows()).toBe(0);
+  });
+
+  it('keeps cached answers when the ingest was a no-op', async () => {
+    await seedCache();
+    const upsert = vi.fn();
+    await ingestDoc({ getByIds: vi.fn().mockResolvedValue([]), upsert });
+    await seedCache();
+
+    const stored = [upsert.mock.calls[0]![0][0]];
+    const res = await ingestDoc({ getByIds: vi.fn().mockResolvedValue(stored), upsert });
+
+    expect(await res.json()).toEqual({ ok: true, chunks: 0, skipped: true });
+    expect(await cachedRows()).toBe(1);
+  });
+});

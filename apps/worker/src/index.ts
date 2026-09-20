@@ -4,7 +4,7 @@ import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
-import { cacheKey, cacheLocale, lookupExact, lookupSemantic, store } from './cache';
+import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -188,8 +188,12 @@ app.post('/api/ingest', async c => {
       ? (body.metadata as Record<string, unknown>)
       : {};
 
-  const chunks = await ingest(body.id, body.text, metadata, c.env);
-  return c.json({ ok: true, chunks });
+  const { chunks, skipped } = await ingest(body.id, body.text, metadata, c.env);
+  // Answers cached against the old content are stale as soon as the index changes.
+  // ponytail: Vectorize upserts land in 1–3 min, so an answer cached in that window can
+  // still be grounded on old content; bump CACHE_EPOCH if that ever matters.
+  if (chunks > 0) await purgeCache(c.env);
+  return c.json({ ok: true, chunks, ...(skipped && { skipped }) });
 });
 
 app.notFound(c => c.json({ error: 'not found' }, 404));

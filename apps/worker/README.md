@@ -65,7 +65,10 @@ pnpm exec wrangler vectorize create resume-rag --dimensions=1024 --metric=cosine
 ## Knowledge base
 
 `content/*.md` holds the content AI Ling answers from — one file per
-document. Pushing content does **not** re-ingest it; after editing, re-ingest by hand:
+document. Every deploy of the worker (push to `main` touching `apps/worker/**`) re-ingests
+the content afterwards. Ingest is idempotent: a document whose text and metadata hash to
+what the index already holds is skipped without embedding, so an unchanged push costs
+nothing. To re-ingest by hand:
 
 ```bash
 # try it locally first
@@ -95,8 +98,14 @@ a stored answer is reusable on the very next request.
 pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once per new migration
 ```
 
-After re-ingesting, bump `CACHE_EPOCH` in `wrangler.jsonc` and deploy so answers
-grounded on the old content stop being served; old rows are purged on the next write.
+An ingest that changes the index empties the cache, so answers grounded on old content
+stop being served; a no-op ingest leaves it alone. Vectorize applies upserts 1–3 minutes
+late, so an answer cached in that window can still reflect the old content. `CACHE_EPOCH`
+remains as a manual override: bump it and deploy to invalidate everything.
+
+Removing or renaming a file in `content/` leaves its vectors in the index (Vectorize
+cannot list by prefix); delete them with `wrangler vectorize delete-vectors`. A document
+that merely shrinks has its stale tail chunks deleted automatically.
 
 ## Telemetry (Analytics Engine)
 

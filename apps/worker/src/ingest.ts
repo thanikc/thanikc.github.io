@@ -31,16 +31,34 @@ export function chunk(text: string, size = 800, overlap = 100): string[] {
   return chunks.filter(c => c !== '');
 }
 
-/** Chunks, embeds, and upserts a document into the Vectorize index. Returns the chunk count. */
+async function contentHash(text: string, metadata: Record<string, unknown>): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify([text, metadata]));
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Chunks, embeds, and upserts a document into the Vectorize index. A document whose
+ * text and metadata hash to what chunk 0 already holds is skipped before any embedding.
+ * When a document shrinks, its leftover tail chunks are deleted so they stop matching.
+ * ponytail: a document removed from content/ leaves its vectors behind (Vectorize can't
+ * list by prefix); delete them by hand with `wrangler vectorize delete-vectors`.
+ */
 export async function ingest(
   docId: string,
   text: string,
   metadata: Record<string, unknown>,
   env: Env,
-): Promise<number> {
+): Promise<{ chunks: number; skipped: boolean }> {
   const chunks = chunk(text);
   if (chunks.length === 0) {
-    return 0;
+    return { chunks: 0, skipped: false };
+  }
+
+  const hash = await contentHash(text, metadata);
+  const [first] = await vectorize(env).getByIds([`${docId}:0`]);
+  if (first?.metadata?.contentHash === hash) {
+    return { chunks: 0, skipped: true };
   }
 
   const vectors = await Promise.all(
@@ -50,6 +68,7 @@ export async function ingest(
       metadata: {
         ...metadata,
         docId,
+        contentHash: hash,
         text: content,
         chunkIndex: i,
         totalChunks: chunks.length,
@@ -60,5 +79,14 @@ export async function ingest(
   );
 
   await vectorize(env).upsert(vectors);
-  return vectors.length;
+
+  const oldTotal = Number(first?.metadata?.totalChunks) || 0;
+  if (oldTotal > chunks.length) {
+    const stale = Array.from(
+      { length: oldTotal - chunks.length },
+      (_, i) => `${docId}:${chunks.length + i}`,
+    );
+    await vectorize(env).deleteByIds(stale);
+  }
+  return { chunks: vectors.length, skipped: false };
 }
