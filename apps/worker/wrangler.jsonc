@@ -21,12 +21,13 @@
       "remote": true,
     },
   ],
-  // Answer cache. No database_id: `wrangler deploy` provisions the database by name.
+  // Answer cache. Created with `wrangler d1 create thanikc-cache`.
   // Apply the schema with `wrangler d1 migrations apply CACHE_DB --remote`.
   "d1_databases": [
     {
       "binding": "CACHE_DB",
       "database_name": "thanikc-cache",
+      "database_id": "c7a9ea29-9726-42a7-8209-e9386be16f15",
       "migrations_dir": "migrations",
     },
   ],

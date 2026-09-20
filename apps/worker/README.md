@@ -92,7 +92,7 @@ cached, and a missing or failing D1 just means no caching. Unlike the Vectorize 
 a stored answer is reusable on the very next request.
 
 ```bash
-pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once, after the first deploy
+pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once per new migration
 ```
 
 After re-ingesting, bump `CACHE_EPOCH` in `wrangler.jsonc` and deploy so answers

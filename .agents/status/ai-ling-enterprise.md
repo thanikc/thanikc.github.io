@@ -29,10 +29,8 @@ policy).
 - plan 03 — done (this commit), D1 cache with both tiers. Decisions beyond the plan: embeddings
   are base64 TEXT, not BLOB; a `provider` column replays the original provider on a hit;
   `CACHE_DB`/`CACHE_EPOCH` are read through a cast in `cache.ts` (no `worker-env.d.ts` entry,
-  so `wrangler types` can't conflict). **Before deploying:** the API token lacks D1 permission
-  (`wrangler d1 create` failed with auth error 10000), so give it D1:Edit; `wrangler.jsonc` omits
-  `database_id` so `wrangler deploy` should provision `thanikc-cache`, then run
-  `wrangler d1 migrations apply CACHE_DB --remote`. Plan 06 wires the `CACHE_EPOCH` bump.
+  so `wrangler types` can't conflict). D1 `thanikc-cache` created and migrated remotely 2026-09-20 (id pinned in `wrangler.jsonc`);
+  only `wrangler deploy` remains. Plan 06 wires the `CACHE_EPOCH` bump.
   Earlier: plan rewritten 2026-09-20 (user decision, overrides "plans are immutable"): cache
   moved from Cache API + Vectorize to **D1** (`CACHE_DB`, optional binding, semantic tier
   = cosine scan in the worker). Still needs `CACHE_EPOCH` for plan 06; run `wrangler d1 create`
