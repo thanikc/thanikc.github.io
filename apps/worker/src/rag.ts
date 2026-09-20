@@ -71,9 +71,10 @@ const ANSWER_LANGUAGES: Record<string, string> = {
 /**
  * Below this best-match score the knowledge base has nothing on the question, so
  * `/api/chat` declines without paying for a model call. Calibrate against
- * `scripts/eval.mjs` (no golden-set question may fall under it).
+ * `scripts/eval.mjs` (no golden-set question may fall under it). 2026-09-20 run:
+ * weakest in-scope top score 0.539, off-topic quicksort 0.431.
  */
-export const MIN_SCORE = 0.4;
+export const MIN_SCORE = 0.48;
 
 const DECLINE_ANSWERS: Record<string, string> = {
   en: "That one's outside what I'm here for — I only know about Thanik and his work. Ask me about his projects or experience, or reach out to him directly (email and LinkedIn are in the site footer).",
