@@ -8,7 +8,7 @@ Updated: 2026-09-20
 
 | Plan | Item                    | State   |
 | ---- | ----------------------- | ------- |
-| 01   | Rate limit + input cap  | todo    |
+| 01   | Rate limit + input cap  | done    |
 | 02   | Groundedness gate       | todo    |
 | 07   | Trim sources payload    | todo    |
 | 03   | Two-tier answer cache   | todo    |
@@ -16,13 +16,18 @@ Updated: 2026-09-20
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
 
-**Next:** plan 01, then 02. Together ~20 lines and they close the only gaps that are
-live risks rather than polish. 07 is a 10-minute cleanup, take it when convenient.
+**Next:** plan 02. With 01 done it closes the last gap that is a live risk rather
+than polish. 07 is a 10-minute cleanup, take it when convenient.
 
 **Order notes:** 03 step 8 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
 gate would have refused.
 
-**Done:** nothing yet. Record here as `plan NN — done <commit>`, one line, plus any
+**Done:** Record here as `plan NN — done <commit>`, one line, plus any
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
+
+- plan 01 — done (uncommitted). Rate limit runs first in the handler, before body
+  parsing. `CHAT_LIMIT` is declared optional in `src/worker-env.d.ts` (absent = allow);
+  if `cf-typegen` is re-run it will emit a non-optional `CHAT_LIMIT: RateLimit` that
+  conflicts — delete the manual line then.

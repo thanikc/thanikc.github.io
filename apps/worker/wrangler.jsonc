@@ -21,6 +21,14 @@
       "remote": true,
     },
   ],
+  // Native rate limiter: 10 chat requests per minute per client IP.
+  "ratelimits": [
+    {
+      "name": "CHAT_LIMIT",
+      "namespace_id": "1001",
+      "simple": { "limit": 10, "period": 60 },
+    },
+  ],
   "vars": {
     "ALLOWED_ORIGIN": "https://thanikc.github.io",
     "EMBEDDING_MODEL": "@cf/baai/bge-m3",

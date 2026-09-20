@@ -17,7 +17,17 @@ app.use('/api/*', (c, next) =>
 
 app.get('/api/health', c => c.json({ status: 'ok' }));
 
+const MAX_MESSAGE_CHARS = 2000;
+
 app.post('/api/chat', async c => {
+  // Absent binding (local dev, tests) means no limit.
+  const verdict = await c.env.CHAT_LIMIT?.limit({
+    key: c.req.header('cf-connecting-ip') ?? 'anon',
+  });
+  if (verdict && !verdict.success) {
+    return c.json({ error: 'rate limited' }, 429);
+  }
+
   const body = (await c.req.json().catch(() => null)) as {
     message?: unknown;
     history?: unknown;
@@ -27,6 +37,9 @@ app.post('/api/chat', async c => {
   const message = typeof body?.message === 'string' ? body.message.trim() : '';
   if (message === '') {
     return c.json({ error: 'message is required' }, 400);
+  }
+  if (message.length > MAX_MESSAGE_CHARS) {
+    return c.json({ error: `message must be at most ${MAX_MESSAGE_CHARS} characters` }, 400);
   }
 
   const history: ChatMessage[] = Array.isArray(body?.history)

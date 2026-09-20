@@ -6,4 +6,6 @@ interface Env {
   GOOGLE_AI_API_KEY?: string;
   OPENROUTER_API_KEY?: string;
   INGEST_TOKEN?: string;
+  // Declared in wrangler.jsonc; optional here because the worker runs without it.
+  CHAT_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
 }

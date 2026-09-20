@@ -34,6 +34,32 @@ describe('POST /api/chat', () => {
     expect(await res.json()).toEqual({ error: 'message is required' });
   });
 
+  it('rejects a message over 2000 chars with 400 before retrieval', async () => {
+    const run = vi.fn();
+    env = { ...VARS, AI: { run } } as unknown as Env;
+
+    const res = await post('/api/chat', { message: 'a'.repeat(2001) });
+
+    expect(res.status).toBe(400);
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it('429s when the rate limiter refuses, keyed on the client IP, without calling a provider', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const limit = vi.fn().mockResolvedValue({ success: false });
+    const run = vi.fn();
+    env = { ...VARS, GROQ_API_KEY: 'g', CHAT_LIMIT: { limit }, AI: { run } } as unknown as Env;
+
+    const res = await post('/api/chat', { message: 'hi' }, { 'cf-connecting-ip': '1.2.3.4' });
+
+    expect(res.status).toBe(429);
+    expect(await res.json()).toEqual({ error: 'rate limited' });
+    expect(limit).toHaveBeenCalledWith({ key: '1.2.3.4' });
+    expect(run).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('runs retrieval + generation and returns answer with sources', async () => {
     vi.stubGlobal(
       'fetch',
