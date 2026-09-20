@@ -11,7 +11,7 @@ Updated: 2026-09-20
 | 01   | Rate limit + input cap  | done    |
 | 02   | Groundedness gate       | done    |
 | 07   | Trim sources payload    | done    |
-| 03   | Two-tier answer cache   | todo    |
+| 03   | D1 answer cache         | todo    |
 | 04   | Telemetry               | todo    |
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
@@ -26,6 +26,10 @@ gate would have refused.
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
 
+- plan 03 — plan rewritten 2026-09-20 (user decision, overrides "plans are immutable"): cache
+  moved from Cache API + Vectorize to **D1** (`CACHE_DB`, optional binding, semantic tier
+  = cosine scan in the worker). Still needs `CACHE_EPOCH` for plan 06; run `wrangler d1 create`
+  and apply the migration before deploying.
 - plan 07 — done (this commit). `sources` is now `{ title, score }[]`; no decisions beyond the plan.
 - plan 02 — done (this commit). Step 5 run 2026-09-20 against the deployed worker
   (paced 7s, its pre-gate build so every question reached the model and reported
