@@ -81,7 +81,7 @@ describe('POST /api/chat', () => {
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1, 0.2]] }) },
       VECTORIZE: {
         query: vi.fn().mockResolvedValue({
-          matches: [{ score: 0.9, metadata: { text: 'Full-stack engineer.' } }],
+          matches: [{ score: 0.9, metadata: { text: 'Full-stack engineer.', title: 'Summary' } }],
         }),
       },
     } as unknown as Env;
@@ -92,7 +92,7 @@ describe('POST /api/chat', () => {
     expect(await res.json()).toEqual({
       answer: 'Thanik is an engineer.',
       provider: 'groq',
-      sources: [{ text: 'Full-stack engineer.', score: 0.9 }],
+      sources: [{ title: 'Summary', score: 0.9 }],
     });
   });
 
@@ -231,7 +231,7 @@ describe('POST /api/chat', () => {
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1]] }) },
       VECTORIZE: {
         query: vi.fn().mockResolvedValue({
-          matches: [{ score: 0.9, metadata: { text: 'Full-stack engineer.' } }],
+          matches: [{ score: 0.9, metadata: { text: 'Full-stack engineer.', title: 'Summary' } }],
         }),
       },
     } as unknown as Env;

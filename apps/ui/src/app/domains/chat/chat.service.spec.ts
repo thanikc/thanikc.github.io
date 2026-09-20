@@ -89,10 +89,10 @@ describe('ChatService', () => {
       answer: 'Two banking products.',
       provider: 'groq',
       sources: [
-        { text: 'a', score: 0.9, title: 'Projects' },
-        { text: 'b', score: 0.8, title: 'Experience' },
-        { text: 'c', score: 0.7, title: 'Projects' },
-        { text: 'd', score: 0.6 },
+        { score: 0.9, title: 'Projects' },
+        { score: 0.8, title: 'Experience' },
+        { score: 0.7, title: 'Projects' },
+        { score: 0.6 },
       ],
     } satisfies ChatResponse);
     await done;
@@ -109,7 +109,7 @@ describe('ChatService', () => {
     httpMock.expectOne(CHAT_ENDPOINT).flush({
       answer: 'Hi',
       provider: 'groq',
-      sources: [{ text: 'a', score: 0.9, title: 'Summary' }],
+      sources: [{ score: 0.9, title: 'Summary' }],
     } satisfies ChatResponse);
     await first;
 

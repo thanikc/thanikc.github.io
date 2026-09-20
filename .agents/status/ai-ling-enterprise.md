@@ -10,14 +10,13 @@ Updated: 2026-09-20
 | ---- | ----------------------- | ------- |
 | 01   | Rate limit + input cap  | done    |
 | 02   | Groundedness gate       | partial |
-| 07   | Trim sources payload    | todo    |
+| 07   | Trim sources payload    | done    |
 | 03   | Two-tier answer cache   | todo    |
 | 04   | Telemetry               | todo    |
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
 
-**Next:** plan 02 step 5 (calibrate `MIN_SCORE`, needs a live eval run), then 07 (a
-10-minute cleanup), then 03.
+**Next:** plan 02 step 5 (calibrate `MIN_SCORE`, needs a live eval run), then 03.
 
 **Order notes:** 03 step 8 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
@@ -27,6 +26,7 @@ gate would have refused.
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
 
+- plan 07 — done (this commit). `sources` is now `{ title, score }[]`; no decisions beyond the plan.
 - plan 02 — steps 1–4 done, step 5 **not run**: `MIN_SCORE` is still the uncalibrated 0.4
   and must not ship before `node scripts/eval.mjs` confirms no golden-set question
   falls under it. Decisions beyond the plan: the gate applies only when `history` is

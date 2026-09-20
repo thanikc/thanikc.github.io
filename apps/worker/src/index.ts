@@ -70,7 +70,11 @@ app.post('/api/chat', async c => {
       buildMessages(message, chunks, history, locale),
       c.env,
     );
-    return c.json({ answer, provider, sources: chunks });
+    return c.json({
+      answer,
+      provider,
+      sources: chunks.map(({ title, score }) => ({ title, score })),
+    });
   } catch (err) {
     if (err instanceof ChatError) {
       return c.json({ error: err.message, attempts: err.attempts }, 502);
