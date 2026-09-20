@@ -11,9 +11,17 @@ export interface CacheEntry extends CachedAnswer {
   key: string;
   locale: string;
   question: string;
+  /** The question's embedding, for the semantic tier. */
+  vector: number[];
 }
 
 const TTL_SECONDS = 30 * 24 * 60 * 60;
+
+/** Cosine similarity at or above which a paraphrase counts as the same question. */
+export const CACHE_MIN_SIMILARITY = 0.95;
+
+/** Newest rows the semantic tier compares against. */
+const SCAN_LIMIT = 200;
 
 // Read through a cast so this compiles whether or not `wrangler types` emitted them.
 type CacheEnv = { CACHE_DB?: D1Database; CACHE_EPOCH?: string };
@@ -63,6 +71,57 @@ export const lookupExact = (env: Env, key: string): Promise<CachedAnswer | null>
     return row ? toCached(row) : null;
   });
 
+// D1 hands BLOBs back as JSON number arrays (~4x the bytes), so embeddings are stored
+// as base64 text instead.
+const encodeVector = (vector: number[]): string =>
+  btoa(String.fromCharCode(...new Uint8Array(new Float32Array(vector).buffer)));
+
+const decodeVector = (text: string): Float32Array =>
+  new Float32Array(Uint8Array.from(atob(text), c => c.charCodeAt(0)).buffer);
+
+function cosine(a: ArrayLike<number>, b: ArrayLike<number>): number {
+  let dot = 0;
+  let normA = 0;
+  let normB = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i]! * b[i]!;
+    normA += a[i]! * a[i]!;
+    normB += b[i]! * b[i]!;
+  }
+  return dot / (Math.sqrt(normA * normB) || 1);
+}
+
+/**
+ * The most similar cached question for this locale and epoch, if it clears
+ * `CACHE_MIN_SIMILARITY`.
+ * ponytail: linear scan over the newest SCAN_LIMIT rows; if the table outgrows that,
+ * move only the embeddings back to Vectorize.
+ */
+export const lookupSemantic = (
+  env: Env,
+  vector: number[],
+  locale: string,
+): Promise<CachedAnswer | null> =>
+  guarded(env, null, async db => {
+    const { results } = await db
+      .prepare(
+        'SELECT answer, provider, sources, embedding FROM answer_cache WHERE epoch = ? AND locale = ? AND created_at >= ? AND embedding IS NOT NULL ORDER BY created_at DESC LIMIT ?',
+      )
+      .bind(epochOf(env), locale, cutoff(), SCAN_LIMIT)
+      .all<{ answer: string; provider: string; sources: string; embedding: string }>();
+
+    let best: (typeof results)[number] | null = null;
+    let bestScore = CACHE_MIN_SIMILARITY;
+    for (const row of results) {
+      const score = cosine(vector, decodeVector(row.embedding));
+      if (score >= bestScore) {
+        best = row;
+        bestScore = score;
+      }
+    }
+    return best ? toCached(best) : null;
+  });
+
 /** Upserts the entry, and drops rows from other epochs or past the TTL while there. */
 export const store = (env: Env, entry: CacheEntry): Promise<void> =>
   guarded(env, undefined, async db => {
@@ -70,7 +129,7 @@ export const store = (env: Env, entry: CacheEntry): Promise<void> =>
     await db.batch([
       db
         .prepare(
-          'INSERT OR REPLACE INTO answer_cache (key, epoch, locale, question, answer, provider, sources, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO answer_cache (key, epoch, locale, question, answer, provider, sources, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(
           entry.key,
@@ -80,6 +139,7 @@ export const store = (env: Env, entry: CacheEntry): Promise<void> =>
           entry.answer,
           entry.provider,
           JSON.stringify(entry.sources),
+          encodeVector(entry.vector),
           Math.floor(Date.now() / 1000),
         ),
       db

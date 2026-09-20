@@ -11,12 +11,12 @@ Updated: 2026-09-20
 | 01   | Rate limit + input cap  | done    |
 | 02   | Groundedness gate       | done    |
 | 07   | Trim sources payload    | done    |
-| 03   | D1 answer cache         | todo    |
+| 03   | D1 answer cache         | done    |
 | 04   | Telemetry               | todo    |
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
 
-**Next:** plan 03. Deploy the worker first — the deployed one predates plan 02, so the gate is not live yet.
+**Next:** plan 04 (telemetry). Not deployed yet: the live worker predates plans 02 and 03, so neither the gate nor the cache is live.
 
 **Order notes:** 03 step 11 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
@@ -26,7 +26,14 @@ gate would have refused.
 decision that contradicts the plan (e.g. a calibrated MIN_SCORE, a chosen orphan-vector
 policy).
 
-- plan 03 — plan rewritten 2026-09-20 (user decision, overrides "plans are immutable"): cache
+- plan 03 — done (this commit), D1 cache with both tiers. Decisions beyond the plan: embeddings
+  are base64 TEXT, not BLOB; a `provider` column replays the original provider on a hit;
+  `CACHE_DB`/`CACHE_EPOCH` are read through a cast in `cache.ts` (no `worker-env.d.ts` entry,
+  so `wrangler types` can't conflict). **Before deploying:** the API token lacks D1 permission
+  (`wrangler d1 create` failed with auth error 10000), so give it D1:Edit; `wrangler.jsonc` omits
+  `database_id` so `wrangler deploy` should provision `thanikc-cache`, then run
+  `wrangler d1 migrations apply CACHE_DB --remote`. Plan 06 wires the `CACHE_EPOCH` bump.
+  Earlier: plan rewritten 2026-09-20 (user decision, overrides "plans are immutable"): cache
   moved from Cache API + Vectorize to **D1** (`CACHE_DB`, optional binding, semantic tier
   = cosine scan in the worker). Still needs `CACHE_EPOCH` for plan 06; run `wrangler d1 create`
   and apply the migration before deploying.

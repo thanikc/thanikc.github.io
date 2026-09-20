@@ -6,7 +6,7 @@ CREATE TABLE answer_cache (
   answer     TEXT NOT NULL,
   provider   TEXT NOT NULL,
   sources    TEXT NOT NULL,
-  embedding  BLOB,
+  embedding  TEXT,
   created_at INTEGER NOT NULL
 );
 

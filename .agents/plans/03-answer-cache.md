@@ -28,8 +28,9 @@ embedding), new `apps/worker/src/cache.ts`, new `apps/worker/migrations/0001_ans
      epoch      TEXT NOT NULL,      -- CACHE_EPOCH at write time
      question   TEXT NOT NULL,
      answer     TEXT NOT NULL,
+     provider   TEXT NOT NULL,      -- replayed so a hit looks like the original
      sources    TEXT NOT NULL,      -- JSON [{title, score}]
-     embedding  BLOB,               -- Float32Array bytes, for the semantic tier
+     embedding  TEXT,               -- base64 Float32Array (D1 returns BLOBs as ~4x-bloated number arrays)
      created_at INTEGER NOT NULL    -- unix seconds
    );
    CREATE INDEX answer_cache_epoch ON answer_cache (epoch, created_at);
@@ -65,8 +66,8 @@ embedding), new `apps/worker/src/cache.ts`, new `apps/worker/migrations/0001_ans
 9. GREEN: `lookupSemantic(env, vector, locale)` selects the newest N rows
    (`N = 200`) for the current epoch and locale, computes cosine in the worker, and
    returns the best row above the threshold. Store the embedding as
-   `new Float32Array(vector).buffer` on write. Vectors from the embedding model are
-   unit-length, so cosine is a dot product.
+   base64 of `new Float32Array(vector).buffer` on write (not a BLOB: D1 reads those back
+   as JSON number arrays). Compute full cosine — don't assume unit length.
    `// ponytail: linear scan over ≤200 rows; if the table outgrows that, move only the
    embeddings back to Vectorize`.
 10. **No known lag:** unlike a Vectorize-backed cache, a stored answer is reusable on

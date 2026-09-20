@@ -81,6 +81,23 @@ after `/api/ingest` returns 200.
 
 See `content/README.md` for the file format.
 
+## Answer cache (D1)
+
+`/api/chat` caches the opening message of a conversation in D1 (`CACHE_DB`, table
+`answer_cache`). An exact repeat (case and whitespace ignored, per locale) is answered
+before any embedding; otherwise the query embedding is compared with the newest 200
+cached questions and a cosine similarity of 0.95 or more reuses that answer. Hits carry
+`cached: 'exact' | 'semantic'`. Follow-ups (non-empty `history`) and declines are never
+cached, and a missing or failing D1 just means no caching. Unlike the Vectorize index,
+a stored answer is reusable on the very next request.
+
+```bash
+pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once, after the first deploy
+```
+
+After re-ingesting, bump `CACHE_EPOCH` in `wrangler.jsonc` and deploy so answers
+grounded on the old content stop being served; old rows are purged on the next write.
+
 ## Commands (run from repo root or this directory)
 
 ```bash

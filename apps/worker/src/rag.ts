@@ -40,7 +40,11 @@ export function vectorize(env: Env): VectorizeLike {
 
 /** Embeds the query and returns the top matching content chunks. */
 export async function retrieve(query: string, env: Env, topK = 5): Promise<RetrievedChunk[]> {
-  const vector = await embed(query, env);
+  return search(await embed(query, env), env, topK);
+}
+
+/** The top matching content chunks for an already-embedded query. */
+export async function search(vector: number[], env: Env, topK = 5): Promise<RetrievedChunk[]> {
   const { matches } = await vectorize(env).query(vector, { topK, returnMetadata: 'all' });
 
   return matches

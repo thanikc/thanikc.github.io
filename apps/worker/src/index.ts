@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { buildMessages, declineAnswer, MIN_SCORE, retrieve } from './rag';
+import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
-import { cacheKey, cacheLocale, lookupExact, store } from './cache';
+import { cacheKey, cacheLocale, lookupExact, lookupSemantic, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -61,13 +61,21 @@ app.post('/api/chat', async c => {
   // A follow-up's answer depends on the turns before it, so only a conversation's
   // opening message goes through the cache.
   const cacheable = history.length === 0;
-  const key = await cacheKey(message, cacheLocale(locale));
+  const lang = cacheLocale(locale);
+  const key = await cacheKey(message, lang);
   if (cacheable) {
     const hit = await lookupExact(c.env, key);
     if (hit) return c.json({ ...hit, cached: 'exact' });
   }
 
-  const chunks = await retrieve(message, c.env);
+  // One embedding serves both the semantic lookup and retrieval.
+  const vector = await embed(message, c.env);
+  if (cacheable) {
+    const hit = await lookupSemantic(c.env, vector, lang);
+    if (hit) return c.json({ ...hit, cached: 'semantic' });
+  }
+
+  const chunks = await search(vector, c.env);
 
   // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
   // conversation, so the gate only applies to a conversation's opening message.
@@ -85,11 +93,12 @@ app.post('/api/chat', async c => {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,
-          locale: cacheLocale(locale),
+          locale: lang,
           question: message,
           answer,
           provider,
           sources,
+          vector,
         }),
       );
     }

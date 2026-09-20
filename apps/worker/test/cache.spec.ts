@@ -154,3 +154,62 @@ describe('answer cache: exact tier', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('answer cache: semantic tier', () => {
+  const askWith = async (
+    message: string,
+    vector: number[],
+    extra: Record<string, unknown> = {},
+  ) => {
+    embedding = vector;
+    return json(await post({ message, ...extra }));
+  };
+
+  it('serves a paraphrase whose embedding is close enough, reusing the one embedding', async () => {
+    const first = await askWith('Who is Thanik?', [1, 0, 0]);
+    await settle();
+    const vectorize = (env.VECTORIZE as unknown as { query: ReturnType<typeof vi.fn> }).query;
+
+    const second = await askWith('Tell me about Thanik', [0.99, 0.1, 0]);
+
+    expect(second).toEqual({ ...first, cached: 'semantic' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(vectorize).toHaveBeenCalledTimes(1);
+    expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(2);
+  });
+
+  it('embeds a cache miss only once', async () => {
+    await askWith('Who is Thanik?', [1, 0, 0]);
+
+    expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not serve a question that is only loosely similar', async () => {
+    await askWith('Who is Thanik?', [1, 0, 0]);
+    await settle();
+
+    const res = await askWith('What is a monad?', [0.9, 0.44, 0]);
+
+    expect(res.cached).toBeUndefined();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not serve across locales', async () => {
+    await askWith('Who is Thanik?', [1, 0, 0]);
+    await settle();
+
+    const res = await askWith('Wer ist Thanik?', [1, 0, 0], { locale: 'de' });
+
+    expect(res.cached).toBeUndefined();
+  });
+
+  it('does not serve rows from another epoch', async () => {
+    await askWith('Who is Thanik?', [1, 0, 0]);
+    await settle();
+    embedding = [1, 0, 0];
+
+    const res = await json(await post({ message: 'Tell me about Thanik' }, { CACHE_EPOCH: '2' }));
+
+    expect(res.cached).toBeUndefined();
+  });
+});
