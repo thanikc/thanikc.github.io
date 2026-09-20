@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { buildMessages, retrieve } from './rag';
+import { buildMessages, declineAnswer, MIN_SCORE, retrieve } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 
@@ -55,10 +55,17 @@ app.post('/api/chat', async c => {
 
   const chunks = await retrieve(message, c.env);
 
+  // `locale` is visitor input; buildMessages and declineAnswer only honour a language
+  // the site is actually published in and ignore anything else.
+  const locale = typeof body?.locale === 'string' ? body.locale : undefined;
+
+  // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
+  // conversation, so the gate only applies to a conversation's opening message.
+  if (history.length === 0 && (chunks[0]?.score ?? 0) < MIN_SCORE) {
+    return c.json({ answer: declineAnswer(locale), provider: 'none', sources: [] });
+  }
+
   try {
-    // `locale` is visitor input; buildMessages only honours a language the site
-    // is actually published in and ignores anything else.
-    const locale = typeof body?.locale === 'string' ? body.locale : undefined;
     const { answer, provider } = await generate(
       buildMessages(message, chunks, history, locale),
       c.env,

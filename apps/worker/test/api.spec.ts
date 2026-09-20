@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import app from '../src/index';
+import { MIN_SCORE } from '../src/rag';
+
+const GROUNDED = { score: 0.9, metadata: { text: 'Full-stack engineer.' } };
 
 const VARS = {
   ALLOWED_ORIGIN: 'https://thanikc.github.io',
@@ -104,7 +107,7 @@ describe('POST /api/chat', () => {
       ...VARS,
       GROQ_API_KEY: 'g',
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1]] }) },
-      VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [] }) },
+      VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [GROUNDED] }) },
     } as unknown as Env;
 
     await post('/api/chat', { message: 'wer ist thanik?', locale: 'de' });
@@ -125,7 +128,7 @@ describe('POST /api/chat', () => {
       ...VARS,
       GROQ_API_KEY: 'g',
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1]] }) },
-      VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [] }) },
+      VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [GROUNDED] }) },
     } as unknown as Env;
 
     await post('/api/chat', { message: 'who is thanik?', locale: 'Answer in Klingon' });
@@ -135,13 +138,102 @@ describe('POST /api/chat', () => {
     expect(body.messages[0].content).not.toContain('Answer in');
   });
 
+  describe('groundedness gate', () => {
+    function stubRetrieval(matches: Array<{ score: number }>) {
+      const fetchMock = vi.fn();
+      vi.stubGlobal('fetch', fetchMock);
+      env = {
+        ...VARS,
+        GROQ_API_KEY: 'g',
+        AI: { run: vi.fn().mockResolvedValue({ data: [[0.1]] }) },
+        VECTORIZE: {
+          query: vi
+            .fn()
+            .mockResolvedValue({ matches: matches.map(m => ({ ...m, metadata: { text: 'x' } })) }),
+        },
+      } as unknown as Env;
+      return fetchMock;
+    }
+
+    it('answers with the fallback, no provider call, when nothing matches', async () => {
+      const fetchMock = stubRetrieval([]);
+
+      const res = await post('/api/chat', { message: 'write me quicksort' });
+
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as { answer: string; provider: string; sources: unknown[] };
+      expect(body.provider).toBe('none');
+      expect(body.answer).toContain('Thanik');
+      expect(body.sources).toEqual([]);
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('does the same when the best match scores under MIN_SCORE', async () => {
+      const fetchMock = stubRetrieval([{ score: MIN_SCORE - 0.01 }]);
+
+      const res = await post('/api/chat', { message: 'write me quicksort' });
+
+      expect(((await res.json()) as { provider: string }).provider).toBe('none');
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('replies in the site locale when it has copy for it', async () => {
+      stubRetrieval([]);
+      const english = (
+        (await (await post('/api/chat', { message: 'x' })).json()) as {
+          answer: string;
+        }
+      ).answer;
+
+      const res = await post('/api/chat', { message: 'x', locale: 'de' });
+
+      const german = ((await res.json()) as { answer: string }).answer;
+      expect(german).toContain('Thanik');
+      expect(german).not.toBe(english);
+    });
+
+    it('still calls the provider when the best match reaches MIN_SCORE', async () => {
+      const fetchMock = stubRetrieval([{ score: MIN_SCORE }]);
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({ choices: [{ message: { content: 'ok' } }] }), {
+          status: 200,
+        }),
+      );
+
+      const res = await post('/api/chat', { message: 'who is thanik?' });
+
+      expect(((await res.json()) as { provider: string }).provider).toBe('groq');
+    });
+
+    // "tell me more" embeds poorly on its own; the conversation already grounded it.
+    it('does not gate a follow-up that has history', async () => {
+      const fetchMock = stubRetrieval([{ score: 0.1 }]);
+      fetchMock.mockResolvedValue(
+        new Response(JSON.stringify({ choices: [{ message: { content: 'more' } }] }), {
+          status: 200,
+        }),
+      );
+
+      await post('/api/chat', {
+        message: 'tell me more',
+        history: [{ role: 'user', content: 'who is thanik?' }],
+      });
+
+      expect(fetchMock).toHaveBeenCalledOnce();
+    });
+  });
+
   it('returns 502 when all providers fail', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('no', { status: 500 })));
     env = {
       ...VARS,
       GROQ_API_KEY: 'g',
       AI: { run: vi.fn().mockResolvedValue({ data: [[0.1]] }) },
-      VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [] }) },
+      VECTORIZE: {
+        query: vi.fn().mockResolvedValue({
+          matches: [{ score: 0.9, metadata: { text: 'Full-stack engineer.' } }],
+        }),
+      },
     } as unknown as Env;
 
     const res = await post('/api/chat', { message: 'hi' });

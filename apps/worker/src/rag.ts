@@ -68,6 +68,24 @@ const ANSWER_LANGUAGES: Record<string, string> = {
   th: 'Thai',
 };
 
+/**
+ * Below this best-match score the knowledge base has nothing on the question, so
+ * `/api/chat` declines without paying for a model call. Calibrate against
+ * `scripts/eval.mjs` (no golden-set question may fall under it).
+ */
+export const MIN_SCORE = 0.4;
+
+const DECLINE_ANSWERS: Record<string, string> = {
+  en: "That one's outside what I'm here for — I only know about Thanik and his work. Ask me about his projects or experience, or reach out to him directly (email and LinkedIn are in the site footer).",
+  de: 'Dazu kann ich leider nichts sagen – ich kenne mich nur mit Thanik und seiner Arbeit aus. Frag mich gern nach seinen Projekten oder seiner Erfahrung, oder schreib ihm direkt (E-Mail und LinkedIn stehen im Footer der Seite).',
+  th: 'เรื่องนี้ Ling ตอบให้ไม่ได้นะ เพราะรู้เรื่องคุณ Thanik และงานของเขาเท่านั้น ลองถามเรื่องโปรเจกต์หรือประสบการณ์ของเขาได้เลย หรือติดต่อเขาโดยตรงก็ได้ (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
+};
+
+/** Canned answer for a question the knowledge base can't ground, in the site locale. */
+export function declineAnswer(locale: unknown): string {
+  return (typeof locale === 'string' && DECLINE_ANSWERS[locale]) || DECLINE_ANSWERS['en']!;
+}
+
 /** The fallback answer language for a given site locale, or null for English. */
 export function answerLanguage(locale: unknown): string | null {
   return typeof locale === 'string' ? (ANSWER_LANGUAGES[locale] ?? null) : null;
