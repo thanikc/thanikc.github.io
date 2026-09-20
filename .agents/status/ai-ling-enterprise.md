@@ -16,7 +16,7 @@ Updated: 2026-09-20
 | 05   | Eval gate + injection   | todo    |
 | 06   | Auto re-ingest          | todo    |
 
-**Next:** plan 04 (telemetry). Not deployed yet: the live worker predates plans 02 and 03, so neither the gate nor the cache is live.
+**Next:** plan 04 (telemetry). Plans 01–03 and 07 are deployed (version 046bdcdf, 2026-09-20) and smoke-tested live: exact cache hit, gate declines off-topic.
 
 **Order notes:** 03 step 11 and 06 step 5 share the `CACHE_EPOCH` bump — whichever
 lands second wires it up. 02 must land before 03, or the cache stores answers the
@@ -30,7 +30,7 @@ policy).
   are base64 TEXT, not BLOB; a `provider` column replays the original provider on a hit;
   `CACHE_DB`/`CACHE_EPOCH` are read through a cast in `cache.ts` (no `worker-env.d.ts` entry,
   so `wrangler types` can't conflict). D1 `thanikc-cache` created and migrated remotely 2026-09-20 (id pinned in `wrangler.jsonc`);
-  only `wrangler deploy` remains. Plan 06 wires the `CACHE_EPOCH` bump.
+  deployed and verified. A live paraphrase did not hit the semantic tier at 0.95 — tune `CACHE_MIN_SIMILARITY` from real traffic. Plan 06 wires the `CACHE_EPOCH` bump.
   Earlier: plan rewritten 2026-09-20 (user decision, overrides "plans are immutable"): cache
   moved from Cache API + Vectorize to **D1** (`CACHE_DB`, optional binding, semantic tier
   = cosine scan in the worker). Still needs `CACHE_EPOCH` for plan 06; run `wrangler d1 create`
