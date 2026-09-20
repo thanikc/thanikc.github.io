@@ -103,7 +103,7 @@ grounded on the old content stop being served; old rows are purged on the next w
 ```bash
 pnpm --filter @thanikc/worker dev      # wrangler dev  → http://localhost:8787
 pnpm --filter @thanikc/worker test     # vitest (Workers pool, bindings stubbed per-test)
-pnpm --filter @thanikc/worker deploy   # wrangler deploy
+pnpm --filter @thanikc/worker run deploy   # wrangler deploy
 pnpm --filter @thanikc/worker cf-typegen  # regenerate worker-configuration.d.ts
 ```
 

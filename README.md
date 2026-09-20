@@ -50,7 +50,7 @@ pnpm --filter @thanikc/ui i18n:check      # every message translated, placeholde
 # Worker (apps/worker)
 pnpm --filter @thanikc/worker dev         # wrangler dev → http://localhost:8787
 pnpm --filter @thanikc/worker test
-pnpm --filter @thanikc/worker deploy
+pnpm --filter @thanikc/worker run deploy
 
 pnpm -r test                              # every package
 pnpm format                               # prettier across apps/
