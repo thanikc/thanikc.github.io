@@ -189,7 +189,6 @@
     "projects.decisionLabel": "Entscheidung:",
     "projects.stack": "Stack",
     "projects.flowLabel": "So funktioniert {$projectName}",
-    "projects.detailsToggle": "Mehr über {$projectName}",
     "calculator.info.title": "Wie gerechnet wird & welche Annahmen dahinterstehen",
     "calculator.info.fetching": "Live-Raten werden geladen …",
     "calculator.info.liveData": "{$START_TAG_MAT_ICON}check_circle{$CLOSE_TAG_MAT_ICON} Live-Wirtschaftsdaten",
@@ -250,6 +249,8 @@
     "calculator.return.hintLive": "US-Aktien, {$INTERPOLATION}–{$INTERPOLATION_1}, nach Inflation (Weltbank)",
     "calculator.return.optimistic": "Liegt über dem langfristigen Schnitt von etwa {$INTERPOLATION} % – das Ergebnis ist ein günstiger Fall.",
     "calculator.withdrawal.error": "Gib einen Wert zwischen {$INTERPOLATION} % und {$INTERPOLATION_1} % ein.",
-    "calculator.years.error": "Gib zwischen {$INTERPOLATION} und {$INTERPOLATION_1} Jahren ein."
+    "calculator.years.error": "Gib zwischen {$INTERPOLATION} und {$INTERPOLATION_1} Jahren ein.",
+    "projects.showDetails": "Details",
+    "projects.hideDetails": "Details ausblenden"
   }
 }

@@ -21,11 +21,10 @@
   </div>
 
   @if (ordered().length > 0) {
-    <!-- One row: the hovered/expanded tile
-         claims more width, the rest yield — see :host's flex rule in
-         project-card.component.ts. Mobile stacks single-column; a horizontal
-         expand has no meaning at 360px width anyway. -->
-    <div class="projects-row flex flex-col gap-6 md:flex-row md:items-stretch">
+    <!-- Two columns from md: wide enough for the tagline and decision to read as
+         sentences. items-start, so opening one card's details doesn't stretch its
+         neighbour into an empty box. -->
+    <div class="projects-grid grid grid-cols-1 items-start gap-6 md:grid-cols-2">
       @for (project of ordered(); track project.name; let i = $index) {
         <app-project-card [project]="project" [index]="i" />
       }

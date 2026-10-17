@@ -548,6 +548,8 @@ test.describe('keyboard', () => {
               label: `${el.tagName.toLowerCase()} "${(el.getAttribute('aria-label') ?? el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 40)}"`,
               top: r.top + window.scrollY,
               height: r.height,
+              left: r.left,
+              width: r.width,
               inMain: !!el.closest('main'),
               focused: sig(el),
               // Why a stop would look unfocused: no :focus-visible, no document focus, or
@@ -578,10 +580,14 @@ test.describe('keyboard', () => {
       const invisibleFocusDiag = flagged.slice(0, 5).map(s => `${s.label}: ${s.diag}`);
 
       // Within <main>, focus moves down the page (same-row neighbours may share a top).
+      // Moving right into the next column of a grid (the next project card) starts
+      // that column at its top, which is reading order, not a jump back.
       const outOfOrder = stops
         .filter(s => s.inMain)
         .flatMap((s, i, list) =>
-          i > 0 && s.top < list[i - 1].top - Math.max(48, list[i - 1].height)
+          i > 0 &&
+          s.left <= list[i - 1].left + list[i - 1].width &&
+          s.top < list[i - 1].top - Math.max(48, list[i - 1].height)
             ? [`${list[i - 1].label} → ${s.label}`]
             : [],
         );

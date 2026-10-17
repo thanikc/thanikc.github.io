@@ -189,7 +189,6 @@
     "projects.decisionLabel": "การตัดสินใจ:",
     "projects.stack": "สแต็ก",
     "projects.flowLabel": "{$projectName} ทำงานอย่างไร",
-    "projects.detailsToggle": "ดูเพิ่มเติมเกี่ยวกับ {$projectName}",
     "calculator.info.title": "คำนวณอย่างไร และใช้สมมติฐานอะไร",
     "calculator.info.fetching": "กำลังดึงอัตราสด...",
     "calculator.info.liveData": "{$START_TAG_MAT_ICON}check_circle{$CLOSE_TAG_MAT_ICON} ข้อมูลเศรษฐกิจสด",
@@ -250,6 +249,8 @@
     "calculator.return.hintLive": "หุ้นสหรัฐฯ ปี {$INTERPOLATION}–{$INTERPOLATION_1} หลังหักเงินเฟ้อ (ธนาคารโลก)",
     "calculator.return.optimistic": "สูงกว่าค่าเฉลี่ยระยะยาวราว {$INTERPOLATION}% ให้ถือว่าผลลัพธ์เป็นกรณีที่ดีที่สุด",
     "calculator.withdrawal.error": "กรอกค่าระหว่าง {$INTERPOLATION}% ถึง {$INTERPOLATION_1}%",
-    "calculator.years.error": "กรอกระหว่าง {$INTERPOLATION} ถึง {$INTERPOLATION_1} ปี"
+    "calculator.years.error": "กรอกระหว่าง {$INTERPOLATION} ถึง {$INTERPOLATION_1} ปี",
+    "projects.showDetails": "รายละเอียด",
+    "projects.hideDetails": "ซ่อนรายละเอียด"
   }
 }

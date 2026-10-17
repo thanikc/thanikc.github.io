@@ -58,10 +58,9 @@ describe('ProfileProjectsComponent', () => {
     );
   });
 
-  // Redesign: one horizontal row — featured
-  // projects still lead, but as ordering within the row, not a separate one.
-  it('lists featured projects before the rest, in one row', () => {
-    expect(namesIn('.projects-row')).toEqual(['A', 'C', 'B', 'D']);
+  // Featured projects lead, as ordering within the one grid, not a separate group.
+  it('lists featured projects before the rest', () => {
+    expect(namesIn('.projects-grid')).toEqual(['A', 'C', 'B', 'D']);
   });
 
   it('shows an empty state when there are no projects', () => {

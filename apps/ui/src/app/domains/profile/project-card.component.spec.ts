@@ -75,23 +75,43 @@ describe('ProjectCardComponent', () => {
     );
   });
 
-  // Redesign: minimal by default (name, status), full detail behind a disclosure —
-  // hover is the mouse affordance, tapping the face is the keyboard/touch one.
-  it('starts collapsed and reveals its details through its face button', () => {
+  // The evidence is the point of the card, so what it is for and the engineering
+  // decision are always on the face; only the supporting detail sits behind the
+  // disclosure, which is a labelled button of its own rather than the whole face.
+  it('shows the tagline and decision up front and the rest behind a disclosure', () => {
     const toggle = card().querySelector<HTMLButtonElement>('button[aria-controls]')!;
-    const detailsId = toggle.getAttribute('aria-controls')!;
-    const details = card().querySelector(`#${detailsId}`)!;
+    const details = card().querySelector(`#${toggle.getAttribute('aria-controls')}`)!;
 
+    expect(details.contains(card().querySelector('.project-tagline'))).toBe(false);
+    expect(details.contains(card().querySelector('.project-decision'))).toBe(false);
+    expect(details.contains(card().querySelector('.project-why'))).toBe(true);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
-    expect(card().classList.contains('is-expanded')).toBe(false);
-    expect(details.textContent).toContain('Gauges the risk of a market crash.');
-    expect(toggle.getAttribute('aria-label')).toContain('CrashDash');
+    expect(toggle.textContent?.trim()).toBe('Details');
 
     toggle.click();
     fixture.detectChanges();
 
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.textContent?.trim()).toBe('Hide details');
     expect(card().classList.contains('is-expanded')).toBe(true);
+  });
+
+  // A heading inside a button is flattened into the button's name and drops out
+  // of heading navigation; the toggle names its project through the heading.
+  it('keeps the project name a real heading that also describes the toggle', () => {
+    const heading = card().querySelector('h3')!;
+    const toggle = card().querySelector<HTMLButtonElement>('button[aria-controls]')!;
+
+    expect(heading.closest('button')).toBeNull();
+    expect(toggle.getAttribute('aria-describedby')).toBe(heading.id);
+    expect(toggle.hasAttribute('aria-label')).toBe(false);
+  });
+
+  it('keeps its actions visible while the details are collapsed', () => {
+    const details = card().querySelector('.project-details')!;
+
+    expect(details.contains(link('Open CrashDash')!)).toBe(false);
+    expect(details.contains(el().querySelector('app-ask-ling-link'))).toBe(false);
   });
 
   it('says what it is for, why it exists and one engineering decision', () => {
@@ -153,19 +173,6 @@ describe('ProjectCardComponent', () => {
 
     render(EXTERNAL);
     expect(cells(card().querySelector('.project-mark')!)).toEqual(crashdash);
-  });
-
-  // Redesign: the reference's tiles sit in one row and the hovered one claims more
-  // width — driven by the same hover/expanded state as the detail disclosure, but at
-  // the host element (the actual flex item in profile-projects' row), not the article.
-  it('marks its host expanded so the row can grow it, in sync with the disclosure', () => {
-    const host = fixture.nativeElement as HTMLElement;
-    expect(host.classList.contains('is-expanded')).toBe(false);
-
-    card().querySelector<HTMLButtonElement>('button[aria-controls]')!.click();
-    fixture.detectChanges();
-
-    expect(host.classList.contains('is-expanded')).toBe(true);
   });
 
   it('opens external links safely in a new tab and says so to screen readers', () => {
