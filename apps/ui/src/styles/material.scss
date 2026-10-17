@@ -72,10 +72,11 @@ body {
 
 // The site is published in English, German and Thai from one layout, and German
 // compounds ("Datenschutz-Grundverordnung") are longer than anything the English
-// copy contains: at 360px they widened the page past the viewport. Every page
-// declares its language, so `hyphens: auto` breaks them where that language allows,
-// with a hard break as the last resort for what has no hyphenation rules (URLs,
-// Thai strings). See the per-locale widths in e2e/design.e2e.ts.
+// copy contains: at 360px they widened the page past the viewport. German pages
+// hyphenate where the language allows; English doesn't need it and read badly with
+// it ("en-gineering", "seri-ous"). Everywhere, a hard break is the last resort for
+// what has no break opportunity at all (URLs, long Thai strings). See the per-locale
+// widths in e2e/design.e2e.ts.
 h1,
 h2,
 h3,
@@ -85,7 +86,17 @@ dt,
 dd,
 code {
   overflow-wrap: break-word;
-  hyphens: auto;
+
+  &:lang(de) {
+    hyphens: auto;
+  }
+}
+
+// Balanced headings: no one-word last line ("…the work / above").
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 // Echoes to-top.ch's decorative line motif under section headings — see
