@@ -25,7 +25,9 @@ export type AskLingAppearance = 'text' | 'filled' | 'outlined';
     >
       <span class="flex items-center gap-2">
         <mat-icon class="ask-ling-icon" aria-hidden="true">auto_awesome</mat-icon>
-        <span class="ask-ling-label">{{ label() }}</span>
+        <!-- Start-aligned: a label that wraps (long German questions) reads as text,
+             not as a centred block. -->
+        <span class="ask-ling-label text-start">{{ label() }}</span>
         <span class="sr-only">{{ screenReaderHint() }}</span>
       </span>
     </button>

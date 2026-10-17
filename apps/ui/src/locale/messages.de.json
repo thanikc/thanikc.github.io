@@ -115,7 +115,7 @@
     "projects.crashdash.tagline": "Ein Dashboard, das das Risiko eines Markt-Crashs aus Makro- und Marktindikatoren einschätzt.",
     "projects.crashdash.why": "Für meine eigenen Investments gebaut — und um ein komplettes Spring-Boot-und-Angular-System einmal ganz durchzuziehen, KI-unterstützt.",
     "projects.crashdash.decision": "Fehlende Daten bleiben unbewertet, statt als Null zu zählen — so liest sich eine Lücke nie als „kein Risiko“.",
-    "projects.crashdash.status": "Privat — Anmeldung erforderlich",
+    "projects.crashdash.status": "Privat · Login nötig",
     "projects.crashdash.open": "CrashDash öffnen",
     "projects.crashdash.hookLabel": "Frag, wie der Risiko-Score funktioniert",
     "projects.crashdash.question": "Wie berechnet CrashDash sein Crash-Risiko-Level?",

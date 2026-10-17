@@ -1,7 +1,8 @@
 .policy-body {
   color: var(--mat-sys-on-surface);
-  // ~70 characters a line: the 48rem article ran paragraphs to ~120 on desktop.
-  max-width: 70ch;
+  // ~75 real characters a line (ch is the width of a "0", wider than an average
+  // letter, so 70ch measured ~95): the 48rem article ran paragraphs to ~120.
+  max-width: 60ch;
 }
 
 // An inline link needs a non-colour signal too (axe: link-in-text-block) —

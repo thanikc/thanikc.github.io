@@ -89,6 +89,9 @@ code {
 
   &:lang(de) {
     hyphens: auto;
+    // Only words of 10+ letters, at least 4 either side of the break: the hero's
+    // short words ("ein-zelne", "Ab-striche") were splitting line after line.
+    hyphenate-limit-chars: 10 4 4;
   }
 }
 
