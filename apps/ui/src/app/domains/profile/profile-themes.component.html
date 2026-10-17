@@ -14,12 +14,7 @@
       <article class="theme-panel relative" [attr.aria-label]="theme.title">
         <div class="theme-scene absolute inset-0" aria-hidden="true">
           @defer (on viewport) {
-            <app-scroll-scene
-              [scene]="sceneFor(i)"
-              range="through"
-              (progress)="onSceneProgress(i, $event)"
-              class="block h-full w-full"
-            />
+            <app-theme-scene [index]="i" (progress)="onSceneProgress(i, $event)" />
           } @placeholder {
             <div class="theme-scene-poster h-full w-full"></div>
           }

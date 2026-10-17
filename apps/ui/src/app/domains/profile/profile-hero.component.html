@@ -3,8 +3,10 @@
   aria-labelledby="hero-name"
 >
   <div class="hero-scene absolute inset-0" aria-hidden="true">
-    @defer (on viewport) {
-      <app-scroll-scene [scene]="heroScene" class="block h-full w-full" />
+    <!-- on idle, not on viewport: the hero is always in the first viewport, so
+         'on viewport' fetched three.js (~520 KB) in the critical path. -->
+    @defer (on idle) {
+      <app-hero-scene />
     } @placeholder {
       <div class="hero-scene-poster h-full w-full"></div>
     }

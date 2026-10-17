@@ -26,8 +26,7 @@ app-theme-toggle {
   transition:
     background-color 0.25s ease,
     color 0.25s ease,
-    border-color 0.25s ease,
-    backdrop-filter 0.25s ease;
+    border-color 0.25s ease;
 
   // Default: transparent over the page base. The header is sticky *in flow*, so
   // the dark hero starts below it, not behind it — the text must read on the
@@ -57,9 +56,9 @@ app-theme-toggle {
 // Past the hero, the fixed header needs a solid backdrop to stay legible over
 // whatever content scrolls beneath it.
 header.scrolled .app-header {
-  background-color: color-mix(in srgb, var(--mat-sys-surface-container) 82%, transparent);
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  // Near-opaque rather than a backdrop blur: the header sits over the animated
+  // scenes, and a blur behind it would be recomposited on every one of their frames.
+  background-color: color-mix(in srgb, var(--mat-sys-surface-container) 96%, transparent);
   color: var(--mat-sys-on-surface);
   border-bottom-color: var(--mat-sys-outline-variant);
   --mat-button-text-label-text-color: var(--mat-sys-on-primary-container);

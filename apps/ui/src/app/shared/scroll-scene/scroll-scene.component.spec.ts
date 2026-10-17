@@ -71,9 +71,11 @@ describe('ScrollSceneComponent', () => {
     }).compileComponents();
   });
 
-  async function createFixture(): Promise<ComponentFixture<ScrollSceneComponent>> {
+  async function createFixture(
+    scene: ScrollSceneDef = stubScene,
+  ): Promise<ComponentFixture<ScrollSceneComponent>> {
     const fixture = TestBed.createComponent(ScrollSceneComponent);
-    fixture.componentRef.setInput('scene', stubScene);
+    fixture.componentRef.setInput('scene', scene);
     fixture.detectChanges();
     await fixture.whenStable();
     return fixture;
@@ -102,6 +104,23 @@ describe('ScrollSceneComponent', () => {
 
     expect(stubScene.onProgress).toHaveBeenCalledTimes(1);
     expect(vi.mocked(stubScene.onProgress).mock.calls[0][0]).toBe(0.5);
+  });
+
+  // renderer.dispose() frees the renderer's own state, not the GPU buffers of the
+  // geometries and materials the scene built; each visit would leak them.
+  it("disposes the scene's geometries and materials on destroy", async () => {
+    const geometry = new THREE.BufferGeometry();
+    const material = new THREE.MeshBasicMaterial();
+    const group = new THREE.Group();
+    group.add(new THREE.Mesh(geometry, material));
+    const disposeGeometry = vi.spyOn(geometry, 'dispose');
+    const disposeMaterial = vi.spyOn(material, 'dispose');
+
+    const fixture = await createFixture({ build: () => group, onProgress: () => {} });
+    fixture.destroy();
+
+    expect(disposeGeometry).toHaveBeenCalled();
+    expect(disposeMaterial).toHaveBeenCalled();
   });
 
   it('disposes the renderer on destroy', async () => {

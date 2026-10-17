@@ -12,15 +12,8 @@ import {
 } from '@angular/core';
 import { AskLingLinkComponent } from '../chat/ask-ling-link.component';
 import { SectionHeaderComponent } from './section-header.component';
-import {
-  ScrollSceneComponent,
-  ScrollSceneDef,
-} from '../../shared/scroll-scene/scroll-scene.component';
+import { ThemeSceneComponent } from './theme-scene.component';
 import { WorkTheme } from './profile.content';
-import { aiScene } from './theme-scenes/ai-scene.def';
-import { modernisingScene } from './theme-scenes/modernising-scene.def';
-import { platformScene } from './theme-scenes/platform-scene.def';
-import { servicesScene } from './theme-scenes/services-scene.def';
 
 /**
  * Scenes run on the 'through' range (0 as a panel's top enters at the viewport
@@ -29,21 +22,13 @@ import { servicesScene } from './theme-scenes/services-scene.def';
  */
 const ACTIVE_FROM = 0.2;
 
-// One scene per WorkTheme, same order as profile.content.ts's WORK_THEMES.
-const THEME_SCENES: readonly ScrollSceneDef[] = [
-  platformScene,
-  modernisingScene,
-  servicesScene,
-  aiScene,
-];
-
 /**
  * "What I work on" as numbered narrative sections: each theme becomes its own full-bleed dark, sticky
  * panel with its own scroll-driven scene, instead of a static card grid.
  */
 @Component({
   selector: 'app-profile-themes',
-  imports: [AskLingLinkComponent, SectionHeaderComponent, ScrollSceneComponent],
+  imports: [AskLingLinkComponent, SectionHeaderComponent, ThemeSceneComponent],
   templateUrl: './profile-themes.component.html',
   styleUrl: './profile-themes.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,8 +37,6 @@ export class ProfileThemesComponent {
   readonly themes = input.required<readonly WorkTheme[]>();
 
   protected readonly headingId = 'work-heading';
-  protected readonly sceneFor = (index: number): ScrollSceneDef =>
-    THEME_SCENES[index % THEME_SCENES.length];
   protected readonly counterFor = (index: number): string =>
     String(index + 1).padStart(2, '0') + '.';
 

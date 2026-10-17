@@ -35,6 +35,9 @@ export interface ScrollSceneDef {
   onProgress(t: number, object: THREE.Object3D): void;
 }
 
+/** Minimum time between frames rendered for time-based drift alone (~30fps). */
+const FRAME_MS = 32;
+
 /**
  * One shared low/high-fidelity switch: a `ScrollSceneDef` reads this itself
  * (from `build`) to size its own geometry/particle count/shadow quality —
@@ -122,23 +125,29 @@ export class ScrollSceneComponent {
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    // Under reduced motion the picture stays still, but progress is still reported
-    // (it drives the section's position dots), so it is emitted on change.
-    const progress = scrollProgress(
-      host,
-      this.range(),
-      reducedMotion ? t => this.progress.emit(t) : undefined,
-    );
+    // Progress is reported on change, not per frame: it drives the section's
+    // position dots, and under reduced motion the picture never moves at all.
+    const progress = scrollProgress(host, this.range(), t => this.progress.emit(t));
 
     const renderFrame = (t = progress.value()): void => {
       this.scene().onProgress(t, object);
-      if (!reducedMotion) this.progress.emit(t);
       renderer.render(threeScene, camera);
     };
 
+    // The scenes drift slowly with time as well as scroll, so they keep rendering
+    // while visible, but at most at FRAME_MS: half the display rate is invisible
+    // for a slow drift and halves the GPU and main-thread cost. A scroll change
+    // renders on the next frame regardless, so scrolling stays smooth.
     let frameId: number | undefined;
-    const loop = (): void => {
-      renderFrame();
+    let lastFrame = 0;
+    let lastProgress = -1;
+    const loop = (now: number): void => {
+      const t = progress.value();
+      if (t !== lastProgress || now - lastFrame >= FRAME_MS) {
+        renderFrame(t);
+        lastFrame = now;
+        lastProgress = t;
+      }
       frameId = requestAnimationFrame(loop);
     };
 
@@ -147,7 +156,7 @@ export class ScrollSceneComponent {
     const visibilityObserver = new IntersectionObserver(([entry]) => {
       if (reducedMotion) return;
       if (entry.isIntersecting && frameId === undefined) {
-        loop();
+        frameId = requestAnimationFrame(loop);
       } else if (!entry.isIntersecting && frameId !== undefined) {
         cancelAnimationFrame(frameId);
         frameId = undefined;
@@ -168,6 +177,12 @@ export class ScrollSceneComponent {
       }
       window.removeEventListener('resize', resize);
       progress.destroy();
+      // renderer.dispose() leaves the scene's own GPU buffers behind.
+      object.traverse(child => {
+        const { geometry, material } = child as Partial<THREE.Mesh>;
+        geometry?.dispose();
+        for (const m of [material].flat()) m?.dispose();
+      });
       renderer.dispose();
     });
   }
