@@ -15,8 +15,15 @@ import { RetirementCalculatorComponent } from './calculator.component';
       <app-retirement-calculator />
     } @placeholder {
       <section>
-        <h1 class="text-2xl font-bold mb-6">Retirement Calculator</h1>
-        <p aria-live="polite">Loading…</p>
+        <h1
+          class="page-heading text-2xl font-bold mb-6"
+          i18n="Heading of the calculator page@@calculator.pageTitle"
+        >
+          Retirement Calculator
+        </h1>
+        <p aria-live="polite" i18n="Shown until the calculator has loaded@@calculator.loading">
+          Loading…
+        </p>
       </section>
     }
   `,

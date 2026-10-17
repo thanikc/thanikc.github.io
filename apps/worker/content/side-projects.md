@@ -80,9 +80,12 @@ source code is private.
 
 The retirement calculator on Thanik's website is a small tool: it projects the
 nest egg needed for a target monthly retirement income and the monthly savings
-needed to close the gap. It is built with Angular Signals. Its default
-assumptions come live from the World Bank open data API — US consumer price
-inflation and a 15-year average of annual stock market returns — and fall back to
-fixed defaults when the API has no data. The page is prerendered as a shell, and
+needed to close the gap. It is built with Angular Signals. Its default return
+comes live from the World Bank open data API: 30 years of the yearly US
+stock-index change, compounded and net of US consumer price inflation, so every
+amount stays in today's money. It falls back to a fixed 6% real return when the
+API has no data, flags returns above the long-run average of about 7% as a best
+case, and refuses to show figures for out-of-range inputs. Amounts are shown in
+the currency of the page's language: dollars, euros or baht. The page is prerendered as a shell, and
 the live-data part loads only in the browser, so the static HTML never contains
 stale numbers.

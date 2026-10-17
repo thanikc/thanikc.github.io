@@ -31,6 +31,7 @@ describe('CalculatorShellComponent', () => {
       estimatedAnnualReturn: signal(7.0),
       isLive: signal(true),
       isLoading: signal(false),
+      returnPeriod: signal(null),
     };
 
     mockCalculatorService = {
@@ -43,6 +44,9 @@ describe('CalculatorShellComponent', () => {
       futureNetWorth: signal(0),
       remainingTargetNestEgg: signal(1200000),
       requiredMonthlyContribution: signal(410.82),
+      inputsValid: signal(true),
+      isReturnOptimistic: signal(false),
+      currency: 'USD',
     };
 
     await TestBed.configureTestingModule({

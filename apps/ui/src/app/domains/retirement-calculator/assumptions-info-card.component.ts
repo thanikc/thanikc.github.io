@@ -16,4 +16,8 @@ export class AssumptionsInfoCardComponent {
   readonly isLoading = input(false);
   readonly safeWithdrawalRate = input(DEFAULT_SAFE_WITHDRAWAL_RATE);
   readonly estimatedAnnualReturn = input(DEFAULT_ANNUAL_RETURN);
+  /** Years the live return covers; null when the baseline is in use. */
+  readonly returnPeriod = input<{ from: number; to: number } | null>(null);
+
+  readonly baselineReturn = DEFAULT_ANNUAL_RETURN;
 }

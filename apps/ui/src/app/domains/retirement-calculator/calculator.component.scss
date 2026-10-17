@@ -38,3 +38,9 @@
     }
   }
 }
+
+// The optimistic-return hint is a caution, not an error: the warning tone keeps it
+// apart from the validation messages, and its wording carries it without the hue.
+.return-warning {
+  color: var(--app-sys-on-warning-container);
+}

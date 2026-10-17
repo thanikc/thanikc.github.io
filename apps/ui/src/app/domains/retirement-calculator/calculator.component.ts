@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, WritableSignal } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  LOCALE_ID,
+  inject,
+  WritableSignal,
+} from '@angular/core';
+import { CurrencyPipe, getCurrencySymbol } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -8,6 +14,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { CalculatorService } from './calculator.service';
 import { AssumptionsInfoCardComponent } from './assumptions-info-card.component';
 import { AssumptionDataService } from './assumption-data.service';
+import { INPUT_BOUNDS, LONG_RUN_REAL_RETURN } from './calculator.constants';
 import { SelectOnFocusDirective } from '../../shared/directives/select-on-focus.directive';
 
 @Component({
@@ -37,6 +44,15 @@ export class RetirementCalculatorComponent {
   readonly estimatedAnnualReturn = this.calculator.estimatedAnnualReturn;
   readonly safeWithdrawalRate = this.calculator.safeWithdrawalRate;
 
+  // Amounts are shown in the locale build's currency.
+  readonly currency = this.calculator.currency;
+  readonly currencySymbol = getCurrencySymbol(this.currency, 'narrow', inject(LOCALE_ID));
+
+  readonly bounds = INPUT_BOUNDS;
+  readonly longRunReturn = LONG_RUN_REAL_RETURN;
+  readonly inputsValid = this.calculator.inputsValid;
+  readonly isReturnOptimistic = this.calculator.isReturnOptimistic;
+
   // Derived results.
   readonly totalNestEggNeeded = this.calculator.totalNestEggNeeded;
   readonly futureNetWorth = this.calculator.futureNetWorth;
@@ -46,6 +62,7 @@ export class RetirementCalculatorComponent {
   // Live data status.
   readonly isLive = this.assumptions.isLive;
   readonly isLoading = this.assumptions.isLoading;
+  readonly returnPeriod = this.assumptions.returnPeriod;
 
   /** Writes a numeric form value, falling back to 0 for empty or invalid input. */
   updateAmount(target: WritableSignal<number>, value: number): void {

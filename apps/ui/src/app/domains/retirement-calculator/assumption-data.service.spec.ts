@@ -3,47 +3,30 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { AssumptionDataService } from './assumption-data.service';
+import { DEFAULT_ANNUAL_RETURN } from './calculator.constants';
+
+const series = (values: Record<string, number | null>) => [
+  {},
+  Object.entries(values).map(([date, value]) => ({
+    country: { id: 'US', value: 'United States' },
+    date,
+    value,
+  })),
+];
 
 describe('AssumptionDataService', () => {
   let service: AssumptionDataService;
   let httpMock: HttpTestingController;
 
-  const mockMarketResponse = [
-    {},
-    [{ country: { id: 'US', value: 'United States' }, date: '2026', value: 10 }],
-  ];
-
-  /** 15 entries: 10 valid values (10,20,…,100), 5 nulls → average = 55 */
-  const mockMarketMultiResponse = [
-    {},
-    [
-      { country: { id: 'US', value: 'United States' }, date: '2020', value: 10 },
-      { country: { id: 'US', value: 'United States' }, date: '2021', value: 20 },
-      { country: { id: 'US', value: 'United States' }, date: '2022', value: 30 },
-      { country: { id: 'US', value: 'United States' }, date: '2023', value: 40 },
-      { country: { id: 'US', value: 'United States' }, date: '2024', value: 50 },
-      { country: { id: 'US', value: 'United States' }, date: '2025', value: 60 },
-      { country: { id: 'US', value: 'United States' }, date: '2026', value: 70 },
-      { country: { id: 'US', value: 'United States' }, date: '2027', value: 80 },
-      { country: { id: 'US', value: 'United States' }, date: '2028', value: 90 },
-      { country: { id: 'US', value: 'United States' }, date: '2029', value: 100 },
-      { country: { id: 'US', value: 'United States' }, date: '2030', value: null },
-      { country: { id: 'US', value: 'United States' }, date: '2031', value: null },
-      { country: { id: 'US', value: 'United States' }, date: '2032', value: null },
-      { country: { id: 'US', value: 'United States' }, date: '2033', value: null },
-      { country: { id: 'US', value: 'United States' }, date: '2034', value: null },
-    ],
-  ];
-
-  /** 15 entries, all null → should fall back to default 7 */
-  const mockMarketAllNullResponse = [
-    {},
-    Array.from({ length: 15 }, (_, i) => ({
-      country: { id: 'US', value: 'United States' },
-      date: String(2020 + i),
-      value: null as unknown as number,
-    })),
-  ];
+  const flush = async (
+    market: Record<string, number | null>,
+    inflation: Record<string, number | null>,
+  ) => {
+    TestBed.tick();
+    httpMock.expectOne(req => req.url.includes('CM.MKT.INDX.ZG')).flush(series(market));
+    httpMock.expectOne(req => req.url.includes('FP.CPI.TOTL.ZG')).flush(series(inflation));
+    await TestBed.inject(ApplicationRef).whenStable();
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -58,72 +41,66 @@ describe('AssumptionDataService', () => {
     httpMock.verify();
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  it('starts from the real-return baseline before the data resolves', () => {
+    expect(service.isLive()).toBe(false);
+    expect(service.estimatedAnnualReturn()).toBe(DEFAULT_ANNUAL_RETURN);
+    expect(service.safeWithdrawalRate()).toBe(4);
+    expect(service.returnPeriod()).toBeNull();
   });
 
-  it('should return default fallbacks before HTTP requests resolve', () => {
-    expect(service.isLive()).toBeFalsy();
-    expect(service.estimatedAnnualReturn()).toBe(7);
-    expect(service.safeWithdrawalRate()).toBe(4.0);
+  // The withdrawal rule and the target income are in today's money, so the
+  // return has to be real (after inflation), not the index's nominal change.
+  it('derives a real return from US market and inflation data', async () => {
+    // (1.10 × 1.21) / (1.00 × 1.10) = 1.21 over two years → 10% a year, real.
+    await flush({ '2021': 21, '2020': 10 }, { '2021': 10, '2020': 0 });
+
+    expect(service.isLive()).toBe(true);
+    expect(service.estimatedAnnualReturn()).toBe(10);
   });
 
-  it('should fetch macroeconomic data and update computed signals on success', async () => {
-    TestBed.tick();
-    const reqs = httpMock.match(req => true);
-    expect(reqs.length).toBe(1);
+  // Averaging yearly % changes overstates what money actually grows by; a
+  // +50% year then a -50% year leaves you with 75%, not 100%.
+  it('compounds the years instead of averaging the percentages', async () => {
+    await flush({ '2021': -50, '2020': 50 }, { '2021': 0, '2020': 0 });
 
-    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
-
-    expect(marketReq).toBeTruthy();
-
-    marketReq!.flush(mockMarketResponse);
-
-    await TestBed.inject(ApplicationRef).whenStable();
-
-    expect(service.isLive()).toBeTruthy();
-    expect(service.estimatedAnnualReturn()).toBe(10); // single valid value → average = 10
+    expect(service.estimatedAnnualReturn()).toBe(-13.4);
   });
 
-  it('should gracefully handle API errors by using fallbacks', () => {
-    TestBed.tick();
-    const reqs = httpMock.match(req => true);
-
-    reqs.forEach(req =>
-      req.flush('Error fetching data', {
-        status: 500,
-        statusText: 'Internal Server Error',
-      }),
+  it('uses only years both series report, and names that period', async () => {
+    await flush(
+      { '2025': 40, '2024': 10, '2023': 10, '2022': null },
+      { '2025': null, '2024': 0, '2023': 0, '2022': 3 },
     );
 
-    expect(service.isLive()).toBeFalsy();
-    expect(service.estimatedAnnualReturn()).toBe(7);
+    expect(service.estimatedAnnualReturn()).toBe(10);
+    expect(service.returnPeriod()).toEqual({ from: 2023, to: 2024 });
   });
 
-  it('should average valid market return values, ignoring null entries', async () => {
+  it('asks for 30 years of each series', () => {
     TestBed.tick();
-    const reqs = httpMock.match(req => true);
+    const reqs = httpMock.match(() => true);
 
-    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
-    expect(marketReq).toBeTruthy();
-
-    marketReq!.flush(mockMarketMultiResponse);
-    await TestBed.inject(ApplicationRef).whenStable();
-
-    // (10+20+30+40+50+60+70+80+90+100) / 10 = 550 / 10 = 55
-    expect(service.estimatedAnnualReturn()).toBe(55);
+    expect(reqs.map(r => r.request.url).every(url => url.includes('per_page=30'))).toBe(true);
+    reqs.forEach(r => r.flush(series({})));
   });
 
-  it('should fall back to default when all market return entries are null', async () => {
+  it('falls back to the baseline when either series fails', async () => {
     TestBed.tick();
-    const reqs = httpMock.match(req => true);
-
-    const marketReq = reqs.find(req => req.request.url.includes('CM.MKT.INDX.ZG'));
-    expect(marketReq).toBeTruthy();
-
-    marketReq!.flush(mockMarketAllNullResponse);
+    httpMock.expectOne(req => req.url.includes('CM.MKT.INDX.ZG')).flush(series({ '2024': 10 }));
+    httpMock
+      .expectOne(req => req.url.includes('FP.CPI.TOTL.ZG'))
+      .flush('down', { status: 500, statusText: 'Internal Server Error' });
     await TestBed.inject(ApplicationRef).whenStable();
 
-    expect(service.estimatedAnnualReturn()).toBe(7);
+    expect(service.isLive()).toBe(false);
+    expect(service.estimatedAnnualReturn()).toBe(DEFAULT_ANNUAL_RETURN);
+    expect(service.returnPeriod()).toBeNull();
+  });
+
+  it('falls back to the baseline when no year has both values', async () => {
+    await flush({ '2024': 10 }, { '2023': 2 });
+
+    expect(service.isLive()).toBe(false);
+    expect(service.estimatedAnnualReturn()).toBe(DEFAULT_ANNUAL_RETURN);
   });
 });

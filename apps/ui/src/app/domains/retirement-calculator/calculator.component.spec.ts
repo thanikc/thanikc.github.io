@@ -15,8 +15,13 @@ describe('RetirementCalculatorComponent', () => {
   let estimatedAnnualReturnMockSignal: WritableSignal<number>;
   let safeWithdrawalRateMockSignal: WritableSignal<number>;
 
+  let inputsValidMockSignal: WritableSignal<boolean>;
+  let isReturnOptimisticMockSignal: WritableSignal<boolean>;
+
   let mockAssumptionService: Partial<AssumptionDataService>;
   let mockCalculatorService: Partial<CalculatorService>;
+
+  const el = () => fixture.nativeElement as HTMLElement;
 
   beforeEach(async () => {
     currentNetWorthMockSignal = signal(0);
@@ -25,9 +30,13 @@ describe('RetirementCalculatorComponent', () => {
     estimatedAnnualReturnMockSignal = signal(7);
     safeWithdrawalRateMockSignal = signal(4);
 
+    inputsValidMockSignal = signal(true);
+    isReturnOptimisticMockSignal = signal(false);
+
     mockAssumptionService = {
       isLive: signal(true),
       isLoading: signal(false),
+      returnPeriod: signal({ from: 1995, to: 2024 }),
     };
 
     mockCalculatorService = {
@@ -40,6 +49,9 @@ describe('RetirementCalculatorComponent', () => {
       futureNetWorth: signal(0),
       remainingTargetNestEgg: signal(1200000),
       requiredMonthlyContribution: signal(410.82),
+      inputsValid: inputsValidMockSignal,
+      isReturnOptimistic: isReturnOptimisticMockSignal,
+      currency: 'USD',
     };
 
     await TestBed.configureTestingModule({
@@ -87,10 +99,10 @@ describe('RetirementCalculatorComponent', () => {
 
   describe('Select on focus', () => {
     const inputSelectors = [
-      'input[aria-label="Current Net Worth in dollars"]',
+      'input[aria-label="Current net worth"]',
       'input[aria-label="Years until retirement"]',
-      'input[aria-label="Target monthly income in dollars"]',
-      'input[aria-label="Estimated annual investment return percentage"]',
+      'input[aria-label="Target monthly income"]',
+      'input[aria-label="Annual return after inflation, in percent"]',
       'input[aria-label="Safe withdrawal rate percentage"]',
     ];
 
@@ -136,7 +148,7 @@ describe('RetirementCalculatorComponent', () => {
       await fixture.whenStable();
 
       const input: HTMLInputElement = fixture.nativeElement.querySelector(
-        'input[aria-label="Current Net Worth in dollars"]',
+        'input[aria-label="Current net worth"]',
       );
 
       expect(input.value).toBe('12345');
@@ -160,8 +172,71 @@ describe('RetirementCalculatorComponent', () => {
         'mat-panel-description',
       );
 
-      expect(description?.textContent).toContain('7% return, 4% withdrawal rate');
+      expect(description?.textContent).toContain('7% real return, 4% withdrawal rate');
       expect(description?.textContent).toContain('7% / 4%');
+    });
+  });
+
+  describe('trustworthy results', () => {
+    const results = () => [...el().querySelectorAll('.summary-cards .card p')];
+
+    it('shows no figures while an input is out of range', () => {
+      inputsValidMockSignal.set(false);
+      fixture.detectChanges();
+
+      expect(results().map(p => p.textContent?.trim())).toEqual(['—', '—', '—', '—']);
+    });
+
+    it('says which range a field accepts once it is left invalid', async () => {
+      const input = el().querySelector<HTMLInputElement>(
+        'input[aria-label="Safe withdrawal rate percentage"]',
+      )!;
+      input.value = '0';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(el().querySelector('mat-error')?.textContent).toContain('between 0.5% and 10%');
+    });
+
+    it('names the source and period of the live return', () => {
+      expect(el().textContent).toContain('1995–2024');
+    });
+
+    it('warns when the return is above the long-run average', () => {
+      expect(el().textContent).not.toContain('best case');
+
+      isReturnOptimisticMockSignal.set(true);
+      fixture.detectChanges();
+
+      expect(el().textContent).toContain('best case');
+    });
+
+    // Screen-reader users change an input and need to hear the answer, once,
+    // without the four cards all re-announcing.
+    it('announces the monthly answer in one polite live region', () => {
+      const live = el().querySelectorAll('p[aria-live="polite"]');
+
+      expect(live.length).toBe(1);
+      expect(live[0].textContent).toContain('$411');
+    });
+
+    it('shows amounts in the currency of the locale build', async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [RetirementCalculatorComponent],
+        providers: [
+          { provide: AssumptionDataService, useValue: mockAssumptionService },
+          { provide: CalculatorService, useValue: { ...mockCalculatorService, currency: 'EUR' } },
+        ],
+      }).compileComponents();
+      fixture = TestBed.createComponent(RetirementCalculatorComponent);
+      fixture.detectChanges();
+
+      expect(results()[0].textContent).toContain('€');
+      expect(el().querySelector('[matprefix]')?.textContent).toContain('€');
     });
   });
 });

@@ -61,4 +61,24 @@ describe('AssumptionsInfoCardComponent', () => {
       expect(paletteClassesIn(host().querySelector('mat-card')!)).toEqual([]);
     }
   });
+
+  // The spinner is decoration next to text that already says what is loading;
+  // the chip itself is the status that changes.
+  it('announces the data source as a status, without an unnamed spinner', () => {
+    fixture.componentRef.setInput('isLoading', true);
+    fixture.detectChanges();
+
+    expect(host().querySelector('[role="status"]')?.textContent).toContain('Fetching');
+    expect(host().querySelector('mat-spinner')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('says where the live return comes from and over which years', () => {
+    fixture.componentRef.setInput('isLive', true);
+    fixture.componentRef.setInput('returnPeriod', { from: 1995, to: 2024 });
+    fixture.detectChanges();
+
+    expect(host().textContent).toContain('World Bank');
+    expect(host().textContent).toContain('1995–2024');
+    expect(host().textContent).toContain('inflation');
+  });
 });

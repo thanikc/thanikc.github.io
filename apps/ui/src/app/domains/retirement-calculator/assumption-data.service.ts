@@ -31,25 +31,45 @@ export type WorldBankResponse = [
 
 type WorldBankResource = HttpResourceRef<WorldBankResponse | undefined>;
 
-/** S&P Global Equity Indices, annual % change. */
+/** S&P Global Equity Indices, annual % change (price index, no dividends). */
 const MARKET_RETURN_INDICATOR = 'CM.MKT.INDX.ZG';
+/** Consumer price inflation, annual %. */
+const INFLATION_INDICATOR = 'FP.CPI.TOTL.ZG';
 const COUNTRY = 'USA';
-/** Years of market data averaged out to smooth single-year swings. */
-const MARKET_RETURN_YEARS = 15;
+/** Years requested per series: long enough to span full market cycles (2000, 2008, 2022). */
+const YEARS = 30;
 
 // https://datahelpdesk.worldbank.org/knowledgebase/articles/898581-api-basic-call-structures
 const marketDataEndpoint = (country: string, indicator: string, perPage = 1) =>
   `https://api.worldbank.org/v2/country/${country}/indicator/${indicator}?format=json&per_page=${perPage}`;
 
-/** Average of all reported (non-null) values, or `defaultValue` when none is numeric. */
-const averageValueOf = (res: WorldBankResource, defaultValue: number): number => {
-  const reported = (res.value()?.[1] ?? [])
-    .map(entry => entry.value)
-    .filter((value): value is number => typeof value === 'number');
+/** Reported (non-null) values by year; empty while loading or after an error. */
+const valuesByYear = (res: WorldBankResource): Map<number, number> =>
+  new Map(
+    ((res.hasValue() && res.value()?.[1]) || [])
+      .filter(entry => typeof entry.value === 'number')
+      .map(entry => [Number(entry.date), entry.value as number]),
+  );
 
-  if (reported.length === 0) return defaultValue;
+/**
+ * Compound real return over the years both series report: the growth of the
+ * index divided by the growth of prices, taken per year. Compounding, not an
+ * average of yearly percentages, which overstates what money actually grows by.
+ */
+const realReturnOf = (market: Map<number, number>, inflation: Map<number, number>) => {
+  const years = [...market.keys()].filter(year => inflation.has(year));
+  if (years.length === 0) return null;
 
-  return reported.reduce((sum, value) => sum + value, 0) / reported.length;
+  const growth = years.reduce(
+    (product, year) => (product * (1 + market.get(year)! / 100)) / (1 + inflation.get(year)! / 100),
+    1,
+  );
+
+  return {
+    rate: (Math.pow(growth, 1 / years.length) - 1) * 100,
+    from: Math.min(...years),
+    to: Math.max(...years),
+  };
 };
 
 /**
@@ -61,18 +81,34 @@ const averageValueOf = (res: WorldBankResource, defaultValue: number): number =>
 })
 export class AssumptionDataService {
   readonly marketReturnResource = httpResource<WorldBankResponse>(() =>
-    marketDataEndpoint(COUNTRY, MARKET_RETURN_INDICATOR, MARKET_RETURN_YEARS),
+    marketDataEndpoint(COUNTRY, MARKET_RETURN_INDICATOR, YEARS),
   );
 
-  /** Multi-year average market return, in percent. */
-  readonly estimatedAnnualReturn = computed(() =>
-    Number(averageValueOf(this.marketReturnResource, DEFAULT_ANNUAL_RETURN).toFixed(2)),
+  readonly inflationResource = httpResource<WorldBankResponse>(() =>
+    marketDataEndpoint(COUNTRY, INFLATION_INDICATOR, YEARS),
   );
+
+  private readonly realReturn = computed(() =>
+    realReturnOf(valuesByYear(this.marketReturnResource), valuesByYear(this.inflationResource)),
+  );
+
+  /** Compound real (after-inflation) market return, in percent. */
+  readonly estimatedAnnualReturn = computed(() =>
+    Number((this.realReturn()?.rate ?? DEFAULT_ANNUAL_RETURN).toFixed(1)),
+  );
+
+  /** The years the live return was computed over, or null on the baseline. */
+  readonly returnPeriod = computed(() => {
+    const real = this.realReturn();
+    return real ? { from: real.from, to: real.to } : null;
+  });
 
   readonly safeWithdrawalRate = signal(DEFAULT_SAFE_WITHDRAWAL_RATE);
 
-  /** Whether the market return resolved from the live API rather than a fallback. */
-  readonly isLive = computed(() => this.marketReturnResource.hasValue());
+  /** Whether the return came from the live API rather than the baseline. */
+  readonly isLive = computed(() => this.realReturn() !== null);
 
-  readonly isLoading = computed(() => this.marketReturnResource.isLoading());
+  readonly isLoading = computed(
+    () => this.marketReturnResource.isLoading() || this.inflationResource.isLoading(),
+  );
 }

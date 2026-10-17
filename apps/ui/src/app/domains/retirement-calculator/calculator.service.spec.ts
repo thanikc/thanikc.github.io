@@ -1,4 +1,4 @@
-import { signal, WritableSignal } from '@angular/core';
+import { LOCALE_ID, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AssumptionDataService } from './assumption-data.service';
 import { DEFAULT_ANNUAL_RETURN, DEFAULT_SAFE_WITHDRAWAL_RATE } from './calculator.constants';
@@ -31,8 +31,45 @@ describe('CalculatorService', () => {
     expect(service.currentNetWorth()).toBe(0);
     expect(service.yearsUntilRetirement()).toBe(30);
     expect(service.targetMonthlyIncome()).toBe(4000);
-    expect(service.estimatedAnnualReturn()).toBe(7); // Default 7%
+    expect(service.estimatedAnnualReturn()).toBe(DEFAULT_ANNUAL_RETURN);
     expect(service.safeWithdrawalRate()).toBe(4); // Default 4%
+    expect(service.currency).toBe('USD');
+  });
+
+  // --- Input validity: results are only meaningful inside these bounds ---
+
+  it('accepts the defaults as valid input', () => {
+    expect(service.inputsValid()).toBe(true);
+  });
+
+  it.each([
+    ['a zero withdrawal rate', (s: CalculatorService) => s.safeWithdrawalRate.set(0)],
+    ['a withdrawal rate above 10%', (s: CalculatorService) => s.safeWithdrawalRate.set(12)],
+    ['zero years', (s: CalculatorService) => s.yearsUntilRetirement.set(0)],
+    ['negative years', (s: CalculatorService) => s.yearsUntilRetirement.set(-5)],
+    ['more than 80 years', (s: CalculatorService) => s.yearsUntilRetirement.set(81)],
+    ['a return above 15%', (s: CalculatorService) => s.estimatedAnnualReturn.set(16)],
+    ['a return below -5%', (s: CalculatorService) => s.estimatedAnnualReturn.set(-6)],
+    ['a negative net worth', (s: CalculatorService) => s.currentNetWorth.set(-1)],
+    ['a negative income', (s: CalculatorService) => s.targetMonthlyIncome.set(-1)],
+  ])('rejects %s', (_, change) => {
+    change(service);
+    expect(service.inputsValid()).toBe(false);
+  });
+
+  // No silent substitution: a 0% rate is invalid, not quietly computed at 4%.
+  it('does not compute the goal from a default the visitor did not enter', () => {
+    service.safeWithdrawalRate.set(0);
+    expect(service.totalNestEggNeeded()).toBe(0);
+  });
+
+  // Above the long-run real average the result is a best case, and says so.
+  it('flags a return above the long-run real average as optimistic', () => {
+    service.estimatedAnnualReturn.set(7);
+    expect(service.isReturnOptimistic()).toBe(false);
+
+    service.estimatedAnnualReturn.set(7.5);
+    expect(service.isReturnOptimistic()).toBe(true);
   });
 
   it('should update safe withdrawal rate and adjust total nest egg goal', () => {
@@ -112,5 +149,36 @@ describe('CalculatorService', () => {
     expect(service.futureNetWorth()).toBeGreaterThan(service.totalNestEggNeeded());
     expect(service.remainingTargetNestEgg()).toBe(0);
     expect(service.requiredMonthlyContribution()).toBe(0);
+  });
+});
+
+describe('CalculatorService per locale', () => {
+  const create = (locale: string) => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: LOCALE_ID, useValue: locale },
+        {
+          provide: AssumptionDataService,
+          useValue: {
+            estimatedAnnualReturn: signal(DEFAULT_ANNUAL_RETURN),
+            safeWithdrawalRate: signal(DEFAULT_SAFE_WITHDRAWAL_RATE),
+          } satisfies Partial<AssumptionDataService>,
+        },
+      ],
+    });
+    return TestBed.inject(CalculatorService);
+  };
+
+  // Amounts are in the visitor's own currency, with a target income that is a
+  // plausible starting point in that currency rather than a converted dollar figure.
+  it.each([
+    ['en', 'USD', 4000],
+    ['de', 'EUR', 3000],
+    ['th', 'THB', 40000],
+  ])('uses %s → %s with a %d monthly target', (locale, currency, income) => {
+    const service = create(locale);
+
+    expect(service.currency).toBe(currency);
+    expect(service.targetMonthlyIncome()).toBe(income);
   });
 });

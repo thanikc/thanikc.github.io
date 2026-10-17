@@ -13,10 +13,10 @@
       </mat-card-title>
     </div>
 
-    <div class="flex min-w-0 shrink-0 justify-self-end">
+    <div class="flex min-w-0 shrink-0 justify-self-end" role="status">
       @if (isLoading()) {
         <div class="data-source-chip loading">
-          <mat-spinner diameter="12"></mat-spinner>
+          <mat-spinner diameter="12" aria-hidden="true"></mat-spinner>
           <span i18n="Shown while the World Bank rates load@@calculator.info.fetching"
             >Fetching live rates...</span
           >
@@ -53,8 +53,8 @@
 
     <p i18n="How the current net worth is grown@@calculator.info.step2">
       <strong>2. Current Net Worth Growth:</strong> Your existing net worth is assumed to compound
-      annually at an estimated rate of <strong>{{ estimatedAnnualReturn() }}%</strong> over the
-      remaining years until retirement:
+      annually at an estimated real rate of <strong>{{ estimatedAnnualReturn() }}%</strong> (after
+      inflation, so every amount stays in today's money) over the remaining years until retirement:
       <code class="formula block my-1 rounded p-2 font-mono text-xs">
         Future Value of Net Worth = Current Net Worth × (1 + Return Rate)^Years
       </code>
@@ -65,5 +65,20 @@
       egg and the future value of your current net worth is funded via monthly contributions
       compounding over time at <strong>{{ estimatedAnnualReturn() }}% per year</strong>.
     </p>
+
+    @if (returnPeriod(); as period) {
+      <p i18n="Where the live return comes from@@calculator.info.sourceLive">
+        <strong>Where the return comes from:</strong> the yearly change of the S&P Global equity
+        index for the US, {{ period.from }}–{{ period.to }}, compounded and net of US consumer price
+        inflation, both from the World Bank's open data. It leaves out dividends, so it errs low. US
+        data is the reference whatever currency you plan in.
+      </p>
+    } @else {
+      <p i18n="Where the baseline return comes from@@calculator.info.sourceBaseline">
+        <strong>Where the return comes from:</strong> live World Bank data is not available right
+        now, so the calculator uses a long-run real return for US stocks of {{ baselineReturn }}%,
+        after inflation.
+      </p>
+    }
   </mat-card-content>
 </mat-card>
