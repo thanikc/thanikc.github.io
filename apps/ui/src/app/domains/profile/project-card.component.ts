@@ -136,12 +136,17 @@ export class ProjectCardComponent {
       $localize`:Accessible name of the how-it-works diagram on a project card@@projects.flowLabel:How ${this.project().name}:projectName: works`,
   );
 
-  /** The primary action reads as a button; the source link stays quieter. */
+  /**
+   * The first action reads as a button on every card; a source link next to a
+   * primary action stays quieter, and is the button itself when it stands alone.
+   */
   protected readonly links = computed<CardLink[]>(() => {
     const { primary, source } = this.project();
     return [
       ...(primary ? [{ ...primary, appearance: 'outlined' as const }] : []),
-      ...(source ? [{ ...source, appearance: 'text' as const }] : []),
+      ...(source
+        ? [{ ...source, appearance: primary ? ('text' as const) : ('outlined' as const) }]
+        : []),
     ];
   });
 }

@@ -193,6 +193,14 @@ describe('ProjectCardComponent', () => {
     expect(primary.getAttribute('target')).toBeNull();
   });
 
+  // Every card's first action looks the same: a source-only project's source link
+  // is its primary action, so it gets the outlined button too.
+  it("gives a source-only project's source link the primary (outlined) style", () => {
+    render({ ...EXTERNAL, primary: undefined });
+
+    expect(link('Source')?.classList).toContain('mat-mdc-outlined-button');
+  });
+
   it('links to the source when there is one, and only then', () => {
     expect(link('Source')?.getAttribute('href')).toBe('https://github.com/example/crashdash');
 

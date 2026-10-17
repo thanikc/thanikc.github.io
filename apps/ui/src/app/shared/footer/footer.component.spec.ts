@@ -68,11 +68,12 @@ describe('FooterComponent', () => {
       expect(cta?.classList.contains('min-h-11')).toBe(true);
     });
 
-    it('invites a conversation, with a decorative right arrow', () => {
+    // On a site where "conversation" means AI Ling, the label says it is email.
+    it('says plainly that it is email, with a decorative envelope', () => {
       const cta = footer().querySelector<HTMLAnchorElement>('.footer-cta');
 
-      expect(cta?.textContent).toContain('Start a conversation');
-      expect(cta?.querySelector('mat-icon')?.textContent?.trim()).toBe('arrow_forward');
+      expect(cta?.textContent).toContain('Email Thanik');
+      expect(cta?.querySelector('mat-icon')?.textContent?.trim()).toBe('mail');
       expect(cta?.querySelector('mat-icon')?.getAttribute('aria-hidden')).toBe('true');
     });
   });
