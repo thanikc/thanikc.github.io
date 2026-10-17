@@ -14,9 +14,9 @@
 
   @if (ordered().length > 0) {
     <!-- Two columns from md: wide enough for the tagline and decision to read as
-         sentences. items-start, so opening one card's details doesn't stretch its
-         neighbour into an empty box. -->
-    <div class="projects-grid grid grid-cols-1 items-start gap-6 md:grid-cols-2">
+         sentences. Cards in a row stretch to one height; each pins its actions to
+         the bottom, so the row's buttons line up. -->
+    <div class="projects-grid grid grid-cols-1 gap-6 md:grid-cols-2">
       @for (project of ordered(); track project.name; let i = $index) {
         <app-project-card [project]="project" [index]="i" />
       }

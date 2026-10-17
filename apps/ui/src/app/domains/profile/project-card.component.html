@@ -36,8 +36,10 @@
     {{ project().decision }}
   </p>
 
-  <!-- Toggle and details share one flex item, so collapsed details cost no gap. -->
-  <div>
+  <!-- Toggle and details share one flex item, so collapsed details cost no gap.
+       mt-auto pins it and the actions to the bottom, so in a row of equal-height
+       cards every Details toggle and button lines up. -->
+  <div class="mt-auto">
     <button
       type="button"
       class="project-toggle page-heading min-h-11 self-start text-sm font-semibold"
@@ -94,7 +96,7 @@
     </div>
   </div>
 
-  <div class="mt-auto flex flex-wrap items-center gap-2">
+  <div class="flex flex-wrap items-center gap-2">
     @for (link of links(); track link.url) {
       @if (link.external) {
         <a

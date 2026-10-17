@@ -69,6 +69,16 @@ describe('ProfileProjectsComponent', () => {
     expect(namesIn('.projects-grid')).toEqual(['A', 'C', 'B', 'D']);
   });
 
+  // Cards side by side share one height (grid's default stretch; each card fills
+  // its cell and pins its actions to the bottom), so a short card doesn't sit
+  // ragged next to a taller one.
+  it('keeps the cards in a row the same height', () => {
+    const grid = el().querySelector('.projects-grid')!;
+
+    expect(grid.classList.contains('items-start')).toBe(false);
+    expect(grid.querySelector('article')?.classList.contains('h-full')).toBe(true);
+  });
+
   it('shows an empty state when there are no projects', () => {
     render([]);
 
