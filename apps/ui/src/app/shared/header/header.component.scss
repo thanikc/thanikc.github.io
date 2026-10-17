@@ -40,8 +40,10 @@ app-theme-toggle {
     color: inherit;
     transition: transform 0.2s ease;
 
-    &:hover {
-      transform: translateY(-1px);
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        transform: translateY(-1px);
+      }
     }
 
     // Height-driven: the mark's aspect-ratio carries the 4.26:1 proportion, so only

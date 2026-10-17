@@ -53,8 +53,17 @@ interface CardLink extends ProjectLink {
         transition: flex-grow 350ms ease-out 120ms;
       }
 
-      :host(:hover),
       :host(.is-expanded) {
+        flex-grow: 4;
+        transition: flex-grow 350ms ease-out;
+      }
+    }
+
+    /* Hover only where hover is real: a tap fakes a sticky :hover on touch, so a
+     * tapped-open tile could never be tapped shut again (is-expanded would toggle
+     * off while the stuck :hover kept it open). Touch uses the face button. */
+    @media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+      :host(:hover) {
         flex-grow: 4;
         transition: flex-grow 350ms ease-out;
       }
@@ -133,7 +142,6 @@ interface CardLink extends ProjectLink {
         visibility 300ms 120ms;
     }
 
-    .project-card:hover .project-details,
     .project-card.is-expanded .project-details {
       visibility: visible;
       max-height: 48rem;
@@ -142,6 +150,18 @@ interface CardLink extends ProjectLink {
         max-height 300ms ease-out,
         opacity 200ms ease-out,
         visibility 300ms;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .project-card:hover .project-details {
+        visibility: visible;
+        max-height: 48rem;
+        opacity: 1;
+        transition:
+          max-height 300ms ease-out,
+          opacity 200ms ease-out,
+          visibility 300ms;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -27,8 +27,10 @@ button.chat-fab {
   border: 1px solid var(--mat-sys-outline);
   transition: border-color 0.25s ease;
 
-  &:hover {
-    border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, var(--mat-sys-outline));
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, var(--mat-sys-outline));
+    }
   }
 }
 
@@ -107,9 +109,16 @@ button.chat-fab {
   transition: opacity 0.15s ease;
 }
 
-.chat-launcher:hover .chat-fab-tip,
+// Hover gated: on touch the tap that opens the chat would otherwise leave the tip
+// stuck on screen after the chat closes.
 .chat-fab:focus-visible ~ .chat-fab-tip {
   opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chat-launcher:hover .chat-fab-tip {
+    opacity: 1;
+  }
 }
 
 // Runs once per arrival, with no fill-mode so the hover rule above governs again

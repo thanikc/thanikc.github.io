@@ -3,8 +3,8 @@
   "short_name": "Thanik C.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1565c0",
+  "background_color": "#f4f4f2",
+  "theme_color": "#f4f4f2",
   "icons": [
     {
       "src": "img/icon-192.png",

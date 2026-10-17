@@ -37,6 +37,12 @@ body {
   margin: 0;
 }
 
+// Mobile browsers paint a grey/blue flash over every tapped control; the buttons
+// already give their own press feedback (Material ripple), so the flash only fights it.
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
 // The full-bleed bands use 100vw, which includes the classic vertical
 // scrollbar's width and so overflows the page sideways on desktop. clip (not
 // hidden) trims that without making a scroll container, so sticky still works.
