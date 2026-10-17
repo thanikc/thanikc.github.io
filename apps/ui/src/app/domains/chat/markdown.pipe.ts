@@ -10,6 +10,11 @@ import { marked } from 'marked';
 export class MarkdownPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     const source = value?.trim();
-    return source ? marked.parse(source, { async: false, gfm: true, breaks: true }) : '';
+    if (!source) return '';
+    // External links open in a new tab: following one must not navigate away from
+    // the page and end the conversation.
+    return marked
+      .parse(source, { async: false, gfm: true, breaks: true })
+      .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
   }
 }

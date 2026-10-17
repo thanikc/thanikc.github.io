@@ -90,5 +90,9 @@ export class ScrollToTopComponent {
   scrollToTop(): void {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, left: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
+    // The button unmounts near the top, which would drop keyboard focus to <body>;
+    // continue from the start of the main content instead (preventScroll: the
+    // smooth scroll above is already on its way there).
+    document.getElementById('main-content')?.focus({ preventScroll: true });
   }
 }

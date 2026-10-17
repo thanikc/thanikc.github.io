@@ -20,8 +20,19 @@ describe('MarkdownPipe', () => {
 
   it('renders links with their href', () => {
     expect(renderMarkdown('[site](https://example.com)')).toContain(
-      '<a href="https://example.com">site</a>',
+      'href="https://example.com">site</a>',
     );
+  });
+
+  // Following a link the assistant cites must not navigate away and end the chat.
+  it('opens external links in a new tab', () => {
+    expect(renderMarkdown('[site](https://example.com)')).toContain(
+      '<a target="_blank" rel="noopener noreferrer" href="https://example.com">site</a>',
+    );
+  });
+
+  it('keeps in-site and mailto links in the same tab', () => {
+    expect(renderMarkdown('[mail](mailto:a@b.c)')).toContain('<a href="mailto:a@b.c">');
   });
 
   it('keeps a single newline as a hard break inside a paragraph', () => {

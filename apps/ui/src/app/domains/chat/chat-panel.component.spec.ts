@@ -90,10 +90,21 @@ describe('ChatPanelComponent', () => {
       expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe('AI Ling');
     });
 
-    it('announces new transcript entries politely', () => {
+    // The visitor knows what they just typed; only the answer is news. A live
+    // transcript list re-announced their own message too.
+    it("announces the assistant's latest answer, not the visitor's own message", () => {
       setInputs({ turns: TURNS });
+      const live = el().querySelector('.chat-announcer[aria-live="polite"]');
+      const lastAnswer = [...TURNS].reverse().find(t => t.role === 'assistant')!;
 
-      expect(el().querySelector('ol')?.getAttribute('aria-live')).toBe('polite');
+      expect(el().querySelector('ol')?.hasAttribute('aria-live')).toBe(false);
+      expect(live?.textContent).toContain(lastAnswer.content);
+      expect(live?.textContent).not.toContain(TURNS.find(t => t.role === 'user')!.content);
+    });
+
+    // A <header> inside the dialog is announced as a second page banner.
+    it('adds no second banner landmark', () => {
+      expect(el().querySelector('header')).toBeNull();
     });
 
     it('colours the panel from theme tokens, not the Tailwind palette', () => {
@@ -147,7 +158,7 @@ describe('ChatPanelComponent', () => {
     });
 
     it('promises more than the page in its subtitle', () => {
-      expect(el().querySelector('header p')?.textContent).toContain(
+      expect(el().querySelector('.chat-header p')?.textContent).toContain(
         "including the parts that aren't on this page",
       );
     });
@@ -215,7 +226,7 @@ describe('ChatPanelComponent', () => {
     it('shows the assistant avatar once in the header, never per turn', () => {
       setInputs({ turns: TURNS });
 
-      const avatar = el().querySelector<HTMLImageElement>('header img.chat-avatar');
+      const avatar = el().querySelector<HTMLImageElement>('.chat-header img.chat-avatar');
       expect(avatar).not.toBeNull();
       expect(avatar!.getAttribute('src')).toContain('chat_avatar');
       expect(avatar!.getAttribute('alt')).toBe('');

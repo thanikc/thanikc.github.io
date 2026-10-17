@@ -42,7 +42,7 @@ describe('ProfileProjectsComponent', () => {
     const section = el().querySelector('section');
     const labelId = section?.getAttribute('aria-labelledby');
 
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+    expect(el().querySelector(`#${labelId} .section-title`)?.textContent?.trim()).toBe(
       'Complete products I build independently, from data model to deployment',
     );
   });

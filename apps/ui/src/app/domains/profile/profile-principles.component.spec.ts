@@ -48,7 +48,7 @@ describe('ProfilePrinciplesComponent', () => {
   it('is a section labelled by its headline', () => {
     const labelId = el().querySelector('section')?.getAttribute('aria-labelledby');
 
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+    expect(el().querySelector(`#${labelId} .section-title`)?.textContent?.trim()).toBe(
       'Four habits, each with the evidence behind it',
     );
   });

@@ -5,7 +5,9 @@
   [attr.aria-labelledby]="headingId"
   (keydown.escape)="close.emit()"
 >
-  <header class="chat-divider flex items-center justify-between gap-3 border-b py-3 pr-2 pl-4">
+  <div
+    class="chat-header chat-divider flex items-center justify-between gap-3 border-b py-3 pr-2 pl-4"
+  >
     <div class="flex min-w-0 items-center gap-3">
       <img
         class="chat-avatar size-10 shrink-0 rounded-full"
@@ -32,7 +34,7 @@
     >
       <mat-icon aria-hidden="true">close</mat-icon>
     </button>
-  </header>
+  </div>
 
   <div
     #transcript
@@ -59,7 +61,10 @@
       </div>
     }
 
-    <ol class="flex flex-col gap-4" aria-live="polite">
+    <!-- Only the answer is announced: the visitor knows what they just typed. -->
+    <p class="chat-announcer sr-only" aria-live="polite">{{ latestAnswer() }}</p>
+
+    <ol class="flex flex-col gap-4">
       @for (turn of turns(); track $index) {
         <li class="chat-turn flex" [attr.data-role]="turn.role">
           @if (turn.role === 'user') {

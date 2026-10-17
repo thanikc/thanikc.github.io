@@ -598,7 +598,9 @@ test.describe('keyboard', () => {
       await hook.focus();
       await page.keyboard.press('Enter');
       await expect(page.getByRole('dialog', { name: 'AI Ling' })).toBeVisible();
-      await expect(page.getByText('Stubbed answer for the design check.')).toBeVisible();
+      await expect(
+        page.locator('.chat-turn').getByText('Stubbed answer for the design check.'),
+      ).toBeVisible();
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog', { name: 'AI Ling' })).toBeHidden();
       const focusReturned = await hook.evaluate(el => el === document.activeElement);

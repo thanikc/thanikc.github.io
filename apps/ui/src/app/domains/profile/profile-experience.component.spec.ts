@@ -56,7 +56,7 @@ describe('ProfileExperienceComponent', () => {
     const labelId = section?.getAttribute('aria-labelledby');
 
     expect(labelId).toBeTruthy();
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+    expect(el().querySelector(`#${labelId} .section-title`)?.textContent?.trim()).toBe(
       'Scale and responsibility, in specifics',
     );
   });

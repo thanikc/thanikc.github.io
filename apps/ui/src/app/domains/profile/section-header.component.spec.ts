@@ -25,8 +25,21 @@ describe('SectionHeaderComponent', () => {
   it('renders an h2 with the given id, for the section to be labelled by', () => {
     const h2 = el().querySelector('h2');
 
-    expect(h2?.textContent?.trim()).toBe('The problems I spend my days on');
+    expect(h2?.querySelector('.section-title')?.textContent?.trim()).toBe(
+      'The problems I spend my days on',
+    );
     expect(h2?.id).toBe('work-heading');
+  });
+
+  // Heading navigation should list sections by name ("What I work on"), not just
+  // by their subtitles; the small label is part of the heading, not a <p> above it.
+  it('puts the section name inside the heading, before its subtitle', () => {
+    const h2 = el().querySelector('h2')!;
+
+    expect(h2.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      'What I work on: The problems I spend my days on',
+    );
+    expect(el().querySelector('p')).toBeNull();
   });
 
   // Header nav links jump here; the margin keeps the heading clear of the sticky header.
@@ -38,7 +51,7 @@ describe('SectionHeaderComponent', () => {
   // sits above the big display headline, in the page-muted pairing since this
   // component sits directly on the page background, not a raised card.
   it('renders the eyebrow as a small tracked label above the heading', () => {
-    const eyebrow = el().querySelector('p');
+    const eyebrow = el().querySelector('h2 .section-eyebrow');
 
     expect(eyebrow?.textContent?.trim()).toBe('What I work on');
     expect(eyebrow?.classList.contains('page-muted')).toBe(true);
@@ -49,14 +62,14 @@ describe('SectionHeaderComponent', () => {
   // The eyebrow is set in the mono face across every section (the reference's
   // own section opener, and the same face the interest panels count in).
   it('sets the eyebrow in the mono face', () => {
-    expect(el().querySelector('p')?.classList.contains('font-mono')).toBe(true);
+    expect(el().querySelector('.section-eyebrow')?.classList.contains('font-mono')).toBe(true);
   });
 
   it('renders the heading in the display face, at headline size', () => {
-    const h2 = el().querySelector('h2');
+    const title = el().querySelector('h2 .section-title');
 
-    expect(h2?.classList.contains('font-display')).toBe(true);
-    expect(h2?.classList.contains('text-3xl')).toBe(true);
+    expect(title?.classList.contains('font-display')).toBe(true);
+    expect(title?.classList.contains('text-3xl')).toBe(true);
   });
 
   // .section-heading opts the h2 out of the global decorative rule (h2::after,

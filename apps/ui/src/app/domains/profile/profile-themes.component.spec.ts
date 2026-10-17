@@ -70,7 +70,7 @@ describe('ProfileThemesComponent', () => {
     const labelId = section?.getAttribute('aria-labelledby');
 
     expect(labelId).toBeTruthy();
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+    expect(el().querySelector(`#${labelId} .section-title`)?.textContent?.trim()).toBe(
       'The kinds of problems I spend my days on',
     );
   });

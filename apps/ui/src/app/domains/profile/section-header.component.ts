@@ -7,15 +7,18 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   // margin does nothing on an inline box, and the content ran into the cards below.
   host: { class: 'block' },
   template: `
-    <div class="space-y-3">
-      <p class="page-muted font-mono text-xs tracking-widest uppercase">{{ eyebrow() }}</p>
-      <h2
-        [id]="headingId()"
-        class="section-heading page-heading font-display scroll-mt-24 text-3xl font-normal tracking-tight sm:text-4xl"
+    <!-- One heading: heading navigation lists the section by name, then subtitle.
+         The colon is for screen readers; visually the two sit on separate lines. -->
+    <h2 [id]="headingId()" class="section-heading flex scroll-mt-24 flex-col gap-3">
+      <span class="section-eyebrow page-muted font-mono text-xs tracking-widest uppercase">{{
+        eyebrow()
+      }}</span
+      ><span class="sr-only">: </span>
+      <span
+        class="section-title page-heading font-display text-3xl font-normal tracking-tight sm:text-4xl"
+        >{{ heading() }}</span
       >
-        {{ heading() }}
-      </h2>
-    </div>
+    </h2>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

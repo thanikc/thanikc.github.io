@@ -40,7 +40,7 @@ describe('ProfileInterestsComponent', () => {
   it('is a section labelled by its headline', () => {
     const labelId = el().querySelector('section')?.getAttribute('aria-labelledby');
 
-    expect(el().querySelector(`#${labelId}`)?.textContent?.trim()).toBe(
+    expect(el().querySelector(`#${labelId} .section-title`)?.textContent?.trim()).toBe(
       'How I stay physical, sharp, and curious away from the keyboard',
     );
   });

@@ -3,22 +3,20 @@
        mixes weight/tone — the claim reads full-strength,
        the scope detail recedes — which the shared component's plain-string heading can't
        express. Same copy as before, just which words carry the emphasis. -->
-  <div class="space-y-3">
-    <p
-      class="page-muted font-mono text-xs tracking-widest uppercase"
+  <h2 [id]="headingId" class="section-heading flex scroll-mt-24 flex-col gap-3">
+    <span
+      class="section-eyebrow page-muted font-mono text-xs tracking-widest uppercase"
       i18n="Heading of the projects section@@projects.heading"
-    >
-      Things I’ve built
-    </p>
-    <h2
-      [id]="headingId"
-      class="section-heading page-muted font-display scroll-mt-24 text-3xl font-normal tracking-tight sm:text-4xl"
+      >Things I’ve built</span
+    ><span class="sr-only">: </span>
+    <span
+      class="section-title page-muted font-display text-3xl font-normal tracking-tight sm:text-4xl"
       i18n="Subtitle of the projects section@@projects.subtitle"
     >
       <strong class="page-heading font-semibold">Complete products I build independently,</strong>
       from data model to deployment
-    </h2>
-  </div>
+    </span>
+  </h2>
 
   @if (ordered().length > 0) {
     <!-- Two columns from md: wide enough for the tagline and decision to read as

@@ -67,6 +67,11 @@ export class ChatPanelComponent {
 
   protected readonly suggestions = CHAT_SUGGESTIONS;
   protected readonly draft = signal('');
+  /** The newest assistant message, for the polite live region. */
+  protected readonly latestAnswer = computed(
+    () => [...this.turns()].reverse().find(turn => turn.role === 'assistant')?.content ?? '',
+  );
+
   protected readonly canSend = computed(() => this.draft().trim() !== '' && !this.pending());
   protected readonly headingId = `chat-heading-${nextId}`;
   protected readonly inputId = `chat-input-${nextId++}`;

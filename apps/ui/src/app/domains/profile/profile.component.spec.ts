@@ -142,7 +142,7 @@ describe('ProfileComponent', () => {
   it('renders a "Beyond the Code" section with one panel per interest', () => {
     const sections = [...el().querySelectorAll('section')];
     const interestsSection = sections.find(section =>
-      section.querySelector('p')?.textContent?.includes('Beyond the Code'),
+      section.querySelector('.section-eyebrow')?.textContent?.includes('Beyond the Code'),
     );
 
     expect(interestsSection).toBeDefined();

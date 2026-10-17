@@ -78,4 +78,20 @@ describe('ScrollToTopComponent', () => {
 
     expect(scrollTo).toHaveBeenCalledWith(expect.objectContaining({ top: 0, left: 0 }));
   });
+
+  // The button unmounts as the page reaches the top, which would drop keyboard
+  // focus to <body>; focus moves to the start of the main content instead.
+  it('moves focus to the main content after scrolling up', async () => {
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+    const main = document.createElement('main');
+    main.id = 'main-content';
+    main.tabIndex = -1;
+    document.body.append(main);
+    await scroll(500);
+
+    button()!.click();
+
+    expect(document.activeElement).toBe(main);
+    main.remove();
+  });
 });
