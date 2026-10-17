@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import * as THREE from 'three';
-import { ScrollRange, scrollProgress } from './scroll-progress';
+import { scrollProgress } from './scroll-progress';
 
 /**
  * Builds the renderer, behind DI rather than a bare `new THREE.WebGLRenderer`
@@ -85,8 +85,6 @@ export function edgeFade(t: number, margin = 0.15): number {
 })
 export class ScrollSceneComponent {
   readonly scene = input.required<ScrollSceneDef>();
-  /** Which scroll span drives the scene; see `ScrollRange`. */
-  readonly range = input<ScrollRange>('pinned');
   readonly progress = output<number>();
 
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
@@ -127,7 +125,7 @@ export class ScrollSceneComponent {
 
     // Progress is reported on change, not per frame: it drives the section's
     // position dots, and under reduced motion the picture never moves at all.
-    const progress = scrollProgress(host, this.range(), t => this.progress.emit(t));
+    const progress = scrollProgress(host, t => this.progress.emit(t));
 
     const renderFrame = (t = progress.value()): void => {
       this.scene().onProgress(t, object);

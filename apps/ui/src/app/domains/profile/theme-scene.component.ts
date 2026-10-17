@@ -28,7 +28,6 @@ const THEME_SCENES: readonly ScrollSceneDef[] = [
   template: `
     <app-scroll-scene
       [scene]="scene()"
-      range="through"
       (progress)="progress.emit($event)"
       class="block h-full w-full"
     />
