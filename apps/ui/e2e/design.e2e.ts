@@ -828,10 +828,47 @@ test.describe('floating controls', () => {
     await page.context().close();
   });
 
+  // A short horizon leaves the no-saving path near the floor; its label landed on
+  // the legend below the chart.
+  test('the chart end labels stay clear of the axis and legend', async ({ browser }) => {
+    for (const width of [360, 1440]) {
+      const page = await openPage(browser, '/en/calculator', { width });
+      await page.fill('input[name="currentNetWorth"]', '200000');
+      await page.fill('input[name="yearsUntilRetirement"]', '5');
+      const label = (await page.locator('.calc-without-label').boundingBox())!;
+      const axis = (await page.locator('.calc-chart-axis').boundingBox())!;
+      expect(label.y + label.height, `label runs into the axis at ${width}px`).toBeLessThanOrEqual(
+        axis.y,
+      );
+      await page.context().close();
+    }
+  });
+
+  // Reading down a phone, the launcher steps out of the corner it would cover.
+  test('the chat launcher tucks away on a phone while scrolling down', async ({ browser }) => {
+    const page = await openPage(browser, '/en/calculator', { width: 360 });
+    const launcher = page.locator('.chat-launcher');
+    await expect(launcher).toBeVisible();
+
+    await page.mouse.wheel(0, 600);
+    await expect(launcher).toHaveClass(/is-tucked/);
+    await expect(launcher).toHaveCSS('opacity', '0');
+
+    await page.mouse.wheel(0, -200);
+    await expect(launcher).not.toHaveClass(/is-tucked/);
+    await page.context().close();
+  });
+
   test('scroll-to-top sits clear of the chat launcher and leaves the footer alone', async ({
     browser,
   }) => {
-    for (const width of [360, 1440]) {
+    // Phones have no scroll-to-top: stacked over the launcher it covered card actions.
+    const phone = await openPage(browser, '/en/', { width: 360 });
+    await phone.evaluate(() => window.scrollTo(0, 1500));
+    await expect(phone.locator('.scroll-to-top-fab')).toBeHidden();
+    await phone.context().close();
+
+    for (const width of [1440]) {
       const page = await openPage(browser, '/en/', { width });
       await page.evaluate(() => window.scrollTo(0, 1500));
       const toTop = page.locator('.scroll-to-top-fab');

@@ -24,11 +24,13 @@
         {{ stat.headline }}
       </h3>
       <p class="max-w-prose text-lg leading-relaxed">{{ stat.detail }}</p>
-      <app-ask-ling-link
-        class="-ml-3 self-start"
-        [question]="stat.question"
-        [label]="stat.hookLabel"
-      />
+      @if (stat.question && stat.hookLabel) {
+        <app-ask-ling-link
+          class="-ml-3 self-start"
+          [question]="stat.question"
+          [label]="stat.hookLabel"
+        />
+      }
     </article>
   } @empty {
     <p class="page-muted mx-auto w-full max-w-6xl px-4 text-sm" i18n="@@common.emptySection">

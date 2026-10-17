@@ -240,9 +240,19 @@ describe('ProfileComponent', () => {
   describe('experience', () => {
     it('gives four concrete, checkable seniority facts', () => {
       expect(EXPERIENCE_STATS).toHaveLength(4);
-      for (const stat of EXPERIENCE_STATS) {
-        expect(stat.question.length).toBeGreaterThan(0);
-      }
+    });
+
+    // The habits already ask about the team's AI rules; the same hook twice on one
+    // page is a door the visitor has already seen.
+    it('asks AI Ling no question twice across the page', () => {
+      const questions = [
+        ...PRINCIPLES.flatMap(p => (p.evidence.kind === 'ask' ? [p.evidence.question] : [])),
+        ...EXPERIENCE_STATS.flatMap(s => (s.question ? [s.question] : [])),
+        ...WORK_THEMES.map(t => t.question),
+        ...PROJECTS.map(p => p.question),
+      ];
+
+      expect(new Set(questions).size).toBe(questions.length);
     });
 
     it('names no companies', () => {

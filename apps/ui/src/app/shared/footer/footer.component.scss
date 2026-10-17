@@ -13,6 +13,15 @@
   // this section sits directly on inverse-surface instead.
   --mat-button-filled-container-color: var(--mat-sys-tertiary-container);
   --mat-button-filled-label-text-color: var(--mat-sys-on-tertiary-container);
+  // AI Ling sits beside the email in chalk, so gold stays on the one email action.
+  --mat-button-outlined-label-text-color: var(--mat-sys-inverse-on-surface);
+  --mat-button-outlined-outline-color: var(--mat-sys-inverse-on-surface);
+}
+
+.footer-source {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 1px;
 }
 
 .footer-about {

@@ -1,7 +1,7 @@
 <section class="calc">
   <header class="calc-header mb-6 space-y-2">
     <h1
-      class="page-heading text-2xl font-bold"
+      class="page-heading font-display text-3xl font-normal tracking-tight sm:text-4xl"
       i18n="Heading of the calculator page@@calculator.pageTitle"
     >
       Retirement calculator
@@ -51,37 +51,46 @@
       [class.is-stale]="!inputsValid()"
       aria-hidden="true"
     >
-      <svg class="calc-chart block w-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
-        @if (chart(); as c) {
-          <path class="calc-gap" [attr.d]="c.gap" [style.d]="c.gapCss" />
-          <line class="calc-goal" x1="0" x2="1000" [attr.y1]="c.goalY" [attr.y2]="c.goalY" />
-          @if (c.hasNetWorth) {
-            <path
-              class="calc-without-saving"
-              [attr.d]="c.withoutSaving"
-              [style.d]="c.withoutSavingCss"
-            />
+      <!-- The end labels are placed in % of this box: the plot alone, so a low end
+           can't land on the axis or legend below it. -->
+      <div class="calc-plot relative">
+        <svg class="calc-chart block w-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
+          @if (chart(); as c) {
+            <path class="calc-gap" [attr.d]="c.gap" [style.d]="c.gapCss" />
+            <line class="calc-goal" x1="0" x2="1000" [attr.y1]="c.goalY" [attr.y2]="c.goalY" />
+            @if (c.hasNetWorth) {
+              <path
+                class="calc-without-saving"
+                [attr.d]="c.withoutSaving"
+                [style.d]="c.withoutSavingCss"
+              />
+            }
+            <path class="calc-with-saving" [attr.d]="c.withSaving" [style.d]="c.withSavingCss" />
           }
-          <path class="calc-with-saving" [attr.d]="c.withSaving" [style.d]="c.withSavingCss" />
-        }
-      </svg>
-      @if (chart(); as c) {
-        <!-- End labels: where each path arrives, in its own colour. -->
-        <span class="calc-end-label calc-goal-label" [style.top.%]="c.goalPct">
-          <ng-container i18n="Chart label on the goal line@@calculator.chart.goal"
-            >Goal</ng-container
-          >
-          {{ c.goal | currency: currency : 'symbol' : '1.0-0' }}
-        </span>
-        @if (c.hasNetWorth) {
-          <span class="calc-end-label calc-without-label" [style.top.%]="c.withoutEndPct">
-            <ng-container
-              i18n="Chart label at the end of the no-saving path@@calculator.chart.onItsOwn"
-              >{{ c.withoutEnd | currency: currency : 'symbol' : '1.0-0' }} on its own</ng-container
+        </svg>
+        @if (chart(); as c) {
+          <!-- End labels: where each path arrives, in its own colour. -->
+          <span class="calc-end-label calc-goal-label" [style.top.%]="c.goalPct">
+            <ng-container i18n="Chart label on the goal line@@calculator.chart.goal"
+              >Goal</ng-container
             >
+            {{ c.goal | currency: currency : 'symbol' : '1.0-0' }}
           </span>
+          @if (c.hasNetWorth) {
+            <span
+              class="calc-end-label calc-without-label"
+              [class.is-above]="c.withoutLabelAbove"
+              [style.top.%]="c.withoutEndPct"
+            >
+              <ng-container
+                i18n="Chart label at the end of the no-saving path@@calculator.chart.onItsOwn"
+                >{{ c.withoutEnd | currency: currency : 'symbol' : '1.0-0' }} on its
+                own</ng-container
+              >
+            </span>
+          }
         }
-      }
+      </div>
       <div class="calc-chart-axis flex justify-between font-mono text-xs">
         <span i18n="Chart axis label for the start@@calculator.chart.today">Today</span>
         <span>{{ chart()?.endYear }}</span>
@@ -133,7 +142,9 @@
           i18n-aria-label="Accessible name of the net-worth input@@calculator.netWorth.ariaLabel"
           aria-label="Current net worth"
         />
-        <span matSuffix class="calc-key calc-key-without" aria-hidden="true"></span>
+        @if (chart()?.hasNetWorth) {
+          <span matSuffix class="calc-key calc-key-without" aria-hidden="true"></span>
+        }
         <mat-error i18n="Error under an amount input that went negative@@calculator.amount.error"
           >Enter 0 or more.</mat-error
         >

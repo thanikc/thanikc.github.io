@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { paletteClassesIn } from '../testing/palette-classes';
 import { FooterComponent } from './footer.component';
+import { ChatService } from '../../domains/chat/chat.service';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -16,7 +17,8 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [FooterComponent],
-      providers: [provideRouter([])],
+      // The footer's Ask AI Ling hook only needs something to open.
+      providers: [provideRouter([]), { provide: ChatService, useValue: { open: vi.fn() } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FooterComponent);
@@ -54,11 +56,23 @@ describe('FooterComponent', () => {
   // Closing statement + CTA button, reusing existing copy —
   // the note already said this; nothing new is invented.
   describe('closing statement and CTA', () => {
-    it('states in one line how the site is built', () => {
+    // The last thing before the CTA points to where the detail lives, not to why the
+    // site exists; the public source it mentions is one click away.
+    it('points to AI Ling for the rest, and links the public source', () => {
       const note = footer().querySelector('.footer-note');
+      const source = note?.querySelector<HTMLAnchorElement>('a.footer-source');
 
-      expect(note?.textContent).toContain('real but low-stakes');
+      expect(note?.textContent).toContain('AI Ling');
       expect(note?.textContent).toContain('test-first');
+      expect(note?.textContent).not.toContain('low-stakes');
+      expect(source?.href).toBe('https://github.com/thanikc/thanikc.github.io');
+    });
+
+    it('offers AI Ling beside the email CTA, outlined so gold stays on email', () => {
+      const hook = footer().querySelector('.footer-statement app-ask-ling-link');
+
+      expect(hook).not.toBeNull();
+      expect(hook?.querySelector('.mat-mdc-outlined-button')).not.toBeNull();
     });
 
     it('offers a primary CTA that emails Thanik', () => {

@@ -307,6 +307,45 @@ describe('RetirementCalculatorComponent', () => {
       expect(el().querySelector('.calc-without-label')?.textContent).toContain('on its own');
     });
 
+    // The net-worth input's key names the no-saving line; with no line drawn it
+    // would point at nothing.
+    it('keys the net-worth input only while its line is drawn', () => {
+      expect(el().querySelector('.calc-key-without')).toBeNull();
+
+      currentNetWorthMockSignal.set(50_000);
+      fixture.detectChanges();
+
+      expect(el().querySelector('.calc-key-without')).not.toBeNull();
+    });
+
+    // End labels are placed in % of the plot box; measured against the whole frame
+    // (axis and legend included) a low end landed on the legend.
+    it('places the end labels against the plot, not the axis and legend', () => {
+      currentNetWorthMockSignal.set(50_000);
+      fixture.detectChanges();
+
+      const plot = el().querySelector('.calc-plot')!;
+      expect(plot.querySelector('svg.calc-chart')).not.toBeNull();
+      expect(plot.querySelector('.calc-goal-label')).not.toBeNull();
+      expect(plot.querySelector('.calc-without-label')).not.toBeNull();
+      expect(plot.querySelector('.calc-chart-axis')).toBeNull();
+    });
+
+    // Under its line by default, clear of the goal label; near the floor there is
+    // no room under it, so it sits above.
+    it('lifts the no-saving label above its line when the line ends near the floor', () => {
+      currentNetWorthMockSignal.set(50_000);
+      fixture.detectChanges();
+      expect(el().querySelector('.calc-without-label')?.classList).toContain('is-above');
+
+      (mockCalculatorService.trajectory as WritableSignal<unknown>).set([
+        { year: 0, withSaving: 50_000, withoutSaving: 50_000 },
+        { year: 40, withSaving: 1_200_000, withoutSaving: 700_000 },
+      ]);
+      fixture.detectChanges();
+      expect(el().querySelector('.calc-without-label')?.classList).not.toContain('is-above');
+    });
+
     it('labels where the paths end: the goal', () => {
       expect(el().querySelector('.calc-goal-label')?.textContent).toContain('$1,200,000');
     });

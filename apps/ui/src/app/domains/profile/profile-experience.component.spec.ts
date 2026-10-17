@@ -100,6 +100,13 @@ describe('ProfileExperienceComponent', () => {
     expect(hooks.map(hook => hook.label())).toEqual(STATS.map(stat => stat.hookLabel));
   });
 
+  it('leaves out the hook for a stat that has no question of its own', () => {
+    render([...STATS, { headline: 'Co-wrote the rules', detail: 'With the tech lead.' }]);
+
+    expect(cards()).toHaveLength(3);
+    expect(fixture.debugElement.queryAll(By.directive(AskLingLinkComponent))).toHaveLength(2);
+  });
+
   it('shows an empty state when there are no stats', () => {
     render([]);
 

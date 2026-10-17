@@ -5,10 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { BrandMarkComponent } from '../brand-mark/brand-mark.component';
 import { EMAIL_LINK, SOCIAL_LINKS } from '../contact/contact-links';
 import { NAV_LINKS } from '../nav-links';
+import { AskLingLinkComponent } from '../../domains/chat/ask-ling-link.component';
 
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink, BrandMarkComponent, MatButtonModule, MatIconModule],
+  imports: [RouterLink, BrandMarkComponent, MatButtonModule, MatIconModule, AskLingLinkComponent],
   templateUrl: './footer.component.html',
   styleUrl: './footer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,4 +19,5 @@ export class FooterComponent {
   readonly navLinks = NAV_LINKS.filter(link => link.fragment !== 'contact');
   readonly socialLinks = SOCIAL_LINKS;
   readonly email = EMAIL_LINK;
+  readonly repoUrl = 'https://github.com/thanikc/thanikc.github.io';
 }

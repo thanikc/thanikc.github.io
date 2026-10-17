@@ -53,14 +53,14 @@ describe('ProfileProjectsComponent', () => {
     expect(el().querySelector('app-section-header #projects-heading')).not.toBeNull();
   });
 
-  // Editorial two-tone headline: the claim reads at
-  // full strength, the scope detail recedes to the page's muted tone — same copy, no new
-  // i18n string, just which words carry the emphasis.
-  it('emphasises the claim clause of the headline over the scope detail', () => {
+  // One headline style for every section: no section opens two-tone.
+  it('opens on a single-tone headline like every other section', () => {
     const heading = el().querySelector('#projects-heading')!;
 
-    expect(heading.querySelector('strong')?.textContent?.trim()).toBe(
-      'Complete products I build independently,',
+    expect(heading.querySelector('strong')).toBeNull();
+    expect(heading.querySelector('.section-title.page-muted')).toBeNull();
+    expect(heading.textContent).toContain(
+      'Complete products I build independently, from data model to deployment',
     );
   });
 

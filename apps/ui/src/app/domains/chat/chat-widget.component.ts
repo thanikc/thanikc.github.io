@@ -18,6 +18,9 @@ import { ChatPanelComponent } from './chat-panel.component';
 import { CookieConsentService } from '../../shared/cookie-consent/cookie-consent.service';
 import { ChatService } from './chat.service';
 
+/** Near the top of the page the launcher always shows: it's how AI Ling is found. */
+const TUCK_AFTER_PX = 200;
+
 /**
  * Floating launcher for AI Ling. The launcher and the panel are mutually
  * exclusive — opening swaps the button out for the panel, closing swaps it back and
@@ -39,6 +42,7 @@ import { ChatService } from './chat.service';
   templateUrl: './chat-widget.component.html',
   styleUrl: './chat-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(window:scroll)': 'onScroll()' },
 })
 export class ChatWidgetComponent {
   protected readonly chat = inject(ChatService);
@@ -107,6 +111,21 @@ export class ChatWidgetComponent {
 
   /** Page scroll offset at the moment the lock engaged; restored when it lifts. */
   private lockedScrollY = 0;
+
+  /**
+   * Reading down the page, the launcher steps aside: it would otherwise cover
+   * whatever sits in the bottom-right corner (hero copy, a calculator field). Any
+   * scroll back up, or a return to the top, brings it back. The stylesheet applies
+   * this on phones only; from 640px the corner is clear of the content column.
+   */
+  protected readonly tucked = signal(false);
+  private lastScrollY = 0;
+
+  protected onScroll(): void {
+    const y = this.document.defaultView?.scrollY ?? 0;
+    this.tucked.set(y > this.lastScrollY && y > TUCK_AFTER_PX);
+    this.lastScrollY = y;
+  }
 
   protected launch(): void {
     this.chat.open();

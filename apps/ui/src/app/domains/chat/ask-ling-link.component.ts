@@ -32,6 +32,16 @@ export type AskLingAppearance = 'text' | 'filled' | 'outlined';
       </span>
     </button>
   `,
+  // A quiet mark at label size, not a 24px glyph: the page carries many of these
+  // hooks, and only the gold email action should read as loud. (The icon sits in a
+  // wrapper span, so Material's own 18px button-icon sizing doesn't reach it.)
+  styles: `
+    .ask-ling-icon {
+      width: 1.125rem;
+      height: 1.125rem;
+      font-size: 1.125rem;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AskLingLinkComponent {

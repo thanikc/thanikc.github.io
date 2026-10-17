@@ -1,16 +1,11 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
-  <!-- Two-tone headline: the claim reads full-strength, the scope detail recedes. -->
   <app-section-header
     i18n-eyebrow="Heading of the projects section@@projects.heading"
     eyebrow="Things I’ve built"
     [headingId]="headingId"
-    muted
-  >
-    <ng-container i18n="Subtitle of the projects section@@projects.subtitle"
-      ><strong class="page-heading font-semibold">Complete products I build independently,</strong>
-      from data model to deployment</ng-container
-    >
-  </app-section-header>
+    i18n-heading="Subtitle of the projects section@@projects.subtitle"
+    heading="Complete products I build independently, from data model to deployment"
+  />
 
   @if (ordered().length > 0) {
     <!-- Two columns from md: wide enough for the tagline and decision to read as

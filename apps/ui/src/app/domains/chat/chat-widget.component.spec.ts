@@ -119,6 +119,28 @@ describe('ChatWidgetComponent', () => {
       expect(launcher().style.bottom).toBe('');
     });
 
+    // On phones the launcher covers whatever sits in the bottom-right corner; it
+    // tucks away while the visitor reads down and comes back as they scroll up.
+    it('tucks the launcher away while scrolling down, and back on scrolling up', () => {
+      const launcher = () => el().querySelector('.chat-launcher')!;
+      const scrollTo = (y: number) => {
+        Object.defineProperty(window, 'scrollY', { value: y, configurable: true });
+        window.dispatchEvent(new Event('scroll'));
+        fixture.detectChanges();
+      };
+
+      scrollTo(120);
+      expect(launcher().classList).not.toContain('is-tucked');
+
+      scrollTo(900);
+      expect(launcher().classList).toContain('is-tucked');
+
+      scrollTo(860);
+      expect(launcher().classList).not.toContain('is-tucked');
+
+      scrollTo(0);
+    });
+
     it('overlays the FAB with a decorative AI star badge', () => {
       const badge = el().querySelector('.chat-launcher .chat-fab-badge');
 

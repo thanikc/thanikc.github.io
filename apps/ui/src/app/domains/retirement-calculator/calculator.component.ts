@@ -94,13 +94,17 @@ export class RetirementCalculatorComponent {
     const css = (d: string) => `path("${d}")`;
 
     const withoutEnd = points[points.length - 1].withoutSaving;
+    const withoutEndPct = (1 - withoutEnd / top) * 100;
 
     return {
       goal,
       endYear: new Date().getFullYear() + lastYear,
       hasNetWorth: this.currentNetWorth() > 0,
       withoutEnd,
-      withoutEndPct: (1 - withoutEnd / top) * 100,
+      withoutEndPct,
+      // Its label hangs under the line, clear of the goal label above; in the bottom
+      // fifth there is no room under it, so it sits above instead.
+      withoutLabelAbove: withoutEndPct > 80,
       withSaving,
       withoutSaving,
       gap,

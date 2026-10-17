@@ -1,6 +1,7 @@
 import { ComponentFixture, DeferBlockBehavior, TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { provideRouter } from '@angular/router';
+import { ChatService } from './domains/chat/chat.service';
 
 // Tailwind palette utilities are frozen to one hex value; themed colour must
 // come from the `--mat-sys-*` tokens instead so it stays in step with the
@@ -20,7 +21,8 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([])],
+      // The footer's Ask AI Ling hook only needs something to open.
+      providers: [provideRouter([]), { provide: ChatService, useValue: { open: vi.fn() } }],
       // The chat widget is deferred; keep it unloaded so this spec needs no chat providers.
       deferBlockBehavior: DeferBlockBehavior.Manual,
     }).compileComponents();

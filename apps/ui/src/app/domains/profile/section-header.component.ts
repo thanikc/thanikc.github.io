@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 /** Eyebrow label and display headline that open each profile section. */
 @Component({
@@ -15,16 +15,9 @@ import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@an
       }}</span
       ><span class="sr-only">: </span>
       <span
-        class="section-title font-display text-3xl font-normal tracking-tight sm:text-4xl"
-        [class.page-heading]="!muted()"
-        [class.page-muted]="muted()"
+        class="section-title page-heading font-display text-3xl font-normal tracking-tight sm:text-4xl"
+        >{{ heading() }}</span
       >
-        @if (heading(); as text) {
-          {{ text }}
-        } @else {
-          <ng-content />
-        }
-      </span>
     </h2>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,8 +27,6 @@ export class SectionHeaderComponent {
   readonly eyebrow = input.required<string>();
   /** Lets the enclosing `<section>` point `aria-labelledby` at the heading. */
   readonly headingId = input.required<string>();
-  /** Plain-text headline; leave it out to project rich content (e.g. a <strong> clause). */
-  readonly heading = input<string>();
-  /** Sets the projected headline in the muted tone, for a <strong> clause to stand out of. */
-  readonly muted = input(false, { transform: booleanAttribute });
+  /** The display headline, in one tone like every other section's. */
+  readonly heading = input.required<string>();
 }

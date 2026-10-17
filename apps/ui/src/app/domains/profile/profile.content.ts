@@ -223,12 +223,15 @@ export const PRINCIPLES: readonly Principle[] = [
   },
 ];
 
-/** A concrete seniority/scale fact, backed by an Ask AI Ling hook instead of an adjective. */
+/**
+ * A concrete seniority/scale fact, backed by an Ask AI Ling hook instead of an
+ * adjective. The hook is left out where another section already asks the question.
+ */
 export interface ExperienceStat {
   headline: string;
   detail: string;
-  hookLabel: string;
-  question: string;
+  hookLabel?: string;
+  question?: string;
 }
 
 export const EXPERIENCE_STATS: readonly ExperienceStat[] = [
@@ -253,8 +256,7 @@ export const EXPERIENCE_STATS: readonly ExperienceStat[] = [
   {
     headline: $localize`:Experience headline@@experience.aiRules.headline:Co-wrote the team's AI rules`,
     detail: $localize`:Experience detail@@experience.aiRules.detail:With the tech lead, introduced a binding set of AI rules — architecture, coding standards, tests — as the team’s minimum bar.`,
-    hookLabel: $localize`:Ask AI Ling hook label@@common.askTeamRulesLabel:Ask about the team rules`,
-    question: $localize`:Question sent to AI Ling@@common.askTeamRulesQuestion:What are the AI rules Thanik wrote for his team?`,
+    // No hook: "Give the AI rules" in How I work already asks about these rules.
   },
 ];
 

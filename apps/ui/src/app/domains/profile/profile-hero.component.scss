@@ -28,6 +28,13 @@
   color: var(--app-on-inverse-muted);
 }
 
+// The first thing a German visitor reads: ragged right beats five hyphenated
+// lines in one paragraph. Its longest word still fits a 320px line whole.
+.hero-positioning,
+.hero-availability {
+  hyphens: manual;
+}
+
 .hero-scene {
   z-index: 0;
 }

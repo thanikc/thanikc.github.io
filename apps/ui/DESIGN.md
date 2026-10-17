@@ -115,7 +115,7 @@ components:
     padding: "4px 12px"
   chat-launcher:
     rounded: "{rounded.full}"
-    size: "64px"
+    size: "56px"
 ---
 
 # Design System: thanikc
@@ -146,6 +146,7 @@ A muted pine-and-stone palette with a single warm gold accent, generated from M3
 - **Pine Ledger Green** (primary): button and link labels on light fills, the accent cell of each project mark, the chat launcher's AI badge, focused field outlines.
 - **Deep Pine** (on-primary-container): the retinted label colour for every outlined and text button and for focused form-field labels on light fills; chosen because primary measured 4.47:1 on the stone card, just under 4.5:1.
 - **Pine Mist** (primary-container): icon tiles at the top of cards.
+- **Mid Pine** (primary-fixed-dim / on-primary-fixed): the accent fill of the interest tiles (Swimming, Learning Mandarin), alternating with charcoal and stone; green rather than gold, since gold means act.
 
 ### Secondary
 - **Sage Wash** (secondary-container / on-secondary-container): tech-stack chips on project cards.
@@ -179,22 +180,23 @@ A muted pine-and-stone palette with a single warm gold accent, generated from M3
 
 ### Hierarchy
 - **Display** (400, 3rem rising to 4.5rem from 640px, tight tracking): the hero name only.
-- **Headline** (400, 1.875rem rising to 2.25rem, tight tracking): section titles.
+- **Headline** (400, 1.875rem rising to 2.25rem, tight tracking): section titles, in one tone, and the H1 of utility pages (calculator, privacy).
 - **Answer** (400, 1.5rem rising to 2.25rem, snug leading, tabular figures): the calculator's one-sentence answer; figures inside it go 600 and gold.
-- **Title** (700, 1.125rem): project names, page titles (1.5rem bold on utility pages such as the calculator).
-- **Body** (400, 0.875rem, relaxed 1.625 leading): card copy and section prose; hero lead runs 1.125rem medium. Prose caps at roughly 60-65ch (max-w-prose, 60ch, 42rem method panel).
+- **Title** (700, 1.125rem): project names and card titles.
+- **Body** (400, 0.875rem, relaxed 1.625 leading): card copy and section prose; hero lead runs 1.125rem medium. Prose caps at about 70 real characters: 28rem for 14px text (the privacy body, the Ask AI Ling pitch), max-w-prose for larger text, 42rem for the method panel. Not ch: in Manrope 60ch runs ~86 characters.
 - **Label Mono** (400, 0.75rem, 0.1em tracking): toolbox group labels, interest indexes, the privacy revision date, chart axis ticks.
+- **Icon glyphs** are sized as icons, not text: 18px on buttons, 2.5rem for the interest tile pictograms.
 
 ### Named Rules
 **The Balanced Heading Rule.** Every h1-h3 uses balanced wrapping; no one-word last lines.
 
-**The German Hyphen Rule.** Only German hyphenates automatically, and only words of 10+ letters with at least 4 letters either side. English never hyphenates; a hard break is the last resort for unbreakable strings (URLs, long Thai runs).
+**The German Hyphen Rule.** Only German hyphenates automatically, and only words of 10+ letters with at least 4 letters either side. The hero lead and availability line never hyphenate (ragged right reads better there). English never hyphenates; a hard break is the last resort for unbreakable strings (URLs, long Thai runs). Thai loanwords the line breaker splits (ฟรีแลนซ์) are held together with U+2060 word joiners in the translation.
 
 **The Tabular Figures Rule.** Any number that changes while the user watches (the answer, end labels, typed inputs) uses tabular figures.
 
 ## Layout
 
-One centred content column (72rem max, 16px gutter) on the light page. Charcoal bands break out full-bleed with viewport maths (100vw with calc(50% - 50vw) margins) and re-centre their own content to the same column; the html element clips horizontal overflow so sticky positioning survives. Sections stack with generous vertical padding (56-80px; the hero 80-112px and at least 80svh). Spacing rhythm is 4px-based, mostly 8 / 12 / 16 / 24px gaps; cards pad 24px. Breakpoints follow Tailwind: 640px (sm) is the main step where type scales up and the launcher grows, 768px (md) moves the calculator deck to three columns, 1024px (lg) lets the English answer sentence fit one line. The header is sticky in flow, transparent over the page until scrolled, then a 96% opaque surface-container fill with a hairline bottom (no backdrop blur). Floating controls stack in the bottom-right: chat launcher at 1rem inset, scroll-to-top centred above it, both anchored sticky above the footer.
+One centred content column (72rem max, 16px gutter) on the light page. Charcoal bands break out full-bleed with viewport maths (100vw with calc(50% - 50vw) margins) and re-centre their own content to the same column; the html element clips horizontal overflow so sticky positioning survives. Sections stack with generous vertical padding (56-80px; the hero 80-112px and at least 80svh). Spacing rhythm is 4px-based, mostly 8 / 12 / 16 / 24px gaps; cards pad 24px. Breakpoints follow Tailwind: 640px (sm) is the main step where type scales up and the launcher grows, 768px (md) moves the calculator deck to three columns, 1024px (lg) lets the English answer sentence fit one line. The header is sticky in flow, transparent over the page until scrolled, then a 96% opaque surface-container fill with a hairline bottom (no backdrop blur). Floating controls stack in the bottom-right: chat launcher at 1rem inset, scroll-to-top centred above it (from 640px only), both anchored sticky above the footer. On phones the launcher tucks down out of view while the visitor scrolls down past 200px and returns on any scroll up.
 
 Reserve space for content that changes: the calculator answer holds its longest wrap per locale (min-height in lh units) so font swap or new figures never move the chart.
 
@@ -251,13 +253,13 @@ The signature break: full-bleed Charcoal with Chalk text and Muted Chalk seconda
 Pixel-mosaic mark and status tag, name, tagline, then a "Decision:" line on the face; why / flow / stack sit behind a Details disclosure that opens with a 0fr-to-1fr grid-row transition (250ms). One primary link style per card plus the Ask AI Ling hook, all pinned to the bottom so rows align.
 
 ### Ask AI Ling Hook
-A text (or outlined) button with a sparkle icon that opens the chat pre-filled with a question; appears on project cards, the hero invite, and the toolbox.
+A text (or outlined) button with an 18px sparkle icon that opens the chat pre-filled with a question; appears on project cards, the hero invite, the habits, experience, themes, toolbox and (outlined, chalk on the band) beside the footer email. Each question is asked once per page.
 
 ### Chat Launcher and Tip
-A 64px (96px from 640px) circular portrait button with a 1px outline and a primary-filled AI badge ringed in the page colour. A light tip bubble (surface-container-highest, outline, level-2 lift) sits to its left on hover or focus and peeks once on arrival from 640px.
+A 56px (96px from 640px) circular portrait button with a 1px outline and a primary-filled AI badge ringed in the page colour. A light tip bubble (surface-container-highest, outline, level-2 lift) sits to its left on hover or focus and peeks once on arrival from 640px.
 
 ### Trajectory Chart (calculator)
-On a 16px-radius Charcoal stage: the answer sentence at display size, then a hand-built SVG. The with-saving curve is 3px Harvest Gold over a 14% gold gap wash, the goal is a 1px 6/6 dashed gold line, the no-saving path a 1.5px Muted Chalk line; end labels are 0.875rem semibold tabular in each path's colour; axis ticks are mono above a 30% chalk rule. Strokes do not scale with the viewBox. The curve redraws in 450ms on input change; invalid input dims the last valid chart to 30% rather than emptying it. Surface brief: `.impeccable/surfaces/ment-calculator-calculator-component-html-0ab35b81.md`.
+On a 16px-radius Charcoal stage: the answer sentence at display size, then a hand-built SVG. The with-saving curve is 3px Harvest Gold over a 14% gold gap wash, the goal is a 1px 6/6 dashed gold line, the no-saving path a 1.5px Muted Chalk line; end labels are 0.875rem semibold tabular in each path's colour, placed in % of the plot box (the no-saving label hangs under its line, or above it in the bottom fifth); axis ticks are mono above a 30% chalk rule. Strokes do not scale with the viewBox. The curve redraws in 450ms on input change; invalid input dims the last valid chart to 30% rather than emptying it. Surface brief: `.impeccable/surfaces/ment-calculator-calculator-component-html-0ab35b81.md`.
 
 ### Motion
 Page enters with a 6px rise and fade (0.35s); hovers nudge 1-3px over 0.2-0.25s; the settling curve cubic-bezier(0.22, 1, 0.36, 1) drives the chart and disclosures. Under reduced motion, travel keyframes are redefined as plain fades and opacity/colour transitions keep their timing.

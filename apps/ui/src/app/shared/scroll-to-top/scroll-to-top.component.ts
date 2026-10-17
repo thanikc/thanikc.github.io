@@ -49,26 +49,26 @@ const SCROLL_VISIBILITY_THRESHOLD_PX = 400;
       z-index: 40;
     }
 
+    /* Not on phones: stacked over the launcher it covered card actions and method
+     * text, and a phone has its own way back up (tap the status bar, flick). */
+    @media (max-width: 639.98px) {
+      :host {
+        display: none;
+      }
+    }
+
     /* Material's mini-FAB is 40px, short of the 44px touch-target minimum. Stacked
-     * on the right above the chat launcher (centred over it: the launcher is 4rem,
-     * 6rem from sm, inset 1rem), not bottom-centre where it sat on card actions. */
+     * on the right above the chat launcher (centred over its 6rem, inset 1rem). */
     .scroll-to-top-fab {
       position: absolute;
-      right: 1.5rem;
-      bottom: 5.75rem;
+      right: 2.5rem;
+      bottom: 7.75rem;
       width: 3rem;
       height: 3rem;
       border: 1px solid var(--mat-sys-outline);
       background-color: var(--app-surface-raised);
       color: var(--mat-sys-on-surface);
       animation: fade-in 200ms ease-out;
-    }
-
-    @media (min-width: 640px) {
-      .scroll-to-top-fab {
-        right: 2.5rem;
-        bottom: 7.75rem;
-      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

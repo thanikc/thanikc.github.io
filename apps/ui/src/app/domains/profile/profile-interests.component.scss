@@ -31,11 +31,12 @@
 // Three fills cycled across the row, each with its own paired on-colour, so
 // text contrast follows the fill automatically.
 .tone-accent {
-  // The site's gold (the hero and footer CTAs, the calculator's goal), not the old
-  // mint teal that sat outside the charcoal/gold/stone palette. The M3 container
-  // pair keeps its paired on-colour contrast.
-  background-color: var(--mat-sys-tertiary-container);
-  color: var(--mat-sys-on-tertiary-container);
+  // Pine green, not gold: gold is kept for the one thing to act on (DESIGN.md,
+  // Gold Means Act). The `fixed` pair rather than `primary-container`, which is
+  // a pale mint that barely reads next to the stone tile; `primary-fixed-dim` is
+  // M3's own mid teal and pairs with `on-primary-fixed` at ~9.9:1.
+  background-color: var(--mat-sys-primary-fixed-dim);
+  color: var(--mat-sys-on-primary-fixed);
 }
 
 .tone-dark {
@@ -58,8 +59,8 @@
   font-size: 2.5rem;
 }
 
-// Decorative counter in the panel's own on-colour: dimming it (70% mix) fell to
-// 3.55:1 on the gold panel, and axe measures aria-hidden text too.
+// Decorative counter in the panel's own on-colour: axe measures aria-hidden text
+// too, and a dimmed counter fell below 4.5:1 on the accent panel.
 .interest-index {
   color: inherit;
 }
