@@ -15,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { EMAIL_LINK } from '../../shared/contact/contact-links';
 import { CHAT_SUGGESTIONS } from './chat.constants';
 import { ChatTurn } from './chat.models';
 import { MarkdownPipe } from './markdown.pipe';
@@ -55,6 +56,7 @@ const MIC_ERROR_MESSAGES: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatPanelComponent {
+  protected readonly email = EMAIL_LINK;
   readonly turns = input.required<ChatTurn[]>();
   readonly pending = input(false);
   readonly error = input<string | null>(null);

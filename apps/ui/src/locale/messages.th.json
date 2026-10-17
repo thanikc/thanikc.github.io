@@ -251,6 +251,8 @@
     "calculator.withdrawal.error": "กรอกค่าระหว่าง {$INTERPOLATION}% ถึง {$INTERPOLATION_1}%",
     "calculator.years.error": "กรอกระหว่าง {$INTERPOLATION} ถึง {$INTERPOLATION_1} ปี",
     "projects.showDetails": "รายละเอียด",
-    "projects.hideDetails": "ซ่อนรายละเอียด"
+    "projects.hideDetails": "ซ่อนรายละเอียด",
+    "hero.availability": "เปิดรับตำแหน่งระดับ Senior และ Lead ทั้งงานประจำ ฟรีแลนซ์ หรือพาร์ตไทม์ ทำงานแบบรีโมต ใช้ภาษาเยอรมันหรืออังกฤษ",
+    "chat.errorEmail": "อีเมลถึง Thanik"
   }
 }

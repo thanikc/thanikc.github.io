@@ -11,12 +11,13 @@
         <nav
           i18n-aria-label="Name of the main site navigation landmark@@header.nav.ariaLabel"
           aria-label="Primary"
-          class="hidden items-center gap-2 sm:flex"
+          class="flex items-center gap-2"
         >
           @for (link of navLinks; track link.fragment) {
             <a
               matButton
-              class="min-h-11 uppercase tracking-widest text-xs"
+              class="nav-link min-h-11 uppercase tracking-widest text-xs"
+              [class.hide-on-phones]="link.hideOnPhones"
               routerLink="/"
               [fragment]="link.fragment"
             >

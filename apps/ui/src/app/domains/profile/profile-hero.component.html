@@ -25,10 +25,17 @@
     <p class="hero-positioning max-w-2xl text-lg leading-relaxed font-medium">
       {{ positioning }}
     </p>
+    <p
+      class="hero-availability max-w-2xl text-base leading-relaxed"
+      i18n="Availability line in the hero@@hero.availability"
+    >
+      Open to senior and lead roles: permanent, freelance or part-time, remote, in German or
+      English.
+    </p>
 
     <div class="hero-next mt-8 flex flex-wrap items-center gap-2">
       <a
-        matButton="outlined"
+        matButton="filled"
         class="min-h-11"
         [href]="email.href"
         [attr.aria-label]="email.ariaLabel"
@@ -71,6 +78,6 @@
       </a>
     </div>
 
-    <app-profile-ask-ling class="mt-auto block pt-8" [prompts]="askLingPrompts()" />
+    <app-profile-ask-ling class="mt-auto block pt-8" [prompts]="heroPrompts()" />
   </div>
 </section>

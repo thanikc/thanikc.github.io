@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { EMAIL_LINK, LINKEDIN_LINK } from '../../shared/contact/contact-links';
 import { HeroSceneComponent } from './hero-scene.component';
@@ -22,6 +22,8 @@ import { ProfileAskLingComponent } from './profile-ask-ling.component';
 })
 export class ProfileHeroComponent {
   readonly askLingPrompts = input.required<readonly string[]>();
+  /** Two starters: contact stays the clear first action; the panel lists the rest. */
+  protected readonly heroPrompts = computed(() => this.askLingPrompts().slice(0, 2));
 
   protected readonly title = $localize`:Job title above the name in the hero@@hero.title:Senior Full-Stack Engineer`;
   protected readonly positioning = $localize`:One-sentence positioning statement in the hero@@hero.positioning:I build Angular and Spring Boot systems for German online banking — a shared platform used by many banks, not just a single app. AI is a big part of how I work, but not an excuse to compromise on engineering quality. I'm as curious about how AI is changing the way we build serious software as I am about what I can build with it.`;

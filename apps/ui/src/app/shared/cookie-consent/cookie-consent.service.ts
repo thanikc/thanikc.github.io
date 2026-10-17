@@ -20,6 +20,9 @@ export class CookieConsentService {
   /** Only shown once, in the browser, until the user makes a choice. */
   readonly showBanner = computed(() => this.isBrowser && this.choice() === null);
 
+  /** The banner's rendered height in px, so other bottom-anchored UI can clear it. */
+  readonly bannerHeight = signal(0);
+
   accept(): void {
     this.setChoice('accepted');
   }

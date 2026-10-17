@@ -18,6 +18,7 @@ describe('ChatWidgetComponent', () => {
   const error = signal<string | null>(null);
   const isOpen = signal(false);
   const showBanner = signal(false);
+  const bannerHeight = signal(0);
   const mockChatService = {
     turns,
     pending,
@@ -74,7 +75,7 @@ describe('ChatWidgetComponent', () => {
       imports: [ChatWidgetComponent],
       providers: [
         { provide: ChatService, useValue: mockChatService },
-        { provide: CookieConsentService, useValue: { showBanner } },
+        { provide: CookieConsentService, useValue: { showBanner, bannerHeight } },
       ],
     }).compileComponents();
 
@@ -103,14 +104,19 @@ describe('ChatWidgetComponent', () => {
       expect(img.getAttribute('height')).toBeTruthy();
     });
 
-    it('hides the launcher while the cookie consent banner is showing, and restores it after', () => {
+    // AI Ling is the site's deep half, so it stays reachable before the cookie
+    // choice; it moves up out of the banner's way instead of disappearing.
+    it('lifts the launcher above the cookie banner while it shows, and back after', () => {
+      const launcher = () => el().querySelector<HTMLElement>('.chat-launcher')!;
       showBanner.set(true);
+      bannerHeight.set(120);
       fixture.detectChanges();
-      expect(fab()).toBeNull();
+      expect(fab()).not.toBeNull();
+      expect(launcher().style.bottom).toBe('136px');
 
       showBanner.set(false);
       fixture.detectChanges();
-      expect(fab()).not.toBeNull();
+      expect(launcher().style.bottom).toBe('');
     });
 
     it('overlays the FAB with a decorative AI star badge', () => {

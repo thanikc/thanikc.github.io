@@ -28,6 +28,7 @@ describe('CookieConsentBannerComponent', () => {
   const mockShowBanner = signal(true);
   const mockCookieConsentService = {
     showBanner: mockShowBanner,
+    bannerHeight: signal(0),
     accept: vi.fn(),
     reject: vi.fn(),
   };

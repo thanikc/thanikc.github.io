@@ -227,11 +227,13 @@ describe('ProfileComponent', () => {
   });
 
   describe('ask AI Ling', () => {
-    it('renders the invitation with an example question per chat starter', () => {
+    it('renders the invitation with the first two chat starters', () => {
       const section = el().querySelector('app-profile-ask-ling');
 
       expect(section).not.toBeNull();
-      expect(section?.querySelectorAll('app-ask-ling-link')).toHaveLength(CHAT_SUGGESTIONS.length);
+      expect(section?.querySelectorAll('app-ask-ling-link')).toHaveLength(
+        Math.min(2, CHAT_SUGGESTIONS.length),
+      );
     });
   });
 

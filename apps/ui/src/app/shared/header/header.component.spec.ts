@@ -58,10 +58,12 @@ describe('HeaderComponent', () => {
       }
     });
 
-    // Name and three links don't fit 360px; phones scroll instead.
-    it('hides below the sm breakpoint', () => {
-      expect(nav()?.classList.contains('hidden')).toBe(true);
-      expect(nav()?.classList.contains('sm:flex')).toBe(true);
+    // Phones get the same three jumps as desktop: without them a first-time mobile
+    // visitor can only scroll to reach Projects or Contact.
+    it('stays visible on phones, with the two links that fit', () => {
+      expect(nav()?.classList.contains('hidden')).toBe(false);
+      expect(nav()?.classList.contains('flex')).toBe(true);
+      expect(links().filter(a => !a.classList.contains('hide-on-phones'))).toHaveLength(2);
     });
 
     // Nav typography: small uppercase letterspaced labels.
@@ -74,10 +76,12 @@ describe('HeaderComponent', () => {
     });
 
     it('styles every link alike, Contact included', () => {
+      const classes = (a: Element) =>
+        a.className.replace('hide-on-phones', '').replace(/\s+/g, ' ').trim();
       const [work, ...others] = links();
 
       for (const link of others) {
-        expect(link.className).toBe(work.className);
+        expect(classes(link)).toBe(classes(work));
       }
     });
   });

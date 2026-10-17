@@ -15,8 +15,13 @@
       (close)="close()"
     />
   </div>
-} @else if (!consentBannerShowing()) {
-  <div class="chat-launcher absolute right-4 bottom-4">
+} @else {
+  <!-- Lifted above the cookie banner while it shows, rather than hidden: its
+       Accept/Reject buttons stay uncovered and AI Ling stays reachable. -->
+  <div
+    class="chat-launcher absolute right-4 bottom-4"
+    [style.bottom.px]="consentBannerShowing() ? bannerHeight() + 16 : null"
+  >
     <button
       #fab
       matFab

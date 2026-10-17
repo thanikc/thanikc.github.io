@@ -77,11 +77,22 @@ describe('ProfileHeroComponent', () => {
   // right below the hero; that card is gone and its content now lives here,
   // alongside the Email/LinkedIn CTAs — one continuous "who I am, talk to me
   // two ways" block instead of a hero followed immediately by another card.
-  it('invites AI Ling exploration alongside the CTAs, one hook per prompt', () => {
+  // Two starters, not all of them: the hero's job is one clear next step (contact),
+  // with AI Ling as the second; the panel carries the full list of starters.
+  it('invites AI Ling exploration with two starter questions', () => {
     expect(text()).toContain('Ask AI Ling');
 
     const hooks = [...el().querySelectorAll('app-ask-ling-link')];
-    expect(hooks).toHaveLength(ASK_LING_PROMPTS.length);
+    expect(hooks).toHaveLength(Math.min(2, ASK_LING_PROMPTS.length));
+  });
+
+  // A recruiter skimming for fit needs availability before scrolling.
+  it('says what roles Thanik is open to, how and in which languages', () => {
+    const line = el().querySelector('.hero-availability')?.textContent ?? '';
+
+    expect(line).toContain('Open to senior and lead roles');
+    expect(line).toContain('remote');
+    expect(line).toContain('German or English');
   });
 
   it('offers Email and LinkedIn as its actions', () => {
@@ -97,8 +108,11 @@ describe('ProfileHeroComponent', () => {
     expect(linkedIn?.getAttribute('rel')).toBe('noopener noreferrer');
     expect(linkedIn?.getAttribute('data-cta-tracking')).toBe('Hero: LinkedIn');
 
+    // Reaching Thanik is the page's success, so Email is the one filled action.
+    expect(email!.classList.contains('mat-mdc-unelevated-button')).toBe(true);
+    expect(linkedIn!.classList.contains('mat-mdc-outlined-button')).toBe(true);
+
     for (const link of [email!, linkedIn!]) {
-      expect(link.classList.contains('mat-mdc-outlined-button')).toBe(true);
       expect(link.classList.contains('min-h-11')).toBe(true);
       const icon = link.querySelector('svg');
       expect(icon?.getAttribute('aria-hidden')).toBe('true');

@@ -318,6 +318,14 @@ describe('ChatPanelComponent', () => {
       expect(retrySpy).toHaveBeenCalledTimes(1);
     });
 
+    // When the assistant is down, the visitor still needs a way to reach Thanik.
+    it('offers email as the way round a failure', () => {
+      setInputs({ turns: TURNS, error: 'Something went wrong' });
+      const email = el().querySelector<HTMLAnchorElement>('[role="alert"] a[href^="mailto:"]');
+
+      expect(email?.textContent).toContain('Email Thanik');
+    });
+
     it('pairs the error with an icon rather than carrying it by colour alone', () => {
       setInputs({ turns: TURNS, error: 'Something went wrong' });
 
