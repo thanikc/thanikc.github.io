@@ -21,8 +21,8 @@ const SCROLL_VISIBILITY_THRESHOLD_PX = 400;
  * same corner, and its height varies with viewport width and content.
  *
  * The host is a zero-height `position: sticky` anchor placed after the footer
- * (mirroring `ChatShellComponent`): the button floats at the viewport bottom and is
- * allowed to overlap the footer once the page bottom scrolls into view.
+ * (mirroring `ChatShellComponent`): the button floats at the viewport bottom, and
+ * hides while the footer is in view rather than sitting on it.
  */
 @Component({
   selector: 'app-scroll-to-top',
@@ -49,18 +49,26 @@ const SCROLL_VISIBILITY_THRESHOLD_PX = 400;
       z-index: 40;
     }
 
-    // Material's mini-FAB is 40px, short of the 44px touch-target minimum.
+    /* Material's mini-FAB is 40px, short of the 44px touch-target minimum. Stacked
+     * on the right above the chat launcher (centred over it: the launcher is 4rem,
+     * 6rem from sm, inset 1rem), not bottom-centre where it sat on card actions. */
     .scroll-to-top-fab {
       position: absolute;
-      left: 50%;
-      bottom: 1rem;
-      transform: translateX(-50%);
+      right: 1.5rem;
+      bottom: 5.75rem;
       width: 3rem;
       height: 3rem;
       border: 1px solid var(--mat-sys-outline);
       background-color: var(--app-surface-raised);
       color: var(--mat-sys-on-surface);
       animation: fade-in 200ms ease-out;
+    }
+
+    @media (min-width: 640px) {
+      .scroll-to-top-fab {
+        right: 2.5rem;
+        bottom: 7.75rem;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -70,9 +78,10 @@ export class ScrollToTopComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly scrolledPastThreshold = signal(false);
+  private readonly footerInView = signal(false);
 
   readonly visible = computed(
-    () => this.scrolledPastThreshold() && !this.cookieConsent.showBanner(),
+    () => this.scrolledPastThreshold() && !this.footerInView() && !this.cookieConsent.showBanner(),
   );
 
   constructor() {
@@ -84,7 +93,20 @@ export class ScrollToTopComponent {
       onScroll();
       window.addEventListener('scroll', onScroll, { passive: true });
       this.destroyRef.onDestroy(() => window.removeEventListener('scroll', onScroll));
+
+      const footer = document.getElementById('contact');
+      if (footer) {
+        const observer = new IntersectionObserver(([entry]) =>
+          this.onFooterVisibilityChange(entry.isIntersecting),
+        );
+        observer.observe(footer);
+        this.destroyRef.onDestroy(() => observer.disconnect());
+      }
     });
+  }
+
+  protected onFooterVisibilityChange(visible: boolean): void {
+    this.footerInView.set(visible);
   }
 
   scrollToTop(): void {

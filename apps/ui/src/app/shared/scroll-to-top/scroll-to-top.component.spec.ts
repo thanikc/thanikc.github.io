@@ -94,4 +94,19 @@ describe('ScrollToTopComponent', () => {
     expect(document.activeElement).toBe(main);
     main.remove();
   });
+
+  // Over the footer it would sit on the wordmark and links; the footer's own
+  // links are the way on from there.
+  it('hides while the footer is in view', async () => {
+    await scroll(500);
+    expect(button()).not.toBeNull();
+
+    fixture.componentInstance['onFooterVisibilityChange'](true);
+    fixture.detectChanges();
+    expect(button()).toBeNull();
+
+    fixture.componentInstance['onFooterVisibilityChange'](false);
+    fixture.detectChanges();
+    expect(button()).not.toBeNull();
+  });
 });

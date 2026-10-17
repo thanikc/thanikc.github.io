@@ -100,8 +100,12 @@ button.chat-fab {
   max-width: min(15rem, calc(100vw - 6.5rem)); // 4rem launcher + its 1rem inset + gaps
   padding: 0.4rem 0.6rem;
   border-radius: 0.5rem;
-  background-color: var(--mat-sys-inverse-surface);
-  color: var(--mat-sys-inverse-on-surface);
+  // A light surface with an outline and a lift, so it reads as a bubble on the
+  // light page and on the charcoal bands alike (inverse-surface vanished on those).
+  background-color: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+  border: 1px solid var(--mat-sys-outline);
+  box-shadow: var(--mat-sys-level2);
   font-size: 0.75rem;
   line-height: 1.35;
   text-align: left;
@@ -124,8 +128,11 @@ button.chat-fab {
 }
 
 // Runs once per arrival, with no fill-mode so the hover rule above governs again
-// as soon as it finishes. Reduced motion collapses it to nothing, leaving the
-// `aria-describedby` association as the description of record.
-.chat-fab-tip-peek {
-  animation: hint-peek 6s ease-out 1.2s;
+// as soon as it finishes; opacity only, so it stays under reduced motion. Not on
+// phones: there it covered the hero's Email and LinkedIn buttons, the page's main
+// action. The `aria-describedby` association describes the launcher everywhere.
+@media (min-width: 640px) {
+  .chat-fab-tip-peek {
+    animation: hint-peek 6s ease-out 1.2s;
+  }
 }

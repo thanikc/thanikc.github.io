@@ -60,8 +60,11 @@ export class ProfileThemesComponent {
 
   constructor() {
     afterNextRender(() => {
-      const observer = new IntersectionObserver(([entry]) =>
-        this.onPanelsVisibilityChange(entry.isIntersecting),
+      // Only while the panels cross the middle of the viewport: an edge of the block
+      // still on screen (the Projects heading below) is not "inside" the section.
+      const observer = new IntersectionObserver(
+        ([entry]) => this.onPanelsVisibilityChange(entry.isIntersecting),
+        { rootMargin: '-50% 0px -50% 0px' },
       );
       observer.observe(this.panelsRef().nativeElement);
       this.destroyRef.onDestroy(() => observer.disconnect());
