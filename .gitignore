@@ -52,3 +52,5 @@ Thumbs.db
 
 # secrets
 .env
+# Impeccable design-detector cache
+**/.impeccable/hook.cache.json

@@ -47,6 +47,12 @@ describe('ProfileProjectsComponent', () => {
     );
   });
 
+  // One section-header component for every section, so a change to how sections
+  // open (as their heading semantics just did) can't miss this one.
+  it('opens with the shared section header', () => {
+    expect(el().querySelector('app-section-header #projects-heading')).not.toBeNull();
+  });
+
   // Editorial two-tone headline: the claim reads at
   // full strength, the scope detail recedes to the page's muted tone — same copy, no new
   // i18n string, just which words carry the emphasis.

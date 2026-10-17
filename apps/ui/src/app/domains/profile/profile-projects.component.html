@@ -1,22 +1,16 @@
 <section class="space-y-6" [attr.aria-labelledby]="headingId">
-  <!-- Bespoke header, not <app-section-header>: the headline
-       mixes weight/tone — the claim reads full-strength,
-       the scope detail recedes — which the shared component's plain-string heading can't
-       express. Same copy as before, just which words carry the emphasis. -->
-  <h2 [id]="headingId" class="section-heading flex scroll-mt-24 flex-col gap-3">
-    <span
-      class="section-eyebrow page-muted font-mono text-xs tracking-widest uppercase"
-      i18n="Heading of the projects section@@projects.heading"
-      >Things I’ve built</span
-    ><span class="sr-only">: </span>
-    <span
-      class="section-title page-muted font-display text-3xl font-normal tracking-tight sm:text-4xl"
-      i18n="Subtitle of the projects section@@projects.subtitle"
+  <!-- Two-tone headline: the claim reads full-strength, the scope detail recedes. -->
+  <app-section-header
+    i18n-eyebrow="Heading of the projects section@@projects.heading"
+    eyebrow="Things I’ve built"
+    [headingId]="headingId"
+    muted
+  >
+    <ng-container i18n="Subtitle of the projects section@@projects.subtitle"
+      ><strong class="page-heading font-semibold">Complete products I build independently,</strong>
+      from data model to deployment</ng-container
     >
-      <strong class="page-heading font-semibold">Complete products I build independently,</strong>
-      from data model to deployment
-    </span>
-  </h2>
+  </app-section-header>
 
   @if (ordered().length > 0) {
     <!-- Two columns from md: wide enough for the tagline and decision to read as

@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { ProjectCardComponent } from './project-card.component';
+import { SectionHeaderComponent } from './section-header.component';
 import { Project } from './profile.content';
 
 /** "Things I've built": one row, featured projects leading, the small tools after. */
 @Component({
   selector: 'app-profile-projects',
-  imports: [ProjectCardComponent],
+  imports: [ProjectCardComponent, SectionHeaderComponent],
   templateUrl: './profile-projects.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

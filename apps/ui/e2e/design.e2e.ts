@@ -22,6 +22,10 @@ const MIN_GAP = 8;
 interface PageOptions {
   width: number;
   reducedMotion?: 'reduce' | 'no-preference';
+  /** Leave the cookie choice unmade, so the consent banner shows. */
+  noConsent?: boolean;
+  /** Hold the World Bank requests open, so the calculator stays in its loading state. */
+  worldBankPending?: boolean;
 }
 
 async function openPage(browser: Browser, route: string, options: PageOptions): Promise<Page> {
@@ -31,8 +35,8 @@ async function openPage(browser: Browser, route: string, options: PageOptions): 
   });
   const page = await context.newPage();
 
-  await page.addInitScript(() => {
-    localStorage.setItem('cookie-consent', 'rejected');
+  await page.addInitScript(noConsent => {
+    if (!noConsent) localStorage.setItem('cookie-consent', 'rejected');
 
     // Layout shift, with what moved, so a failure points at its cause.
     type Shift = { value: number; hadRecentInput: boolean; sources?: { node?: Node }[] };
@@ -57,7 +61,7 @@ async function openPage(browser: Browser, route: string, options: PageOptions): 
         });
       }
     }).observe({ type: 'layout-shift', buffered: true });
-  });
+  }, options.noConsent ?? false);
 
   // Deterministic and free: no live providers, no analytics, no live World Bank data.
   // Both APIs are cross-origin, so the stubs must answer CORS (and the chat preflight).
@@ -80,10 +84,10 @@ async function openPage(browser: Browser, route: string, options: PageOptions): 
   );
   await page.route(/googletagmanager|google-analytics/, route => route.abort());
   await page.route(/api\.worldbank\.org/, route =>
-    route.fulfill({ headers: cors, json: [{}, []] }),
+    options.worldBankPending ? undefined : route.fulfill({ headers: cors, json: [{}, []] }),
   );
 
-  await page.goto(route, { waitUntil: 'networkidle' });
+  await page.goto(route, { waitUntil: options.worldBankPending ? 'load' : 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.locator('button.chat-fab').waitFor({ state: 'visible' });
   // Entrance animations (staggered card-rise) must finish before anything is measured.
@@ -412,12 +416,18 @@ for (const route of ROUTES) {
       reducedMotion: 'reduce',
     });
 
-    // Collapsed animations (active duration ≈ 0) may still sit in their delay; nothing moves.
+    // Reduced motion keeps fades (state changes still read) but nothing travels:
+    // no running animation may move, scale or rotate anything.
     const running = await page.evaluate(() =>
       document
         .getAnimations()
         .filter(a => a.playState === 'running')
         .filter(a => Number(a.effect?.getComputedTiming().activeDuration ?? 0) > 1)
+        .filter(a =>
+          ((a.effect as KeyframeEffect | null)?.getKeyframes() ?? []).some(
+            k => k['transform'] !== undefined && k['transform'] !== 'none',
+          ),
+        )
         .map(a => (a as CSSAnimation).animationName ?? a.constructor.name),
     );
     record(`motion-${slug(route)}`, { route, running });
@@ -743,5 +753,61 @@ test.describe('language', () => {
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(MIN_TARGET);
 
     await context.close();
+  });
+});
+
+// States the per-route design check never reaches: its stubs answer at once, the
+// cookie choice is preset and the chat stays closed. Each is scanned on its own.
+const seriousViolations = async (page: Page, include?: string) => {
+  const builder = new AxeBuilder({ page });
+  const axe = await (include ? builder.include(include) : builder).analyze();
+  return axe.violations
+    .filter(v => ['serious', 'critical'].includes(v.impact ?? ''))
+    .map(v => `${v.id} (${v.impact}) ×${v.nodes.length}: ${v.nodes[0]?.target.join(' ')}`);
+};
+
+test.describe('states', () => {
+  test('calculator while its live rates load', async ({ browser }) => {
+    const page = await openPage(browser, '/en/calculator', { width: 360, worldBankPending: true });
+    await expect(page.locator('.data-source-chip.loading')).toBeVisible();
+
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.context().close();
+  });
+
+  test('cookie banner, with the chat launcher clear of its buttons', async ({ browser }) => {
+    for (const width of [360, 1440]) {
+      const page = await openPage(browser, '/de/', { width, noConsent: true });
+      const banner = page.getByRole('region', { name: 'Cookie-Einwilligung' });
+      await expect(banner).toBeVisible();
+
+      expect(await seriousViolations(page)).toEqual([]);
+      const fab = await page.locator('button.chat-fab').boundingBox();
+      const top = (await banner.boundingBox())!.y;
+      expect(
+        fab!.y + fab!.height,
+        `launcher bottom vs banner top at ${width}px`,
+      ).toBeLessThanOrEqual(top);
+      await page.context().close();
+    }
+  });
+
+  test('open chat dialog', async ({ browser }) => {
+    const page = await openPage(browser, '/en/', { width: 1440, reducedMotion: 'reduce' });
+    await page.locator('button.chat-fab').click();
+    await expect(page.getByRole('dialog', { name: 'AI Ling' })).toBeVisible();
+    // The sheet fades in (still, under reduced motion): scan it once it has landed.
+    await page.evaluate(() =>
+      Promise.all(
+        document
+          .getAnimations()
+          .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+          .filter(a => (a as CSSAnimation).animationName !== 'hint-peek')
+          .map(a => a.finished),
+      ),
+    );
+
+    expect(await seriousViolations(page, '[role="dialog"]')).toEqual([]);
+    await page.context().close();
   });
 });

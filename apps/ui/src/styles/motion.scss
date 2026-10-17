@@ -87,16 +87,52 @@
   }
 }
 
-// Honour the OS-level motion preference app-wide. Durations are collapsed
-// rather than disabled so animations that set a final state (the card reveal,
-// which starts at `opacity: 0`) still land on it.
+// Honour the OS-level motion preference with a designed alternative, not a blanket
+// kill: nothing travels, but state changes still read. The movement keyframes are
+// redefined as plain fades (a later @keyframes of the same name wins while this
+// query matches) and opacity/colour transitions keep their timing. hint-peek and
+// fade-in are opacity-only already; the only transform transitions left are
+// 1–3px hover nudges, which exist only for a mouse.
 @media (prefers-reduced-motion: reduce) {
+  @keyframes page-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes card-rise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes typing-dot {
+    0%,
+    60%,
+    100% {
+      opacity: 0.35;
+    }
+    30% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes hero-drift {
+    from,
+    to {
+      transform: none;
+    }
+  }
+
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }

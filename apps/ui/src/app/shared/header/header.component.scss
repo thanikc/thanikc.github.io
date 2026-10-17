@@ -12,12 +12,6 @@
   z-index: 50;
 }
 
-// Material's icon button defaults to a 40px state layer; the touch-target rule is
-// 44px. The token cascades into the toggle without touching Material's DOM.
-app-theme-toggle {
-  --mat-icon-button-state-layer-size: 44px;
-}
-
 // Phones: the three links sit beside the brand and the language picker, so they
 // lose most of the button's side padding (the 44px height stays).
 @media (max-width: 639px) {

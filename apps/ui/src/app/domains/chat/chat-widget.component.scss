@@ -95,7 +95,9 @@ button.chat-fab {
   right: calc(100% + 0.5rem);
   top: 50%;
   width: max-content;
-  max-width: 15rem;
+  // Clamped to the space left of the launcher: at 320px a fixed 15rem ran ~8px
+  // off the left edge.
+  max-width: min(15rem, calc(100vw - 6.5rem)); // 4rem launcher + its 1rem inset + gaps
   padding: 0.4rem 0.6rem;
   border-radius: 0.5rem;
   background-color: var(--mat-sys-inverse-surface);

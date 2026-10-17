@@ -1,6 +1,6 @@
 // Token-driven surfaces shared by the profile's section components. Global rather
 // than per component so every section's cards, chips and captions read the same,
-// follow the theme toggle, and don't each carry a copy against the style budget.
+// follow the theme tokens, and don't each carry a copy against the style budget.
 
 .surface-card {
   color: var(--mat-sys-on-surface);

@@ -16,7 +16,7 @@
 }
 
 .footer-about {
-  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  color: var(--app-on-inverse-muted);
 
   // The name stays the brightest thing in the column; the summary is the quiet line.
   > .font-bold {
@@ -25,7 +25,7 @@
 }
 
 .footer-link {
-  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  color: var(--app-on-inverse-muted);
   transition: color 0.2s ease;
 
   &:hover {

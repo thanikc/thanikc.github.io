@@ -130,6 +130,13 @@ h2::after {
   // than a new hand-picked colour.
   --app-surface-base: var(--mat-sys-surface-container-low);
   --app-surface-raised: #dad6ce;
+  // A focused form field's floating label is primary by default: 4.47:1 on the beige
+  // raised fill the chat and calculator fields sit on, just under the 4.5:1 floor.
+  // on-primary-container is the same hue, darker (privacy links use it for the same reason).
+  --mat-form-field-outlined-focus-label-text-color: var(--mat-sys-on-primary-container);
+
+  // Secondary text on the dark full-bleed bands (hero, work themes, footer).
+  --app-on-inverse-muted: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
   // The chat panel keeps that same beige rather than following the page —
   // a deliberate choice, not an oversight (both are light now, but distinct
   // tones so the panel still reads as its own surface).

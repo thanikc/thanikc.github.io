@@ -14,7 +14,7 @@
 
   // The shared header takes its colours from these; retint them for the dark fill.
   --app-on-base: var(--mat-sys-inverse-on-surface);
-  --app-on-base-muted: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  --app-on-base-muted: var(--app-on-inverse-muted);
 }
 
 .theme-panel {
@@ -41,7 +41,7 @@
 }
 
 .theme-counter {
-  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  color: var(--app-on-inverse-muted);
 }
 
 .theme-progress {

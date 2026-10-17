@@ -25,7 +25,7 @@
 }
 
 .hero-availability {
-  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  color: var(--app-on-inverse-muted);
 }
 
 .hero-scene {
@@ -49,7 +49,7 @@
 }
 
 .hero-badge {
-  color: color-mix(in srgb, var(--mat-sys-inverse-on-surface) 72%, transparent);
+  color: var(--app-on-inverse-muted);
 }
 
 .hero-name {

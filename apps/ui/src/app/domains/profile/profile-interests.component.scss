@@ -29,7 +29,7 @@
 }
 
 // Three fills cycled across the row, each with its own paired on-colour, so
-// text contrast follows the fill (and the theme toggle) automatically.
+// text contrast follows the fill automatically.
 .tone-accent {
   // The `fixed` pair, not `primary-container`: container is a pale mint that
   // barely reads as a distinct panel next to the light one, and darkening it by
@@ -67,12 +67,6 @@
 }
 
 @media print {
-  // The global decorative rule under every h2 (material.scss) is what the
-  // reference's opener doesn't have — the band below carries the boundary instead.
-  .interest-heading::after {
-    content: none;
-  }
-
   .interest-section {
     width: auto;
     margin: 0;

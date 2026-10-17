@@ -87,10 +87,10 @@ describe('CalculatorShellComponent', () => {
 
     for (const cls of [
       'block',
-      'min-h-[1390px]',
-      'sm:min-h-[990px]',
-      'md:min-h-[785px]',
-      'lg:min-h-[660px]',
+      'min-h-[1650px]',
+      'sm:min-h-[1190px]',
+      'md:min-h-[960px]',
+      'lg:min-h-[760px]',
     ]) {
       expect(host.classList.contains(cls), cls).toBe(true);
     }
