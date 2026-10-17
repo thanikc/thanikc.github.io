@@ -256,6 +256,9 @@
     "calculator.method": "คำนวณอย่างไร",
     "calculator.purpose": "ต้องเก็บเงินเดือนละเท่าไรเพื่อเกษียณด้วยรายได้ที่ต้องการ คิดเป็นมูลค่าเงินวันนี้ จากข้อมูลตลาดล่าสุด",
     "calculator.reset": "เริ่มใหม่",
-    "calculator.chart.onItsOwn": "{$INTERPOLATION} หากไม่ออมเพิ่ม"
+    "calculator.chart.onItsOwn": "{$INTERPOLATION} หากไม่ออมเพิ่ม",
+    "toolbox.hookLabel": "ถามว่าผมใช้ตัวไหนทุกวัน",
+    "toolbox.question": "Thanik ใช้เครื่องมือตัวไหนในนี้ทุกวัน และใช้ทำอะไร",
+    "privacy.toc.ariaLabel": "สารบัญ"
   }
 }

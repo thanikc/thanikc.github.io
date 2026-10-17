@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
 import { CookieConsentService } from '../../shared/cookie-consent/cookie-consent.service';
 
 @Component({
   selector: 'app-privacy-policy',
-  imports: [MatButtonModule, DatePipe],
+  imports: [MatButtonModule, DatePipe, RouterLink],
   templateUrl: './privacy-policy.component.html',
   styleUrl: './privacy-policy.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

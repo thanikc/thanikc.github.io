@@ -256,6 +256,9 @@
     "calculator.method": "So wird gerechnet",
     "calculator.purpose": "Wie viel du jeden Monat zurücklegen musst, um im Ruhestand vom gewünschten Einkommen zu leben – in heutigem Geld, auf Basis aktueller Marktdaten.",
     "calculator.reset": "Neu beginnen",
-    "calculator.chart.onItsOwn": "{$INTERPOLATION} von allein"
+    "calculator.chart.onItsOwn": "{$INTERPOLATION} von allein",
+    "toolbox.hookLabel": "Frag, welche ich täglich nutze",
+    "toolbox.question": "Welche dieser Werkzeuge nutzt Thanik täglich, und wofür?",
+    "privacy.toc.ariaLabel": "Inhalt"
   }
 }

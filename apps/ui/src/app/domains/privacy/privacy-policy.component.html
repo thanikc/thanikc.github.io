@@ -23,9 +23,129 @@
     assistant if you choose to use it.
   </p>
 
+  <!-- Twelve sections: a contents list so a visitor can jump to the one they need
+       (their rights, the AI assistant, cookies) instead of scrolling the whole policy. -->
+  <nav
+    class="policy-toc"
+    i18n-aria-label="Name of the privacy policy contents list@@privacy.toc.ariaLabel"
+    aria-label="Contents"
+  >
+    <ol class="columns-1 gap-8 space-y-1 text-sm sm:columns-2">
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s1"
+          i18n="Privacy policy section heading@@privacy.s1.heading"
+          >1. Who We Are</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s2"
+          i18n="Privacy policy section heading@@privacy.s2.heading"
+          >2. Overview of Data Processing</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s3"
+          i18n="Privacy policy section heading@@privacy.s3.heading"
+          >3. Hosting on GitHub Pages</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s4"
+          i18n="Privacy policy section heading@@privacy.s4.heading"
+          >4. AI Assistant (Chat)</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s5"
+          i18n="Privacy policy section heading@@privacy.s5.heading"
+          >5. Cookies, Local Storage &amp; Your Consent Choice</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s6"
+          i18n="Privacy policy section heading@@privacy.s6.heading"
+          >6. Google Fonts</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s7"
+          i18n="Privacy policy section heading@@privacy.s7.heading"
+          >7. Google Analytics (GA4)</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s9"
+          i18n="Privacy policy section heading@@privacy.s9.heading"
+          >8. International Data Transfers</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s10"
+          i18n="Privacy policy section heading@@privacy.s10.heading"
+          >9. How Long We Keep Data</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s11"
+          i18n="Privacy policy section heading@@privacy.s11.heading"
+          >10. Your Rights Under the GDPR</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s12"
+          i18n="Privacy policy section heading@@privacy.s12.heading"
+          >11. Changes to This Policy</a
+        >
+      </li>
+      <li>
+        <a
+          class="policy-link"
+          routerLink="/privacy-policy"
+          fragment="privacy-s13"
+          i18n="Privacy policy section heading@@privacy.s13.heading"
+          >12. Contact</a
+        >
+      </li>
+    </ol>
+  </nav>
+
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s1"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s1.heading"
     >
       1. Who We Are
@@ -42,7 +162,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s2"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s2.heading"
     >
       2. Overview of Data Processing
@@ -64,7 +185,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s3"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s3.heading"
     >
       3. Hosting on GitHub Pages
@@ -90,7 +212,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s4"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s4.heading"
     >
       4. AI Assistant (Chat)
@@ -147,7 +270,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s5"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s5.heading"
     >
       5. Cookies, Local Storage &amp; Your Consent Choice
@@ -195,7 +319,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s6"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s6.heading"
     >
       6. Google Fonts
@@ -220,7 +345,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s7"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s7.heading"
     >
       7. Google Analytics (GA4)
@@ -237,7 +363,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s9"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s9.heading"
     >
       8. International Data Transfers
@@ -255,7 +382,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s10"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s10.heading"
     >
       9. How Long We Keep Data
@@ -271,7 +399,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s11"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s11.heading"
     >
       10. Your Rights Under the GDPR
@@ -312,7 +441,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s12"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s12.heading"
     >
       11. Changes to This Policy
@@ -325,7 +455,8 @@
 
   <section class="space-y-3">
     <h2
-      class="section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
+      id="privacy-s13"
+      class="scroll-mt-24 section-heading page-heading font-display text-2xl sm:text-3xl font-normal tracking-tight"
       i18n="Privacy policy section heading@@privacy.s13.heading"
     >
       12. Contact

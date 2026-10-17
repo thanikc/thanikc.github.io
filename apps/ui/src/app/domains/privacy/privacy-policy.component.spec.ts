@@ -1,3 +1,4 @@
+import { provideRouter } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { vi } from 'vitest';
 import { PrivacyPolicyComponent } from './privacy-policy.component';
@@ -30,7 +31,10 @@ describe('PrivacyPolicyComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [PrivacyPolicyComponent],
-      providers: [{ provide: CookieConsentService, useValue: mockCookieConsentService }],
+      providers: [
+        provideRouter([]),
+        { provide: CookieConsentService, useValue: mockCookieConsentService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PrivacyPolicyComponent);
@@ -58,6 +62,18 @@ describe('PrivacyPolicyComponent', () => {
     expect(h2Text).toContain('Google Analytics');
     expect(h2Text).toContain('International Data Transfers');
     expect(h2Text).toContain('Your Rights');
+  });
+
+  it('opens with a contents list linking to every section', () => {
+    const el = fixture.nativeElement as HTMLElement;
+    const links = [...el.querySelectorAll<HTMLAnchorElement>('nav.policy-toc a')];
+    const headings = [...el.querySelectorAll('section h2')];
+
+    expect(links).toHaveLength(headings.length);
+    links.forEach((link, i) => {
+      expect(link.getAttribute('href')).toBe(`/privacy-policy#${headings[i].id}`);
+      expect(link.textContent?.trim()).toBe(headings[i].textContent?.trim());
+    });
   });
 
   it('does not describe advertising, which the site no longer runs', () => {

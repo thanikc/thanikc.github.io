@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+import { ChatService } from '../chat/chat.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProfileToolboxComponent } from './profile-toolbox.component';
 import { ToolGroup } from './profile.content';
@@ -23,6 +25,7 @@ describe('ProfileToolboxComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ProfileToolboxComponent],
+      providers: [{ provide: ChatService, useValue: { open: vi.fn() } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProfileToolboxComponent);
@@ -78,5 +81,13 @@ describe('ProfileToolboxComponent', () => {
 
   it('colours itself from theme tokens, not the Tailwind palette', () => {
     expect(paletteClassesIn(el())).toEqual([]);
+  });
+
+  // The opener's column held only the heading; a hook into AI Ling uses it the way
+  // every other section offers one.
+  it('offers an Ask AI Ling hook beside the stack', () => {
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-ask-ling-link'),
+    ).not.toBeNull();
   });
 });
