@@ -47,6 +47,8 @@ describe('CalculatorShellComponent', () => {
       inputsValid: signal(true),
       isReturnOptimistic: signal(false),
       currency: 'USD',
+      trajectory: signal([]),
+      reset: vi.fn(),
     };
 
     await TestBed.configureTestingModule({
@@ -63,7 +65,7 @@ describe('CalculatorShellComponent', () => {
     fixture = TestBed.createComponent(CalculatorShellComponent);
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
-    expect(el.querySelector('h1')?.textContent).toContain('Retirement Calculator');
+    expect(el.querySelector('h1')?.textContent).toContain('Retirement calculator');
     expect(el.querySelector('app-retirement-calculator')).toBeNull();
   });
 
@@ -87,10 +89,10 @@ describe('CalculatorShellComponent', () => {
 
     for (const cls of [
       'block',
-      'min-h-[1650px]',
-      'sm:min-h-[1190px]',
-      'md:min-h-[960px]',
-      'lg:min-h-[760px]',
+      'min-h-[1330px]',
+      'sm:min-h-[1285px]',
+      'md:min-h-[1070px]',
+      'lg:min-h-[1105px]',
     ]) {
       expect(host.classList.contains(cls), cls).toBe(true);
     }

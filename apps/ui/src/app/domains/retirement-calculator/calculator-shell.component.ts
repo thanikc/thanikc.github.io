@@ -6,11 +6,13 @@ import { RetirementCalculatorComponent } from './calculator.component';
   imports: [RetirementCalculatorComponent],
   // The host reserves the rendered calculator's height in both defer states, so the
   // footer does not jump when the placeholder is swapped out. Arbitrary values on
-  // purpose: the tallest of en/de/th at each breakpoint's narrowest width, measured
-  // with the baseline assumptions (whose source note is the longer one): 360 → 1642px
-  // (de), 640 → 1186px (de), 768 → 954px (de), 1024 → 760px (en/de), rounded up.
-  // Re-measure if the calculator's layout or copy changes.
-  host: { class: 'block mb-8 min-h-[1650px] sm:min-h-[1190px] md:min-h-[960px] lg:min-h-[760px]' },
+  // purpose: the tallest of en/de/th anywhere in each breakpoint band, measured with
+  // the Playwright design check's stubs (639 → 1326px, 767 → 1280px, 1023 → 1066px,
+  // 1440 → 1102px), rounded up. The chart scales with width, so the narrow end of a
+  // band keeps up to ~110px spare. Re-measure if the calculator's layout or copy changes.
+  host: {
+    class: 'block mb-8 min-h-[1330px] sm:min-h-[1285px] md:min-h-[1070px] lg:min-h-[1105px]',
+  },
   template: `
     @defer (on immediate) {
       <app-retirement-calculator />
@@ -20,7 +22,7 @@ import { RetirementCalculatorComponent } from './calculator.component';
           class="page-heading text-2xl font-bold mb-6"
           i18n="Heading of the calculator page@@calculator.pageTitle"
         >
-          Retirement Calculator
+          Retirement calculator
         </h1>
         <p aria-live="polite" i18n="Shown until the calculator has loaded@@calculator.loading">
           Loading…

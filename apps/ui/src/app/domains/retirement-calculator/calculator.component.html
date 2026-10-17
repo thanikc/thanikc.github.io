@@ -1,257 +1,295 @@
-<section>
-  <h1
-    class="page-heading text-2xl font-bold mb-6"
-    i18n="Heading of the calculator page@@calculator.pageTitle"
-  >
-    Retirement Calculator
-  </h1>
+<section class="calc">
+  <header class="calc-header mb-6 space-y-2">
+    <h1
+      class="page-heading text-2xl font-bold"
+      i18n="Heading of the calculator page@@calculator.pageTitle"
+    >
+      Retirement calculator
+    </h1>
+    <p
+      class="calc-purpose page-muted max-w-2xl"
+      i18n="What the calculator is for@@calculator.purpose"
+    >
+      How much to put aside each month to retire on the income you want, in today's money, from live
+      market data.
+    </p>
+  </header>
+
+  <!-- The answer is a picture of the money over time: one sentence, then the curve
+       rising to meet the goal. The sentence is the page's one polite live region. -->
+  <div class="calc-stage rounded-2xl p-5 sm:p-8">
+    <p class="calc-answer font-display text-2xl leading-snug sm:text-4xl" aria-live="polite">
+      @if (!inputsValid()) {
+        <ng-container i18n="Answer when an input is invalid@@calculator.answer.invalid"
+          >Fix the highlighted field to see your plan.</ng-container
+        >
+      } @else if (requiredMonthlyContribution() === 0) {
+        <ng-container i18n="Answer when savings already reach the goal@@calculator.answer.onTrack"
+          >You're on track: what you have today grows past your
+          <span class="calc-figure">{{
+            totalNestEggNeeded() | currency: currency : 'symbol' : '1.0-0'
+          }}</span>
+          goal in {{ yearsUntilRetirement() }} years.</ng-container
+        >
+      } @else {
+        <ng-container i18n="The calculator's answer@@calculator.answer.save"
+          >Save
+          <span class="calc-figure">{{
+            requiredMonthlyContribution() | currency: currency : 'symbol' : '1.0-0'
+          }}</span>
+          a month for {{ yearsUntilRetirement() }} years to retire on
+          {{ targetMonthlyIncome() | currency: currency : 'symbol' : '1.0-0' }} a
+          month.</ng-container
+        >
+      }
+    </p>
+
+    <!-- While an input is invalid the last valid chart stays, dimmed: the frame keeps
+         its meaning instead of turning into an empty block. -->
+    <div
+      class="calc-chart-frame relative mt-6"
+      [class.is-stale]="!inputsValid()"
+      aria-hidden="true"
+    >
+      <svg class="calc-chart block w-full" viewBox="0 0 1000 400" preserveAspectRatio="none">
+        @if (chart(); as c) {
+          <path class="calc-gap" [attr.d]="c.gap" [style.d]="c.gapCss" />
+          <line class="calc-goal" x1="0" x2="1000" [attr.y1]="c.goalY" [attr.y2]="c.goalY" />
+          @if (c.hasNetWorth) {
+            <path
+              class="calc-without-saving"
+              [attr.d]="c.withoutSaving"
+              [style.d]="c.withoutSavingCss"
+            />
+          }
+          <path class="calc-with-saving" [attr.d]="c.withSaving" [style.d]="c.withSavingCss" />
+        }
+      </svg>
+      @if (chart(); as c) {
+        <!-- End labels: where each path arrives, in its own colour. -->
+        <span class="calc-end-label calc-goal-label" [style.top.%]="c.goalPct">
+          <ng-container i18n="Chart label on the goal line@@calculator.chart.goal"
+            >Goal</ng-container
+          >
+          {{ c.goal | currency: currency : 'symbol' : '1.0-0' }}
+        </span>
+        @if (c.hasNetWorth) {
+          <span class="calc-end-label calc-without-label" [style.top.%]="c.withoutEndPct">
+            <ng-container
+              i18n="Chart label at the end of the no-saving path@@calculator.chart.onItsOwn"
+              >{{ c.withoutEnd | currency: currency : 'symbol' : '1.0-0' }} on its own</ng-container
+            >
+          </span>
+        }
+      }
+      <div class="calc-chart-axis flex justify-between font-mono text-xs">
+        <span i18n="Chart axis label for the start@@calculator.chart.today">Today</span>
+        <span>{{ chart()?.endYear }}</span>
+      </div>
+      @if (inputsValid()) {
+        <div class="calc-legend mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm">
+          <span
+            class="calc-legend-saving"
+            i18n="Chart legend for the savings path@@calculator.chart.withSaving"
+            >With your monthly saving</span
+          >
+          @if (chart()?.hasNetWorth) {
+            <span
+              class="calc-legend-without"
+              i18n="Chart legend for the path without saving@@calculator.chart.withoutSaving"
+              >What you have, growing on its own</span
+            >
+          }
+        </div>
+      }
+    </div>
+  </div>
 
   <!-- A raised card, not the bare page: mat-form-field's outline appearance has no
        fill of its own, so its label/input text (Material's own on-surface tokens,
        tuned dark for a light surface) needs a light surface underneath it. -->
-  <form class="surface-card grid grid-cols-1 md:grid-cols-3 gap-4 rounded-2xl p-4 mb-6 sm:p-6">
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label i18n="Calculator input label@@calculator.netWorth.label"
-        >Current Net Worth</mat-label
-      >
-      <span matPrefix class="px-2">{{ currencySymbol }}</span>
-      <input
-        matInput
-        type="number"
-        min="0"
-        appSelectOnFocus
-        [ngModel]="currentNetWorth()"
-        (ngModelChange)="updateAmount(currentNetWorth, $event)"
-        name="currentNetWorth"
-        i18n-aria-label="Accessible name of the net-worth input@@calculator.netWorth.ariaLabel"
-        aria-label="Current net worth"
-      />
-      <mat-icon matSuffix aria-hidden="true">account_balance</mat-icon>
-      <mat-error i18n="Error under an amount input that went negative@@calculator.amount.error"
-        >Enter 0 or more.</mat-error
-      >
-    </mat-form-field>
+  <form class="calc-deck surface-card mt-6 rounded-2xl p-4 sm:p-6">
+    <h2
+      class="calc-deck-heading page-heading mb-3 text-base font-semibold"
+      i18n="Heading of the inputs@@calculator.deck.plan"
+    >
+      Your plan
+    </h2>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+        <mat-label i18n="Calculator input label@@calculator.netWorth.label"
+          >Current net worth</mat-label
+        >
+        <span matPrefix class="px-2">{{ currencySymbol }}</span>
+        <input
+          matInput
+          type="number"
+          required
+          min="0"
+          appSelectOnFocus
+          [ngModel]="shown(currentNetWorth())"
+          (ngModelChange)="updateAmount(currentNetWorth, $event)"
+          name="currentNetWorth"
+          i18n-aria-label="Accessible name of the net-worth input@@calculator.netWorth.ariaLabel"
+          aria-label="Current net worth"
+        />
+        <span matSuffix class="calc-key calc-key-without" aria-hidden="true"></span>
+        <mat-error i18n="Error under an amount input that went negative@@calculator.amount.error"
+          >Enter 0 or more.</mat-error
+        >
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label i18n="Calculator input label@@calculator.years.label"
-        >Years Until Retirement</mat-label
-      >
-      <input
-        matInput
-        type="number"
-        [min]="bounds.years.min"
-        [max]="bounds.years.max"
-        appSelectOnFocus
-        [ngModel]="yearsUntilRetirement()"
-        (ngModelChange)="updateAmount(yearsUntilRetirement, $event)"
-        name="yearsUntilRetirement"
-        i18n-aria-label="Accessible name of the years input@@calculator.years.ariaLabel"
-        aria-label="Years until retirement"
-      />
-      <mat-icon matSuffix aria-hidden="true">hourglass_bottom</mat-icon>
-      <mat-error i18n="Error under the years input@@calculator.years.error"
-        >Enter between {{ bounds.years.min }} and {{ bounds.years.max }} years.</mat-error
-      >
-    </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+        <mat-label i18n="Calculator input label@@calculator.years.label"
+          >Years until retirement</mat-label
+        >
+        <input
+          matInput
+          type="number"
+          required
+          [min]="bounds.years.min"
+          [max]="bounds.years.max"
+          appSelectOnFocus
+          [ngModel]="shown(yearsUntilRetirement())"
+          (ngModelChange)="updateAmount(yearsUntilRetirement, $event)"
+          name="yearsUntilRetirement"
+          i18n-aria-label="Accessible name of the years input@@calculator.years.ariaLabel"
+          aria-label="Years until retirement"
+        />
+        <span matSuffix class="calc-key calc-key-axis" aria-hidden="true"></span>
+        <mat-error i18n="Error under the years input@@calculator.years.error"
+          >Enter between {{ bounds.years.min }} and {{ bounds.years.max }} years.</mat-error
+        >
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="w-full">
-      <mat-label i18n="Calculator input label@@calculator.income.label"
-        >Target Monthly Income</mat-label
-      >
-      <span matPrefix class="px-2">{{ currencySymbol }}</span>
-      <input
-        matInput
-        type="number"
-        min="0"
-        appSelectOnFocus
-        [ngModel]="targetMonthlyIncome()"
-        (ngModelChange)="updateAmount(targetMonthlyIncome, $event)"
-        name="targetMonthlyIncome"
-        i18n-aria-label="Accessible name of the target-income input@@calculator.income.ariaLabel"
-        aria-label="Target monthly income"
-      />
-      <mat-icon matSuffix aria-hidden="true">payments</mat-icon>
-      <mat-error i18n="Error under an amount input that went negative@@calculator.amount.error"
-        >Enter 0 or more.</mat-error
-      >
-    </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+        <mat-label i18n="Calculator input label@@calculator.income.label"
+          >Target monthly income</mat-label
+        >
+        <span matPrefix class="px-2">{{ currencySymbol }}</span>
+        <input
+          matInput
+          type="number"
+          required
+          min="0"
+          appSelectOnFocus
+          [ngModel]="shown(targetMonthlyIncome())"
+          (ngModelChange)="updateAmount(targetMonthlyIncome, $event)"
+          name="targetMonthlyIncome"
+          i18n-aria-label="Accessible name of the target-income input@@calculator.income.ariaLabel"
+          aria-label="Target monthly income"
+        />
+        <span matSuffix class="calc-key calc-key-goal" aria-hidden="true"></span>
+        <mat-error i18n="Error under an amount input that went negative@@calculator.amount.error"
+          >Enter 0 or more.</mat-error
+        >
+      </mat-form-field>
+    </div>
+
+    <h2
+      class="calc-deck-heading page-heading mt-8 mb-3 text-base font-semibold"
+      i18n="Heading of the assumption inputs@@calculator.deck.assumptions"
+    >
+      Assumptions
+    </h2>
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+        <mat-label i18n="Calculator input label@@calculator.return.label"
+          >Annual return after inflation (%)</mat-label
+        >
+        <input
+          matInput
+          type="number"
+          required
+          step="0.5"
+          [min]="bounds.annualReturn.min"
+          [max]="bounds.annualReturn.max"
+          appSelectOnFocus
+          [ngModel]="shown(estimatedAnnualReturn())"
+          (ngModelChange)="updateAmount(estimatedAnnualReturn, $event)"
+          name="estimatedAnnualReturn"
+          i18n-aria-label="Accessible name of the annual return input@@calculator.return.ariaLabel"
+          aria-label="Annual return after inflation, in percent"
+        />
+        <span matPrefix class="calc-key calc-key-slope ml-3" aria-hidden="true"></span>
+        <span matSuffix class="px-2">%</span>
+        @if (isReturnOptimistic()) {
+          <mat-hint
+            class="return-warning"
+            i18n="Hint when the return is above the long-run average@@calculator.return.optimistic"
+            >Above the long-run average of about {{ longRunReturn }}%: treat the result as a best
+            case.</mat-hint
+          >
+        } @else if (returnPeriod(); as period) {
+          <mat-hint i18n="Hint under the return input, live data@@calculator.return.hintLive"
+            >US stocks, {{ period.from }}–{{ period.to }}, after inflation (World Bank)</mat-hint
+          >
+        } @else {
+          <mat-hint i18n="Hint under the return input, baseline@@calculator.return.hint"
+            >Long-run US stock return after inflation</mat-hint
+          >
+        }
+        <mat-error i18n="Error under the return input@@calculator.return.error"
+          >Enter between {{ bounds.annualReturn.min }}% and
+          {{ bounds.annualReturn.max }}%.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="w-full">
+        <mat-label i18n="Calculator input label@@calculator.withdrawal.label"
+          >Safe withdrawal rate (%)</mat-label
+        >
+        <input
+          matInput
+          type="number"
+          required
+          step="0.25"
+          [min]="bounds.withdrawalRate.min"
+          [max]="bounds.withdrawalRate.max"
+          appSelectOnFocus
+          [ngModel]="shown(safeWithdrawalRate())"
+          (ngModelChange)="updateAmount(safeWithdrawalRate, $event)"
+          name="safeWithdrawalRate"
+          i18n-aria-label="
+            Accessible name of the withdrawal rate input@@calculator.withdrawal.ariaLabel"
+          aria-label="Safe withdrawal rate percentage"
+        />
+        <span matPrefix class="calc-key calc-key-goal ml-3" aria-hidden="true"></span>
+        <span matSuffix class="px-2">%</span>
+        <mat-hint i18n="Hint under the withdrawal rate input@@calculator.withdrawal.hint"
+          >Standard rule of thumb (~4% Trinity Study rule)</mat-hint
+        >
+        <mat-error i18n="Error under the withdrawal rate input@@calculator.withdrawal.error"
+          >Enter between {{ bounds.withdrawalRate.min }}% and
+          {{ bounds.withdrawalRate.max }}%.</mat-error
+        >
+      </mat-form-field>
+    </div>
+
+    <button
+      matButton
+      type="button"
+      class="calc-reset mt-2 min-h-11"
+      i18n="Resets the calculator inputs@@calculator.reset"
+      (click)="reset()"
+    >
+      Start over
+    </button>
   </form>
 
-  <mat-accordion class="mb-8 block">
-    <mat-expansion-panel class="assumptions-panel rounded-xl">
-      <!-- The header stays a single Material-sized row at every width: the
-           label shortens and the summary switches to a compact form rather
-           than wrapping. The summary never shrinks — the live numbers are the
-           part worth reading while the panel is closed. -->
-      <mat-expansion-panel-header>
-        <mat-panel-title class="flex flex-none items-center gap-2 font-medium">
-          <mat-icon class="panel-icon" aria-hidden="true">tune</mat-icon>
-          <span
-            class="sm:hidden"
-            i18n="Short form of the assumptions panel title@@calculator.assumptions.titleShort"
-            >Assumptions</span
-          >
-          <span
-            class="hidden sm:inline"
-            i18n="Assumptions panel title@@calculator.assumptions.title"
-            >Investment Assumptions</span
-          >
-        </mat-panel-title>
-        <mat-panel-description class="grow justify-end whitespace-nowrap">
-          <span
-            class="hidden sm:inline"
-            i18n="Collapsed summary of the two assumptions@@calculator.assumptions.summary"
-          >
-            {{ estimatedAnnualReturn() }}% real return, {{ safeWithdrawalRate() }}% withdrawal rate
-          </span>
-          <span class="sm:hidden">
-            {{ estimatedAnnualReturn() }}% / {{ safeWithdrawalRate() }}%
-          </span>
-        </mat-panel-description>
-      </mat-expansion-panel-header>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-        <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label i18n="Calculator input label@@calculator.return.label"
-            >Annual Return after Inflation (%)</mat-label
-          >
-          <input
-            matInput
-            type="number"
-            step="0.5"
-            [min]="bounds.annualReturn.min"
-            [max]="bounds.annualReturn.max"
-            appSelectOnFocus
-            [ngModel]="estimatedAnnualReturn()"
-            (ngModelChange)="updateAmount(estimatedAnnualReturn, $event)"
-            name="estimatedAnnualReturn"
-            i18n-aria-label="
-              Accessible name of the annual return input@@calculator.return.ariaLabel"
-            aria-label="Annual return after inflation, in percent"
-          />
-          <span matSuffix class="px-2">%</span>
-          @if (isReturnOptimistic()) {
-            <mat-hint
-              class="return-warning"
-              i18n="
-                Hint when the return is above the long-run average@@calculator.return.optimistic"
-              >Above the long-run average of about {{ longRunReturn }}%: treat the result as a best
-              case.</mat-hint
-            >
-          } @else if (returnPeriod(); as period) {
-            <mat-hint i18n="Hint under the return input, live data@@calculator.return.hintLive"
-              >US stocks, {{ period.from }}–{{ period.to }}, after inflation (World Bank)</mat-hint
-            >
-          } @else {
-            <mat-hint i18n="Hint under the return input, baseline@@calculator.return.hint"
-              >Long-run US stock return after inflation</mat-hint
-            >
-          }
-          <mat-error i18n="Error under the return input@@calculator.return.error"
-            >Enter between {{ bounds.annualReturn.min }}% and
-            {{ bounds.annualReturn.max }}%.</mat-error
-          >
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label i18n="Calculator input label@@calculator.withdrawal.label"
-            >Safe Withdrawal Rate (%)</mat-label
-          >
-          <input
-            matInput
-            type="number"
-            step="0.25"
-            [min]="bounds.withdrawalRate.min"
-            [max]="bounds.withdrawalRate.max"
-            appSelectOnFocus
-            [ngModel]="safeWithdrawalRate()"
-            (ngModelChange)="updateAmount(safeWithdrawalRate, $event)"
-            name="safeWithdrawalRate"
-            i18n-aria-label="
-              Accessible name of the withdrawal rate input@@calculator.withdrawal.ariaLabel"
-            aria-label="Safe withdrawal rate percentage"
-          />
-          <span matSuffix class="px-2">%</span>
-          <mat-hint i18n="Hint under the withdrawal rate input@@calculator.withdrawal.hint"
-            >Standard rule of thumb (~4% Trinity Study rule)</mat-hint
-          >
-          <mat-error i18n="Error under the withdrawal rate input@@calculator.withdrawal.error"
-            >Enter between {{ bounds.withdrawalRate.min }}% and
-            {{ bounds.withdrawalRate.max }}%.</mat-error
-          >
-        </mat-form-field>
-      </div>
-    </mat-expansion-panel>
-  </mat-accordion>
-
-  <!-- One polite announcement of the answer, so a screen reader hears the result of
-       an edit without all four cards re-announcing. -->
-  <p class="sr-only" aria-live="polite">
-    @if (inputsValid()) {
-      <ng-container i18n="Screen-reader announcement of the result@@calculator.result.announce"
-        >You need to save
-        {{ requiredMonthlyContribution() | currency: currency : 'symbol' : '1.0-0' }} a
-        month.</ng-container
-      >
-    } @else {
-      <ng-container
-        i18n="Screen-reader announcement when an input is invalid@@calculator.result.invalid"
-        >Check the highlighted fields to see a result.</ng-container
-      >
-    }
-  </p>
-
-  <div class="summary-cards grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.nestEgg"
-        >Total Nest Egg Goal</span
-      >
-      <p class="text-2xl font-semibold mt-1">
-        {{ inputsValid() ? (totalNestEggNeeded() | currency: currency : 'symbol' : '1.0-0') : '—' }}
-      </p>
-    </div>
-
-    <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.compounded"
-        >Compounded Net Worth</span
-      >
-      <p class="text-2xl font-semibold mt-1">
-        {{ inputsValid() ? (futureNetWorth() | currency: currency : 'symbol' : '1.0-0') : '—' }}
-      </p>
-    </div>
-
-    <div class="card p-4 rounded-xl">
-      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.gap"
-        >Remaining Gap</span
-      >
-      <p class="text-2xl font-semibold mt-1">
-        {{
-          inputsValid() ? (remainingTargetNestEgg() | currency: currency : 'symbol' : '1.0-0') : '—'
-        }}
-      </p>
-    </div>
-
-    <!-- The answer leads on phones, where the four cards stack; in the four-column row
-         it closes the sum it is the result of. -->
-    <div class="card highlight order-first p-4 rounded-xl lg:order-none">
-      <span class="text-sm font-medium" i18n="Result card label@@calculator.result.monthly"
-        >Required Monthly Savings</span
-      >
-      <p class="text-2xl font-semibold mt-1">
-        {{
-          inputsValid()
-            ? (requiredMonthlyContribution() | currency: currency : 'symbol' : '1.0-0')
-            : '—'
-        }}
-      </p>
-    </div>
-  </div>
-
-  <app-assumptions-info-card
-    [safeWithdrawalRate]="safeWithdrawalRate()"
-    [estimatedAnnualReturn]="estimatedAnnualReturn()"
-    [isLive]="isLive()"
-    [returnPeriod]="returnPeriod()"
-    [isLoading]="isLoading()"
-  />
+  <details class="calc-method mt-6">
+    <summary
+      class="page-heading min-h-11 cursor-pointer py-2 font-semibold"
+      i18n="Expander for the formulas@@calculator.method"
+    >
+      How this is calculated
+    </summary>
+    <app-assumptions-info-card
+      [safeWithdrawalRate]="safeWithdrawalRate()"
+      [estimatedAnnualReturn]="estimatedAnnualReturn()"
+      [isLive]="isLive()"
+      [isLoading]="isLoading()"
+      [returnPeriod]="returnPeriod()"
+    />
+  </details>
 </section>

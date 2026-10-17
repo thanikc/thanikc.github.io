@@ -57,6 +57,48 @@ describe('CalculatorService', () => {
     expect(service.inputsValid()).toBe(false);
   });
 
+  // An emptied field is not a 0: it is missing, and the results must say so.
+  it('treats an emptied field as invalid, not as zero', () => {
+    service.targetMonthlyIncome.set(NaN);
+    expect(service.inputsValid()).toBe(false);
+  });
+
+  // The chart: one point per year from today to retirement, the savings path
+  // landing on the goal and the no-saving path landing on the compounded net worth.
+  it('traces the savings path from today to the goal, year by year', () => {
+    service.currentNetWorth.set(50_000);
+    service.yearsUntilRetirement.set(20);
+    service.estimatedAnnualReturn.set(5);
+    const points = service.trajectory();
+
+    expect(points).toHaveLength(21);
+    expect(points[0]).toEqual({ year: 0, withSaving: 50_000, withoutSaving: 50_000 });
+    expect(points[20].withSaving).toBeCloseTo(service.totalNestEggNeeded(), -2);
+    expect(points[20].withoutSaving).toBeCloseTo(service.futureNetWorth(), 6);
+    expect(points[10].withSaving).toBeGreaterThan(points[10].withoutSaving);
+  });
+
+  it('traces nothing while an input is invalid', () => {
+    service.yearsUntilRetirement.set(0);
+    expect(service.trajectory()).toEqual([]);
+  });
+
+  it('resets every input to where the page started', () => {
+    service.currentNetWorth.set(1);
+    service.yearsUntilRetirement.set(2);
+    service.targetMonthlyIncome.set(3);
+    service.estimatedAnnualReturn.set(9);
+    service.safeWithdrawalRate.set(3);
+
+    service.reset();
+
+    expect(service.currentNetWorth()).toBe(0);
+    expect(service.yearsUntilRetirement()).toBe(30);
+    expect(service.targetMonthlyIncome()).toBe(4000);
+    expect(service.estimatedAnnualReturn()).toBe(DEFAULT_ANNUAL_RETURN);
+    expect(service.safeWithdrawalRate()).toBe(4);
+  });
+
   // No silent substitution: a 0% rate is invalid, not quietly computed at 4%.
   it('does not compute the goal from a default the visitor did not enter', () => {
     service.safeWithdrawalRate.set(0);

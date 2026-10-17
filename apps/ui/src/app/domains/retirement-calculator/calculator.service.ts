@@ -20,9 +20,14 @@ export class CalculatorService {
   readonly currency = this.localCurrency.code;
 
   // --- Core inputs ---
-  readonly currentNetWorth = signal(0);
-  readonly yearsUntilRetirement = signal(30);
-  readonly targetMonthlyIncome = signal(this.localCurrency.monthlyIncome);
+  private readonly defaults = {
+    netWorth: 0,
+    years: 30,
+    monthlyIncome: this.localCurrency.monthlyIncome,
+  };
+  readonly currentNetWorth = signal(this.defaults.netWorth);
+  readonly yearsUntilRetirement = signal(this.defaults.years);
+  readonly targetMonthlyIncome = signal(this.defaults.monthlyIncome);
 
   // --- Adjustable assumptions: user-writable, reseeded whenever live data arrives ---
   readonly estimatedAnnualReturn = linkedSignal(() => this.assumptions.estimatedAnnualReturn());
@@ -78,4 +83,38 @@ export class CalculatorService {
     // Payment of an annuity whose future value is the gap: PMT = FV * r / ((1 + r)^n - 1)
     return gap * (monthlyRate / (Math.pow(1 + monthlyRate, totalMonths) - 1));
   });
+
+  /**
+   * The chart's two paths, one point per year from today (0) to retirement: what
+   * the net worth grows to on its own, and that plus the required monthly saving,
+   * which lands on the goal. Same compounding as the figures above (annual on the
+   * net worth, monthly on contributions). Empty while an input is invalid.
+   */
+  readonly trajectory = computed(() => {
+    if (!this.inputsValid()) return [];
+
+    const years = this.yearsUntilRetirement();
+    const rate = this.estimatedAnnualReturn() / 100;
+    const monthlyRate = rate / MONTHS_PER_YEAR;
+    const contribution = this.requiredMonthlyContribution();
+
+    return Array.from({ length: years + 1 }, (_, year) => {
+      const months = year * MONTHS_PER_YEAR;
+      const withoutSaving = this.currentNetWorth() * Math.pow(1 + rate, year);
+      const saved =
+        monthlyRate === 0
+          ? contribution * months
+          : (contribution * (Math.pow(1 + monthlyRate, months) - 1)) / monthlyRate;
+      return { year, withSaving: withoutSaving + saved, withoutSaving };
+    });
+  });
+
+  /** Back to the page's starting values, with the live assumptions. */
+  reset(): void {
+    this.currentNetWorth.set(this.defaults.netWorth);
+    this.yearsUntilRetirement.set(this.defaults.years);
+    this.targetMonthlyIncome.set(this.defaults.monthlyIncome);
+    this.estimatedAnnualReturn.set(this.assumptions.estimatedAnnualReturn());
+    this.safeWithdrawalRate.set(this.assumptions.safeWithdrawalRate());
+  }
 }

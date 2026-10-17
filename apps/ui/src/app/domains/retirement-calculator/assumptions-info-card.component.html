@@ -1,24 +1,13 @@
-<mat-card class="info-card mt-6">
-  <!-- flex-wrap, not one row: the status chip is as wide as its longest translation
-       ("Live-Raten werden geladen …"), and at 360px it has to drop below the title
-       rather than push the card wider than the page. -->
-  <mat-card-header class="flex flex-wrap items-start gap-2">
-    <div class="flex min-w-0 grow">
-      <mat-icon matCardAvatar aria-hidden="true" class="info-icon">info</mat-icon>
-      <mat-card-title
-        class="info-title text-base font-semibold"
-        i18n="Title of the how-it-is-calculated card@@calculator.info.title"
-      >
-        How It Is Calculated & Underlying Assumptions
-      </mat-card-title>
-    </div>
-
+<mat-card appearance="outlined" class="info-card mt-2">
+  <!-- The expander's summary ("How this is calculated") is the title; the card
+       opens with where the data stands. -->
+  <mat-card-header class="flex items-start">
     <div class="flex min-w-0 shrink-0 justify-self-end" role="status">
       @if (isLoading()) {
         <div class="data-source-chip loading">
           <mat-spinner diameter="12" aria-hidden="true"></mat-spinner>
           <span i18n="Shown while the World Bank rates load@@calculator.info.fetching"
-            >Fetching live rates...</span
+            >Fetching live rates…</span
           >
         </div>
       } @else if (isLive()) {
@@ -27,7 +16,7 @@
           i18n="Chip: assumptions came from the live API@@calculator.info.liveData"
         >
           <mat-icon class="chip-icon" aria-hidden="true">check_circle</mat-icon>
-          Live Economic Data
+          Live economic data
         </span>
       } @else {
         <span
@@ -35,7 +24,7 @@
           i18n="Chip: assumptions fell back to fixed values@@calculator.info.baselineData"
         >
           <mat-icon class="chip-icon" aria-hidden="true">history</mat-icon>
-          Baseline Assumptions
+          Baseline assumptions
         </span>
       }
     </div>
@@ -43,27 +32,27 @@
 
   <mat-card-content class="info-body mt-3 space-y-3 text-sm">
     <p i18n="How the target nest egg is derived@@calculator.info.step1">
-      <strong>1. Target Nest Egg:</strong> Based on the standard
-      <strong>{{ safeWithdrawalRate() }}% Safe Withdrawal Rate</strong> (Trinity Study rule), your
-      required nest egg is calculated as:
-      <code class="formula block my-1 rounded p-2 font-mono text-xs">
-        Target Nest Egg = (Desired Monthly Income × 12) / {{ safeWithdrawalRate() / 100 }}
-      </code>
+      <strong>1. Target nest egg:</strong> At your
+      <strong>{{ safeWithdrawalRate() }}% withdrawal rate</strong> (the Trinity Study rule of thumb
+      is 4%), the nest egg you need is:
+      <span class="formula my-2 block">
+        Target nest egg = (monthly income × 12) / {{ safeWithdrawalRate() / 100 }}
+      </span>
     </p>
 
     <p i18n="How the current net worth is grown@@calculator.info.step2">
-      <strong>2. Current Net Worth Growth:</strong> Your existing net worth is assumed to compound
+      <strong>2. How your net worth grows:</strong> Your existing net worth is assumed to compound
       annually at an estimated real rate of <strong>{{ estimatedAnnualReturn() }}%</strong> (after
       inflation, so every amount stays in today's money) over the remaining years until retirement:
-      <code class="formula block my-1 rounded p-2 font-mono text-xs">
-        Future Value of Net Worth = Current Net Worth × (1 + Return Rate)^Years
-      </code>
+      <span class="formula my-2 block">
+        Net worth at retirement = net worth today × (1 + return)^years
+      </span>
     </p>
 
     <p i18n="How the required monthly contribution is derived@@calculator.info.step3">
-      <strong>3. Required Monthly Contribution:</strong> The remaining gap between your target nest
-      egg and the future value of your current net worth is funded via monthly contributions
-      compounding over time at <strong>{{ estimatedAnnualReturn() }}% per year</strong>.
+      <strong>3. The monthly saving:</strong> The remaining gap between your target nest egg and the
+      future value of your current net worth is funded via monthly contributions compounding over
+      time at <strong>{{ estimatedAnnualReturn() }}% per year</strong>.
     </p>
 
     @if (returnPeriod(); as period) {

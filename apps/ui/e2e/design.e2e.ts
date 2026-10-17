@@ -769,6 +769,7 @@ const seriousViolations = async (page: Page, include?: string) => {
 test.describe('states', () => {
   test('calculator while its live rates load', async ({ browser }) => {
     const page = await openPage(browser, '/en/calculator', { width: 360, worldBankPending: true });
+    await page.locator('details.calc-method summary').click();
     await expect(page.locator('.data-source-chip.loading')).toBeVisible();
 
     expect(await seriousViolations(page)).toEqual([]);

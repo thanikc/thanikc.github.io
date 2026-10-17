@@ -17,6 +17,8 @@ describe('RetirementCalculatorComponent', () => {
 
   let inputsValidMockSignal: WritableSignal<boolean>;
   let isReturnOptimisticMockSignal: WritableSignal<boolean>;
+  let monthlyMockSignal: WritableSignal<number>;
+  const resetSpy = vi.fn();
 
   let mockAssumptionService: Partial<AssumptionDataService>;
   let mockCalculatorService: Partial<CalculatorService>;
@@ -32,6 +34,8 @@ describe('RetirementCalculatorComponent', () => {
 
     inputsValidMockSignal = signal(true);
     isReturnOptimisticMockSignal = signal(false);
+    monthlyMockSignal = signal(410.82);
+    resetSpy.mockClear();
 
     mockAssumptionService = {
       isLive: signal(true),
@@ -48,10 +52,16 @@ describe('RetirementCalculatorComponent', () => {
       totalNestEggNeeded: signal(1200000),
       futureNetWorth: signal(0),
       remainingTargetNestEgg: signal(1200000),
-      requiredMonthlyContribution: signal(410.82),
+      requiredMonthlyContribution: monthlyMockSignal,
       inputsValid: inputsValidMockSignal,
       isReturnOptimistic: isReturnOptimisticMockSignal,
       currency: 'USD',
+      trajectory: signal([
+        { year: 0, withSaving: 0, withoutSaving: 0 },
+        { year: 20, withSaving: 400_000, withoutSaving: 0 },
+        { year: 40, withSaving: 1_200_000, withoutSaving: 0 },
+      ]),
+      reset: resetSpy,
     };
 
     await TestBed.configureTestingModule({
@@ -134,9 +144,10 @@ describe('RetirementCalculatorComponent', () => {
       expect(safeWithdrawalRateMockSignal()).toBe(3.5);
     });
 
-    it('should default invalid/NaN input to 0', () => {
-      component.updateAmount(component.currentNetWorth, NaN);
-      expect(currentNetWorthMockSignal()).toBe(0);
+    // An emptied field stays missing (and so invalid) rather than quietly 0.
+    it('keeps an emptied field empty instead of turning it into 0', () => {
+      component.updateAmount(component.currentNetWorth, null);
+      expect(currentNetWorthMockSignal()).toBeNaN();
     });
   });
 
@@ -162,29 +173,32 @@ describe('RetirementCalculatorComponent', () => {
       const el = fixture.nativeElement as HTMLElement;
 
       expect(el.querySelectorAll('h1').length).toBe(1);
-      expect(el.querySelector('h1')?.textContent).toContain('Retirement Calculator');
+      expect(el.querySelector('h1')?.textContent).toContain('Retirement calculator');
     });
 
-    // Both forms are always rendered; a media query picks one, so the collapsed
-    // header never has to wrap or clip the live numbers.
-    it('offers a full and a compact summary of the assumptions', () => {
-      const description = (fixture.nativeElement as HTMLElement).querySelector(
-        'mat-panel-description',
-      );
-
-      expect(description?.textContent).toContain('7% real return, 4% withdrawal rate');
-      expect(description?.textContent).toContain('7% / 4%');
+    it('says in one line what the calculator is for', () => {
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector('.calc-purpose')?.textContent,
+      ).toContain("today's money");
     });
   });
 
   describe('trustworthy results', () => {
-    const results = () => [...el().querySelectorAll('.summary-cards .card p')];
+    const answer = () => el().querySelector('.calc-answer')!;
 
-    it('shows no figures while an input is out of range', () => {
+    // The last valid chart stays, dimmed, so the frame isn't an empty block; the
+    // sentence says what to do.
+    it('dims the last valid chart while an input is out of range, and says what to do', () => {
       inputsValidMockSignal.set(false);
       fixture.detectChanges();
 
-      expect(results().map(p => p.textContent?.trim())).toEqual(['—', '—', '—', '—']);
+      expect(answer().textContent).toContain('Fix the highlighted field');
+      expect(el().querySelector('.calc-chart-frame')?.classList).toContain('is-stale');
+      expect(el().querySelector('.calc-chart path.calc-with-saving')).not.toBeNull();
+      expect(el().querySelector('.calc-legend')).toBeNull();
+      yearsUntilRetirementMockSignal.set(NaN);
+      fixture.detectChanges();
+      expect(el().textContent).not.toContain('NaN');
     });
 
     it('says which range a field accepts once it is left invalid', async () => {
@@ -199,6 +213,24 @@ describe('RetirementCalculatorComponent', () => {
       fixture.detectChanges();
 
       expect(el().querySelector('mat-error')?.textContent).toContain('between 0.5% and 10%');
+    });
+
+    it('flags an emptied field as an error, not a quiet zero', async () => {
+      targetMonthlyIncomeMockSignal.set(NaN);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const input = el().querySelector<HTMLInputElement>(
+        'input[aria-label="Target monthly income"]',
+      )!;
+      input.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      // Material leaves aria-invalid off an empty required field; the field state
+      // and its error text carry it.
+      expect(input.value).toBe('');
+      expect(input.closest('mat-form-field')?.classList).toContain('mat-form-field-invalid');
     });
 
     it('names the source and period of the live return', () => {
@@ -216,11 +248,23 @@ describe('RetirementCalculatorComponent', () => {
 
     // Screen-reader users change an input and need to hear the answer, once,
     // without the four cards all re-announcing.
-    it('announces the monthly answer in one polite live region', () => {
+    // The answer is one sentence, and it is the page's single polite live region.
+    it('answers in one sentence: the monthly saving, for how long, for what income', () => {
       const live = el().querySelectorAll('p[aria-live="polite"]');
 
       expect(live.length).toBe(1);
-      expect(live[0].textContent).toContain('$411');
+      expect(live[0]).toBe(answer());
+      const text = answer().textContent!.replace(/\s+/g, ' ');
+      expect(text).toContain('$411');
+      expect(text).toContain('40 years');
+      expect(text).toContain('$4,000');
+    });
+
+    it('says so when what you have already reaches the goal', () => {
+      monthlyMockSignal.set(0);
+      fixture.detectChanges();
+
+      expect(answer().textContent).toContain('on track');
     });
 
     it('shows amounts in the currency of the locale build', async () => {
@@ -235,8 +279,60 @@ describe('RetirementCalculatorComponent', () => {
       fixture = TestBed.createComponent(RetirementCalculatorComponent);
       fixture.detectChanges();
 
-      expect(results()[0].textContent).toContain('€');
+      expect(el().querySelector('.calc-goal-label')?.textContent).toContain('€');
       expect(el().querySelector('[matprefix]')?.textContent).toContain('€');
     });
+  });
+
+  describe('trajectory chart', () => {
+    const chart = () => el().querySelector('svg.calc-chart')!;
+
+    it('draws the savings path, the gap and the goal', () => {
+      expect(chart().querySelector('path.calc-with-saving')?.getAttribute('d')).toMatch(/^M/);
+      expect(chart().querySelector('path.calc-gap')).not.toBeNull();
+      expect(chart().querySelector('line.calc-goal')).not.toBeNull();
+    });
+
+    // Nothing in the first view reads "$0": with nothing saved yet there is no
+    // no-saving path, end label or legend entry to show.
+    it('draws the no-saving path only when there is a net worth to grow', () => {
+      expect(chart().querySelector('path.calc-without-saving')).toBeNull();
+      expect(el().querySelector('.calc-without-label')).toBeNull();
+      expect(el().querySelector('.calc-legend-without')).toBeNull();
+
+      currentNetWorthMockSignal.set(50_000);
+      fixture.detectChanges();
+
+      expect(chart().querySelector('path.calc-without-saving')).not.toBeNull();
+      expect(el().querySelector('.calc-without-label')?.textContent).toContain('on its own');
+    });
+
+    it('labels where the paths end: the goal', () => {
+      expect(el().querySelector('.calc-goal-label')?.textContent).toContain('$1,200,000');
+    });
+
+    // The sentence carries the answer in text.
+    it('is decoration for assistive tech: the sentence carries the answer', () => {
+      expect(chart().closest('[aria-hidden="true"]')).not.toBeNull();
+    });
+
+    it('labels where the path starts and the year it ends', () => {
+      const labels = el().querySelector('.calc-chart-axis')!.textContent!;
+      expect(labels).toContain('Today');
+      expect(labels).toContain(String(new Date().getFullYear() + 40));
+    });
+  });
+
+  it('keeps the maths one click away, collapsed', () => {
+    const details = el().querySelector<HTMLDetailsElement>('details.calc-method')!;
+
+    expect(details.open).toBe(false);
+    expect(details.querySelector('summary')?.textContent).toContain('How this is calculated');
+    expect(details.querySelector('app-assumptions-info-card')).not.toBeNull();
+  });
+
+  it('resets the inputs to where the page started', () => {
+    el().querySelector<HTMLButtonElement>('button.calc-reset')!.click();
+    expect(resetSpy).toHaveBeenCalled();
   });
 });

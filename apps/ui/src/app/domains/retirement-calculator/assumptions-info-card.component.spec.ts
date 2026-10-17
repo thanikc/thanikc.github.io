@@ -35,7 +35,7 @@ describe('AssumptionsInfoCardComponent', () => {
     fixture.componentRef.setInput('estimatedAnnualReturn', 6);
     fixture.detectChanges();
 
-    expect(host().textContent).toContain('3.5% Safe Withdrawal Rate');
+    expect(host().textContent).toContain('3.5% withdrawal rate');
     expect(host().textContent).toContain('6%');
   });
 
@@ -44,12 +44,12 @@ describe('AssumptionsInfoCardComponent', () => {
   it('labels the data source rather than relying on colour alone', () => {
     fixture.componentRef.setInput('isLive', true);
     fixture.detectChanges();
-    expect(statusChip()?.textContent).toContain('Live Economic Data');
+    expect(statusChip()?.textContent).toContain('Live economic data');
     expect(statusChip()?.querySelector('mat-icon')).not.toBeNull();
 
     fixture.componentRef.setInput('isLive', false);
     fixture.detectChanges();
-    expect(statusChip()?.textContent).toContain('Baseline Assumptions');
+    expect(statusChip()?.textContent).toContain('Baseline assumptions');
     expect(statusChip()?.querySelector('mat-icon')).not.toBeNull();
   });
 

@@ -1,46 +1,222 @@
-.assumptions-panel {
-  border: 1px solid var(--mat-sys-outline-variant);
+// The calculator in the profile's own world: the answer sits on the same charcoal
+// band as the hero and work themes, with gold for the goal and the answer, and the
+// inputs on the stone deck below it.
+
+.calc-stage {
+  color: var(--mat-sys-inverse-on-surface);
+  background-color: var(--mat-sys-inverse-surface);
 }
 
-.panel-icon {
-  color: var(--mat-sys-primary);
-}
+.calc-answer {
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  // Holds the sentence's longest wrap (German: four lines on a phone, two from sm),
+  // so the font swapping in or the figures changing never moves the chart below.
+  min-height: 4lh;
 
-.summary-cards {
-  .card {
-    background-color: var(--app-surface-raised);
-    // The raised fill separates the box from the page; the border still carries the
-    // boundary at 3:1 (`outline`, not `outline-variant`), since fills alone can't.
-    border: 1px solid var(--mat-sys-outline);
-    transition:
-      transform 0.2s ease,
-      box-shadow 0.2s ease,
-      border-color 0.2s ease;
+  @media (min-width: 640px) {
+    min-height: 2lh;
+  }
 
-    // Gated: a tap fakes :hover on touch and leaves the card lifted until the next tap.
-    @media (hover: hover) and (pointer: fine) {
-      &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 24px -10px color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
-        border-color: color-mix(in srgb, var(--mat-sys-primary) 60%, var(--mat-sys-outline));
-      }
-    }
-
-    &.highlight {
-      background: linear-gradient(
-        135deg,
-        var(--mat-sys-primary-container),
-        color-mix(in srgb, var(--mat-sys-tertiary-container) 60%, var(--mat-sys-primary-container))
-      );
-      color: var(--mat-sys-on-primary-container);
-      border-color: transparent;
-      box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--mat-sys-primary) 40%, transparent);
+  // One line fits from lg, except German's longer sentence.
+  @media (min-width: 1024px) {
+    &:not(:lang(de)) {
+      min-height: 1lh;
     }
   }
+}
+
+// Gold on charcoal: the figures the sentence is about.
+.calc-figure {
+  color: var(--mat-sys-tertiary-container);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calc-chart-frame {
+  // Taller on phones relative to width, so the curve still reads as a climb.
+  --calc-chart-ratio: 1.6;
+}
+
+@media (min-width: 640px) {
+  .calc-chart-frame {
+    // Wide enough that the first row of inputs still lands in a 1440×900 view, so
+    // the curve can be watched while an input changes.
+    --calc-chart-ratio: 3.6;
+  }
+}
+
+.calc-chart-frame.is-stale .calc-chart,
+.calc-chart-frame.is-stale .calc-end-label,
+.calc-chart-frame.is-stale .calc-chart-axis {
+  opacity: 0.3;
+}
+
+.calc-chart {
+  aspect-ratio: var(--calc-chart-ratio);
+  height: auto;
+  overflow: visible;
+
+  path,
+  line {
+    // The viewBox stretches with the frame; strokes stay their drawn width.
+    vector-effect: non-scaling-stroke;
+    fill: none;
+  }
+
+  // The one authored motion: the curve redraws to its new shape as an input
+  // changes (where browsers animate the CSS d property). Reduced motion: instant.
+  path {
+    transition: d 450ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.calc-with-saving {
+  stroke: var(--mat-sys-tertiary-container);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.calc-without-saving {
+  stroke: var(--app-on-inverse-muted);
+  stroke-width: 1.5;
+}
+
+.calc-gap {
+  fill: color-mix(in srgb, var(--mat-sys-tertiary-container) 14%, transparent) !important;
+  stroke: none;
+}
+
+.calc-goal {
+  stroke: var(--mat-sys-tertiary-container);
+  stroke-width: 1;
+  stroke-dasharray: 6 6;
+}
+
+.calc-end-label {
+  position: absolute;
+  right: 0;
+  transform: translateY(calc(-100% - 0.375rem));
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.calc-goal-label {
+  color: var(--mat-sys-tertiary-container);
+}
+
+// Sits under its line's end rather than above, clear of the goal label.
+.calc-without-label {
+  transform: translateY(0.375rem);
+  color: var(--app-on-inverse-muted);
+  font-weight: 500;
+}
+
+.calc-chart-axis {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--mat-sys-inverse-on-surface) 30%, transparent);
+  color: var(--app-on-inverse-muted);
+}
+
+// Legend keys drawn in CSS, matching each path's stroke.
+.calc-legend {
+  color: var(--app-on-inverse-muted);
+
+  > span::before {
+    content: '';
+    display: inline-block;
+    width: 1.25rem;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+    border-top: 3px solid var(--mat-sys-tertiary-container);
+  }
+
+  > .calc-legend-without::before {
+    border-top: 1.5px solid var(--app-on-inverse-muted);
+  }
+}
+
+// Each core input carries the key of the chart part it moves: the muted line for
+// what you have, the gold dashed goal for the income, an axis tick for the years.
+.calc-key {
+  display: inline-block;
+  width: 1.5rem;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+}
+
+.calc-key-without {
+  border-top: 1.5px solid var(--mat-sys-on-surface-variant);
+}
+
+.calc-key-goal {
+  border-top: 2px dashed var(--mat-sys-tertiary);
+}
+
+.calc-key-slope {
+  height: 0.75rem;
+  width: 1.25rem;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--mat-sys-tertiary) calc(50% - 1px) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+}
+
+.calc-key-axis {
+  height: 0.625rem;
+  border-bottom: 1.5px solid var(--mat-sys-on-surface-variant);
+  border-right: 1.5px solid var(--mat-sys-on-surface-variant);
+  width: 1rem;
+}
+
+// Typed numbers line up as they change.
+.calc-deck input {
+  font-variant-numeric: tabular-nums;
 }
 
 // The optimistic-return hint is a caution, not an error: the warning tone keeps it
 // apart from the validation messages, and its wording carries it without the hue.
 .return-warning {
   color: var(--app-sys-on-warning-container);
+}
+
+.calc-method {
+  // As wide as the text it holds (62ch paragraphs plus the card's padding).
+  max-width: 42rem;
+
+  > summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    text-decoration-thickness: 1px;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    // A drawn chevron in place of the browser's triangle; turns as it opens.
+    &::before {
+      content: '';
+      width: 0.45rem;
+      height: 0.45rem;
+      border-right: 1.5px solid currentColor;
+      border-bottom: 1.5px solid currentColor;
+      transform: rotate(-45deg);
+      transition: transform 150ms ease-out;
+    }
+  }
+
+  &[open] > summary::before {
+    transform: rotate(45deg);
+  }
 }
