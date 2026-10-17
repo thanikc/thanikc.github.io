@@ -93,6 +93,8 @@ describe('ProfileHeroComponent', () => {
     expect(line).toContain('Open to senior and lead roles');
     expect(line).toContain('remote');
     expect(line).toContain('German or English');
+    // Employment types read as active job hunting to a current employer.
+    expect(line).not.toMatch(/permanent|freelance|part-time/);
   });
 
   it('offers Email and LinkedIn as its actions', () => {

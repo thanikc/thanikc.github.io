@@ -242,7 +242,7 @@
     "calculator.years.error": "กรอกระหว่าง {$INTERPOLATION} ถึง {$INTERPOLATION_1} ปี",
     "projects.showDetails": "รายละเอียด",
     "projects.hideDetails": "ซ่อนรายละเอียด",
-    "hero.availability": "เปิดรับตำแหน่งระดับ Senior และ Lead ทั้งงานประจำ ฟ\u2060รี\u2060แ\u2060ล\u2060น\u2060ซ์ หรือพ\u2060า\u2060ร์\u2060ต\u2060ไ\u2060ท\u2060ม์ ทำงานแบบรีโมต ใช้ภาษาเยอรมันหรืออังกฤษ",
+    "hero.availability": "เปิดรับตำแหน่งระดับ Senior และ Lead ทำงานแบบรีโมต ใช้ภาษาเยอรมันหรืออังกฤษ",
     "chat.errorEmail": "อีเมลถึง Thanik",
     "calculator.answer.invalid": "แก้ไขช่องที่ไฮไลต์ไว้เพื่อดูแผนของคุณ",
     "calculator.answer.onTrack": "คุณมาถูกทางแล้ว: สิ่งที่คุณมีวันนี้จะเติบโตเกินเป้าหมาย {$START_TAG_SPAN}{$INTERPOLATION}{$CLOSE_TAG_SPAN} ภายใน {$INTERPOLATION_1} ปี",

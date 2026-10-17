@@ -242,7 +242,7 @@
     "calculator.years.error": "Gib zwischen {$INTERPOLATION} und {$INTERPOLATION_1} Jahren ein.",
     "projects.showDetails": "Details",
     "projects.hideDetails": "Details ausblenden",
-    "hero.availability": "Offen für Senior- und Lead-Rollen: fest angestellt, freiberuflich oder in Teilzeit, remote, auf Deutsch oder Englisch.",
+    "hero.availability": "Offen für Senior- und Lead-Rollen: remote, auf Deutsch oder Englisch.",
     "chat.errorEmail": "Thanik mailen",
     "calculator.answer.invalid": "Korrigiere das markierte Feld, um deinen Plan zu sehen.",
     "calculator.answer.onTrack": "Du bist auf Kurs: Was du heute hast, wächst in {$INTERPOLATION_1} Jahren über dein Ziel von {$START_TAG_SPAN}{$INTERPOLATION}{$CLOSE_TAG_SPAN} hinaus.",
