@@ -144,6 +144,17 @@ describe('ProfileThemesComponent', () => {
       expect(dots[1].classList.contains('active')).toBe(true);
     });
 
+    // Scenes report progress from the moment a panel's top enters at the bottom
+    // of the viewport; the dot moves on once it has reached the middle.
+    it('keeps the current dot while the next theme is only peeking in', () => {
+      fixture.componentInstance['onSceneProgress'](0, 0.8);
+      fixture.componentInstance['onSceneProgress'](1, 0.1);
+      fixture.detectChanges();
+
+      const dots = [...el().querySelectorAll('.theme-dot')];
+      expect(dots[0].classList.contains('active')).toBe(true);
+    });
+
     // Visibility is driven by an IntersectionObserver on the whole panels
     // block, not derived from individual scenes' progress: a theme whose
     // `@defer` never mounted (scrolled past too fast to trigger `on

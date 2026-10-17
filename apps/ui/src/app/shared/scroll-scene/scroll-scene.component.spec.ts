@@ -92,6 +92,18 @@ describe('ScrollSceneComponent', () => {
     expect(rendererInstance.render).toHaveBeenCalledTimes(1);
   });
 
+  // At either end of the range a scene is faded out (edgeFade), so a still drawn
+  // there would be blank; the still is the scene at its midpoint.
+  it('draws the reduced-motion still at the midpoint of the scene', async () => {
+    stubMatchMedia(true);
+    vi.mocked(stubScene.onProgress).mockClear();
+
+    await createFixture();
+
+    expect(stubScene.onProgress).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(stubScene.onProgress).mock.calls[0][0]).toBe(0.5);
+  });
+
   it('disposes the renderer on destroy', async () => {
     const fixture = await createFixture();
 

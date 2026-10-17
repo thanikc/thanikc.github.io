@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import * as THREE from 'three';
-import { scrollProgress } from './scroll-progress';
+import { ScrollRange, scrollProgress } from './scroll-progress';
 
 /**
  * Builds the renderer, behind DI rather than a bare `new THREE.WebGLRenderer`
@@ -68,7 +68,7 @@ export function edgeFade(t: number, margin = 0.15): number {
 @Component({
   selector: 'app-scroll-scene',
   template: `
-    <div class="scroll-scene-pin sticky top-0 h-screen w-full overflow-hidden">
+    <div class="scroll-scene-pin sticky top-0 h-svh w-full overflow-hidden">
       <canvas #canvas class="block h-full w-full"></canvas>
     </div>
   `,
@@ -82,6 +82,8 @@ export function edgeFade(t: number, margin = 0.15): number {
 })
 export class ScrollSceneComponent {
   readonly scene = input.required<ScrollSceneDef>();
+  /** Which scroll span drives the scene; see `ScrollRange`. */
+  readonly range = input<ScrollRange>('pinned');
   readonly progress = output<number>();
 
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
@@ -120,12 +122,17 @@ export class ScrollSceneComponent {
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    const progress = scrollProgress(host);
+    // Under reduced motion the picture stays still, but progress is still reported
+    // (it drives the section's position dots), so it is emitted on change.
+    const progress = scrollProgress(
+      host,
+      this.range(),
+      reducedMotion ? t => this.progress.emit(t) : undefined,
+    );
 
-    const renderFrame = (): void => {
-      const t = progress.value();
+    const renderFrame = (t = progress.value()): void => {
       this.scene().onProgress(t, object);
-      this.progress.emit(t);
+      if (!reducedMotion) this.progress.emit(t);
       renderer.render(threeScene, camera);
     };
 
@@ -148,8 +155,10 @@ export class ScrollSceneComponent {
     });
     visibilityObserver.observe(canvas);
 
+    // One still, drawn at the midpoint: at either end a scene is faded out
+    // (edgeFade), so a still drawn at the starting progress would be blank.
     if (reducedMotion) {
-      renderFrame();
+      renderFrame(0.5);
     }
 
     this.destroyRef.onDestroy(() => {

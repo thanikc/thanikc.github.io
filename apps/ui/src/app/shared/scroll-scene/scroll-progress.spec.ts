@@ -110,4 +110,33 @@ describe('scrollProgress', () => {
 
     expect(value()).toBe(0);
   });
+
+  // A scene that is only visible while pinned leaves the panel dark while it
+  // enters and leaves; 'through' spans the whole time any of it is on screen.
+  describe("'through' range", () => {
+    it.each([
+      [800, 0], // top at the viewport bottom: just entering
+      [0, 0.5], // halfway through its 1600px on-screen span
+      [-800, 1], // bottom at the viewport top: just left
+    ])('at top %d it is %d', (top, expected) => {
+      const { value, destroy } = scrollProgress(mockWrapper(top, 800), 'through');
+
+      expect(value()).toBeCloseTo(expected);
+      destroy();
+    });
+  });
+
+  it('reports each change to an optional listener, and only changes', async () => {
+    const wrapper = mockWrapper(-800, WRAPPER_HEIGHT);
+    const onChange = vi.fn();
+    const { destroy } = scrollProgress(wrapper, 'pinned', onChange);
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    window.dispatchEvent(new Event('scroll'));
+    await flushRaf();
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(0.5);
+    destroy();
+  });
 });

@@ -22,6 +22,13 @@ import { modernisingScene } from './theme-scenes/modernising-scene.def';
 import { platformScene } from './theme-scenes/platform-scene.def';
 import { servicesScene } from './theme-scenes/services-scene.def';
 
+/**
+ * Scenes run on the 'through' range (0 as a panel's top enters at the viewport
+ * bottom). At ~0.2 a 130vh panel's top has reached the middle of the screen,
+ * which is when it reads as the current theme.
+ */
+const ACTIVE_FROM = 0.2;
+
 // One scene per WorkTheme, same order as profile.content.ts's WORK_THEMES.
 const THEME_SCENES: readonly ScrollSceneDef[] = [
   platformScene,
@@ -53,14 +60,14 @@ export class ProfileThemesComponent {
   private readonly progressByIndex = signal<readonly number[]>([]);
 
   // Sections are stacked in order and each scene's own progress clamps to
-  // [0, 1] outside its own range, so the last one that's started (> 0) is
+  // [0, 1] outside its own range, so the last one past ACTIVE_FROM is
   // the active one — derived purely from the existing per-scene `progress`
   // outputs, no extra scroll listener.
   protected readonly activeIndex = computed(() => {
     const values = this.progressByIndex();
     let active = 0;
     for (let i = 0; i < values.length; i++) {
-      if (values[i] > 0) active = i;
+      if (values[i] > ACTIVE_FROM) active = i;
     }
     return active;
   });

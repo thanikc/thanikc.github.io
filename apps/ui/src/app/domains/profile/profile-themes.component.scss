@@ -18,7 +18,12 @@
 }
 
 .theme-panel {
-  min-height: 200vh;
+  // Enough beyond one screen for the text to stay pinned while its scene turns,
+  // not so much that four sentences take eight screens. The scene runs on the
+  // 'through' range, so it is drawn whenever any of the panel is on screen.
+  min-height: 130vh;
+  // The gap between one theme's text and the next one's.
+  padding-top: 15svh;
   color: var(--mat-sys-inverse-on-surface);
   background-color: var(--mat-sys-inverse-surface);
 
@@ -77,6 +82,7 @@
 
   .theme-panel {
     min-height: 0;
+    padding-top: 0;
     background: none;
     color: #000;
     break-inside: avoid;

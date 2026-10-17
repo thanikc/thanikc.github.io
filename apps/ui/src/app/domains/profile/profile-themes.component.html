@@ -16,6 +16,7 @@
           @defer (on viewport) {
             <app-scroll-scene
               [scene]="sceneFor(i)"
+              range="through"
               (progress)="onSceneProgress(i, $event)"
               class="block h-full w-full"
             />
@@ -24,8 +25,11 @@
           }
         </div>
 
+        <!-- Pinned in the upper part of the screen at its natural height, not centred
+             in a full-height box: a centred box left most of a viewport of empty fill
+             between one theme's text leaving and the next one's arriving. -->
         <div
-          class="theme-content sticky top-0 z-10 mx-auto flex h-screen max-w-6xl flex-col justify-center gap-3 px-4"
+          class="theme-content sticky top-[20svh] z-10 mx-auto flex max-w-6xl flex-col gap-3 px-4"
         >
           <span class="theme-counter text-sm font-bold tracking-widest">{{ counterFor(i) }}</span>
           <h3 class="theme-title font-display text-4xl font-normal tracking-tight sm:text-6xl">
