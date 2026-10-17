@@ -812,3 +812,40 @@ test.describe('states', () => {
     await page.context().close();
   });
 });
+
+test.describe('floating controls', () => {
+  // On phones the launcher tip's arrival peek covered the hero's Email/LinkedIn.
+  test('the chat tip does not peek over the hero on a phone', async ({ browser }) => {
+    // openPage lands finite animations on their end state, so assert the peek is
+    // not set up at all rather than sampling its opacity.
+    const page = await openPage(browser, '/en/', { width: 360 });
+    await expect(page.locator('#chat-fab-tip')).toHaveClass(/chat-fab-tip-peek/);
+    await expect(page.locator('#chat-fab-tip')).toHaveCSS('animation-name', 'none');
+
+    const desktop = await openPage(browser, '/en/', { width: 1440 });
+    await expect(desktop.locator('#chat-fab-tip')).toHaveCSS('animation-name', 'hint-peek');
+    await desktop.context().close();
+    await page.context().close();
+  });
+
+  test('scroll-to-top sits clear of the chat launcher and leaves the footer alone', async ({
+    browser,
+  }) => {
+    for (const width of [360, 1440]) {
+      const page = await openPage(browser, '/en/', { width });
+      await page.evaluate(() => window.scrollTo(0, 1500));
+      const toTop = page.locator('.scroll-to-top-fab');
+      await expect(toTop).toBeVisible();
+
+      const a = (await toTop.boundingBox())!;
+      const b = (await page.locator('button.chat-fab').boundingBox())!;
+      const overlap =
+        a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+      expect(overlap, `scroll-to-top overlaps the launcher at ${width}px`).toBe(false);
+
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await expect(toTop).toBeHidden();
+      await page.context().close();
+    }
+  });
+});
