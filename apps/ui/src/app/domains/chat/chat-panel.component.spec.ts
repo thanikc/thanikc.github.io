@@ -621,4 +621,10 @@ describe('ChatPanelComponent', () => {
       expect(closeSpy).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('limits the composer to what the worker accepts', () => {
+    const textarea = fixture.nativeElement.querySelector('textarea') as HTMLTextAreaElement;
+
+    expect(textarea.maxLength).toBe(2000);
+  });
 });

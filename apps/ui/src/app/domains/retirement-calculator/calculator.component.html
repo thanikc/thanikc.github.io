@@ -160,6 +160,7 @@
           required
           [min]="bounds.years.min"
           [max]="bounds.years.max"
+          pattern="\d+"
           appSelectOnFocus
           [ngModel]="shown(yearsUntilRetirement())"
           (ngModelChange)="updateAmount(yearsUntilRetirement, $event)"
@@ -169,7 +170,7 @@
         />
         <span matSuffix class="calc-key calc-key-axis" aria-hidden="true"></span>
         <mat-error i18n="Error under the years input@@calculator.years.error"
-          >Enter between {{ bounds.years.min }} and {{ bounds.years.max }} years.</mat-error
+          >Enter whole years between {{ bounds.years.min }} and {{ bounds.years.max }}.</mat-error
         >
       </mat-form-field>
 

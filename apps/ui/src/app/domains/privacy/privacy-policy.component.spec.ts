@@ -58,7 +58,6 @@ describe('PrivacyPolicyComponent', () => {
 
     expect(h2Text).toContain('Who We Are');
     expect(h2Text).toContain('Cookies');
-    expect(h2Text).toContain('Google Fonts');
     expect(h2Text).toContain('Google Analytics');
     expect(h2Text).toContain('International Data Transfers');
     expect(h2Text).toContain('Your Rights');
@@ -147,5 +146,42 @@ describe('PrivacyPolicyComponent', () => {
 
   it('colours the page from theme tokens, not the Tailwind palette', () => {
     expect(paletteClassesIn(compiled())).toEqual([]);
+  });
+
+  // This page is a factual inventory of the data flows, so these pin it to what the code does.
+  describe('states what the site actually does', () => {
+    const text = () => compiled().textContent!.replace(/\s+/g, ' ');
+
+    it('no longer claims the backend writes nothing, and names what the cache keeps', () => {
+      expect(text()).not.toContain('nothing is written to a database');
+      expect(text()).not.toContain('not stored by us at all');
+      expect(text()).toContain('30 days');
+      expect(text()).toContain('fingerprint');
+    });
+
+    it('discloses the per-request metrics', () => {
+      expect(text()).toContain('Analytics Engine');
+    });
+
+    it('discloses that voice input can send audio to the browser maker', () => {
+      expect(text()).toContain('speech recognition');
+      expect(text()).toContain('audio');
+    });
+
+    it('says analytics does not load before consent', () => {
+      expect(text()).not.toContain('Consent Mode');
+      expect(text()).toContain('is not loaded');
+    });
+
+    it('no longer describes fonts fetched from Google', () => {
+      expect(text()).not.toContain('Google Fonts');
+      expect(text()).not.toContain('fonts.googleapis.com');
+    });
+
+    it('numbers its sections without a gap', () => {
+      const numbers = headings('section h2').map(h => Number.parseInt(h!, 10));
+
+      expect(numbers).toEqual(numbers.map((_, i) => i + 1));
+    });
   });
 });

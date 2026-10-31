@@ -46,6 +46,10 @@ jobs:
       - name: Run Tests
         run: pnpm --filter @thanikc/ui test
 
+      # A missing translation falls back to English in a build that otherwise succeeds.
+      - name: Check Translations
+        run: pnpm --filter @thanikc/ui i18n:check
+
       # build:pages, not build: it adds the deployment root the localized build
       # leaves empty (language redirect + the root-only files). See
       # apps/ui/scripts/emit-pages-root.mjs.

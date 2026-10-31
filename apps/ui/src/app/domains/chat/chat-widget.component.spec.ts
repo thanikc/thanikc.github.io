@@ -24,10 +24,8 @@ describe('ChatWidgetComponent', () => {
     pending,
     error,
     isOpen,
-    hasConversation: signal(false),
     send: vi.fn(async (_message: string) => undefined),
     retry: vi.fn(async () => undefined),
-    reset: vi.fn(),
     open: vi.fn((_question?: string) => isOpen.set(true)),
     close: vi.fn(() => isOpen.set(false)),
   };
@@ -307,13 +305,6 @@ describe('ChatWidgetComponent', () => {
 
       expect(panel()).toBeNull();
       expect(document.activeElement).toBe(fab());
-    });
-
-    it('keeps the conversation when the panel is closed', () => {
-      panelInstance().close.emit();
-      fixture.detectChanges();
-
-      expect(mockChatService.reset).not.toHaveBeenCalled();
     });
   });
 });

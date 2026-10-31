@@ -44,7 +44,6 @@ describe('ChatService', () => {
     expect(service.turns()).toEqual([]);
     expect(service.pending()).toBe(false);
     expect(service.error()).toBeNull();
-    expect(service.hasConversation()).toBe(false);
   });
 
   it('posts the message and an empty history to the configured chat endpoint', async () => {
@@ -77,7 +76,6 @@ describe('ChatService', () => {
     const done = service.send('Hello');
 
     expect(service.turns()).toEqual([{ role: 'user', content: 'Hello' }]);
-    expect(service.hasConversation()).toBe(true);
 
     httpMock.expectOne(CHAT_ENDPOINT).flush(answer('Hi there'));
     await done;
@@ -166,10 +164,7 @@ describe('ChatService', () => {
     const done = service.send('Hello');
     httpMock
       .expectOne(CHAT_ENDPOINT)
-      .flush(
-        { error: 'all providers failed', attempts: ['groq: 500'] },
-        { status: 502, statusText: 'Bad Gateway' },
-      );
+      .flush({ error: 'could not generate an answer' }, { status: 502, statusText: 'Bad Gateway' });
     await done;
 
     expect(service.error()).toEqual(expect.any(String));
@@ -315,20 +310,6 @@ describe('ChatService', () => {
       expect(service.isOpen()).toBe(false);
       expect(service.turns()).toHaveLength(2);
     });
-  });
-
-  it('resets the conversation', async () => {
-    const failed = service.send('Hello');
-    httpMock
-      .expectOne(CHAT_ENDPOINT)
-      .flush({ error: 'down' }, { status: 502, statusText: 'Bad Gateway' });
-    await failed;
-
-    service.reset();
-
-    expect(service.turns()).toEqual([]);
-    expect(service.error()).toBeNull();
-    expect(service.hasConversation()).toBe(false);
   });
 });
 

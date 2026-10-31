@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
 export interface GtagWindow extends Window {
-  dataLayer?: unknown[][];
+  dataLayer?: unknown[];
   gtag?: (...args: unknown[]) => void;
 }
 
@@ -15,10 +15,11 @@ export interface ConsentUpdate {
   ad_personalization: ConsentState;
 }
 
+const MEASUREMENT_ID = 'G-HSC8QB0EQL';
+
 /**
- * Bootstrapping (dataLayer/gtag.js script tag) is done statically in
- * src/index.html so it is present in the prerendered HTML. This service only
- * forwards page views/events to the already-initialized `window.gtag`.
+ * Google Analytics, which is not on the page until the visitor accepts: nothing reaches
+ * Google before `enable()`, and until then every other method here is a no-op.
  */
 @Injectable({
   providedIn: 'root',
@@ -26,13 +27,34 @@ export interface ConsentUpdate {
 export class AnalyticsService {
   private readonly document = inject(DOCUMENT);
 
-  trackPageView(path: string): void {
+  /** Adds gtag.js to the page. Only call this for a visitor who has accepted. */
+  enable(): void {
     const view = this.window;
+    if (!view || view.gtag) return;
+
+    view.dataLayer ??= [];
+    // gtag.js only reads queued calls in this exact form: an `arguments` object, not an array.
+    view.gtag = function () {
+      view.dataLayer!.push(arguments);
+    };
+    view.gtag('js', new Date());
+    // Page views are reported by `trackPageView`; the automatic one would count them twice.
+    view.gtag('config', MEASUREMENT_ID, { send_page_view: false });
+
+    const script = this.document.createElement('script');
+    script.async = true;
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
+    this.document.head.append(script);
+  }
+
+  /** Reports the address in the bar, so each language build counts as its own page. */
+  trackPageView(): void {
+    const location = this.window?.location;
 
     this.gtag('event', 'page_view', {
       page_title: this.document.title,
-      page_path: path,
-      page_location: view?.location.origin + path,
+      page_path: location?.pathname,
+      page_location: location?.href,
     });
   }
 
@@ -40,8 +62,10 @@ export class AnalyticsService {
     this.gtag('event', name, params);
   }
 
-  /** Forwards a Consent Mode v2 update to the gtag.js queued in index.html. */
+  /** A withdrawal also switches off a gtag.js already on the page, which can't be unloaded. */
   updateConsent(consent: ConsentUpdate): void {
+    const view = this.window as (GtagWindow & Record<string, unknown>) | null;
+    if (view) view[`ga-disable-${MEASUREMENT_ID}`] = consent.analytics_storage === 'denied';
     this.gtag('consent', 'update', consent);
   }
 

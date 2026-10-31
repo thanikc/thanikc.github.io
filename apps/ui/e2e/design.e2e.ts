@@ -885,4 +885,57 @@ test.describe('floating controls', () => {
       await page.context().close();
     }
   });
+
+  // The privacy policy promises this, so it is checked against real traffic.
+  test('nothing goes to Google until the visitor accepts, and the fonts are our own', async ({
+    browser,
+  }) => {
+    const page = await (
+      await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    ).newPage();
+    const google = /google|gstatic/;
+    const requests: string[] = [];
+    page.on('request', request => requests.push(request.url()));
+    await page.route(google, route => route.abort());
+    await page.route(/api\.worldbank\.org/, route =>
+      route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [{}, []] }),
+    );
+
+    await page.goto('/en/', { waitUntil: 'networkidle' });
+    await page.evaluate(() => document.fonts.ready);
+
+    expect(requests.filter(url => google.test(url))).toEqual([]);
+    expect(requests.some(url => url.endsWith('.woff2'))).toBe(true);
+    expect(await page.evaluate(() => document.fonts.check('16px Manrope'))).toBe(true);
+
+    const gtag = page.waitForRequest(/googletagmanager\.com\/gtag\/js/);
+    await page.getByRole('button', { name: 'Accept', exact: true }).click();
+    await gtag;
+
+    // A returning visitor who accepted gets analytics without seeing the banner again.
+    const again = page.waitForRequest(/googletagmanager\.com\/gtag\/js/);
+    await page.reload();
+    await again;
+    await page.context().close();
+  });
+
+  test('a visitor who rejected never loads analytics, on this page view or the next', async ({
+    browser,
+  }) => {
+    const page = await (
+      await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    ).newPage();
+    const requests: string[] = [];
+    page.on('request', request => requests.push(request.url()));
+    await page.route(/api\.worldbank\.org/, route =>
+      route.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [{}, []] }),
+    );
+
+    await page.goto('/en/', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: 'Reject', exact: true }).click();
+    await page.reload({ waitUntil: 'networkidle' });
+
+    expect(requests.filter(url => /google|gstatic/.test(url))).toEqual([]);
+    await page.context().close();
+  });
 });

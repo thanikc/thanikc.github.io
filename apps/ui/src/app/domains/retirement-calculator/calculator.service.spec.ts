@@ -52,6 +52,7 @@ describe('CalculatorService', () => {
     ['a return below -5%', (s: CalculatorService) => s.estimatedAnnualReturn.set(-6)],
     ['a negative net worth', (s: CalculatorService) => s.currentNetWorth.set(-1)],
     ['a negative income', (s: CalculatorService) => s.targetMonthlyIncome.set(-1)],
+    ['a part year', (s: CalculatorService) => s.yearsUntilRetirement.set(10.5)],
   ])('rejects %s', (_, change) => {
     change(service);
     expect(service.inputsValid()).toBe(false);
@@ -172,6 +173,18 @@ describe('CalculatorService', () => {
 
     expect(service.futureNetWorth()).toBe(0);
     expect(service.requiredMonthlyContribution()).toBeCloseTo(gap / totalMonths, 6);
+  });
+
+  it('saves enough to reach the goal when the return is negative', () => {
+    service.currentNetWorth.set(0);
+    service.yearsUntilRetirement.set(30);
+    service.targetMonthlyIncome.set(4000);
+    service.safeWithdrawalRate.set(4);
+    service.estimatedAnnualReturn.set(-2);
+
+    // Contributions lose value too, so plain division (3,333 a month) falls short.
+    expect(service.requiredMonthlyContribution()).toBeCloseTo(4430, -1);
+    expect(service.trajectory().at(-1)?.withSaving).toBeCloseTo(service.totalNestEggNeeded(), -2);
   });
 
   it('should return 0 required contribution when years until retirement is 0', () => {

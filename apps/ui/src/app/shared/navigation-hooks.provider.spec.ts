@@ -23,7 +23,7 @@ describe('provideNavigationHooks()', () => {
     events.next(new NavigationEnd(1, '/first', '/privacy-policy'));
     TestBed.tick();
 
-    expect(trackPageView).toHaveBeenCalledWith('/privacy-policy');
+    expect(trackPageView).toHaveBeenCalled();
     expect(update).toHaveBeenCalledWith('/privacy-policy');
 
     trackPageView.mockRestore();

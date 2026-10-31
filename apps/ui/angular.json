@@ -46,6 +46,7 @@
               }
             ],
             "styles": [
+              "src/styles/fonts.css",
               "src/styles/tailwind.css",
               "src/styles/material.scss",
               "src/styles/motion.scss",

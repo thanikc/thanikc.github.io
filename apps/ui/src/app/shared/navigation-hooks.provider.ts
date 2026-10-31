@@ -13,8 +13,7 @@ import { LocaleHeadService } from './i18n/locale-head.service';
 /**
  * On every completed navigation: reports a Google Analytics page view, and declares the
  * route's canonical URL and other languages. Runs during prerendering too, which is what
- * puts the language links in the static HTML the crawler sees. gtag.js itself (including
- * the measurement id) is bootstrapped in src/index.html so it is in that HTML as well.
+ * puts the language links in the static HTML the crawler sees.
  */
 export function provideNavigationHooks(): EnvironmentProviders {
   return makeEnvironmentProviders([
@@ -28,7 +27,7 @@ export function provideNavigationHooks(): EnvironmentProviders {
           takeUntilDestroyed(),
         )
         .subscribe(({ urlAfterRedirects }) => {
-          analytics.trackPageView(urlAfterRedirects);
+          analytics.trackPageView();
           localeHead.update(urlAfterRedirects);
         });
     }),

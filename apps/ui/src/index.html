@@ -39,52 +39,6 @@
     <link rel="apple-touch-icon" href="img/apple-touch-icon.png" />
     <link rel="manifest" href="manifest.webmanifest" />
     <meta name="theme-color" content="#f4f4f2" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!--
-      Noto Sans Thai: Manrope has no Thai glyphs, so the Thai build would otherwise render in
-      whatever Thai face the visitor's OS happens to have — or in tofu boxes on a
-      machine with none. Each @font-face carries a unicode-range, so English and
-      German visitors never download the Thai woff2.
-    -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500&display=swap"
-      rel="stylesheet"
-    />
-    <!--
-      Site-wide sans (body and headlines), paired with a metric-matched "Manrope Fallback" @font-face (styles/material.scss)
-      so text paints immediately and swaps with ~0 reflow.
-    -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block"
-      rel="stylesheet"
-    />
-    <!--
-      Consent Mode v2 defaults must be queued before gtag.js loads so
-      those scripts see "denied" on first read. The cookie consent banner
-      (CookieConsentService) calls gtag('consent', 'update', ...) once the user
-      makes a choice.
-    -->
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag('consent', 'default', {
-        ad_storage: 'denied',
-        ad_user_data: 'denied',
-        ad_personalization: 'denied',
-        analytics_storage: 'denied',
-      });
-      gtag('js', new Date());
-      gtag('config', 'G-HSC8QB0EQL');
-    </script>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HSC8QB0EQL"></script>
   </head>
   <body>
     <app-root></app-root>
