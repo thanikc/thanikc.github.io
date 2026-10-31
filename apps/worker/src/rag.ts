@@ -42,11 +42,6 @@ export function vectorize(env: Env): VectorizeLike {
   return env.VECTORIZE as unknown as VectorizeLike;
 }
 
-/** Embeds the query and returns the top matching content chunks. */
-export async function retrieve(query: string, env: Env, topK = 5): Promise<RetrievedChunk[]> {
-  return search(await embed(query, env), env, topK);
-}
-
 /** The top matching content chunks for an already-embedded query. */
 export async function search(vector: number[], env: Env, topK = 5): Promise<RetrievedChunk[]> {
   const { matches } = await vectorize(env).query(vector, { topK, returnMetadata: 'all' });
@@ -92,12 +87,16 @@ const DECLINE_ANSWERS: Record<string, string> = {
 
 /** Canned answer for a question the knowledge base can't ground, in the site locale. */
 export function declineAnswer(locale: unknown): string {
-  return (typeof locale === 'string' && DECLINE_ANSWERS[locale]) || DECLINE_ANSWERS['en']!;
+  return typeof locale === 'string' && Object.hasOwn(DECLINE_ANSWERS, locale)
+    ? DECLINE_ANSWERS[locale]!
+    : DECLINE_ANSWERS['en']!;
 }
 
 /** The fallback answer language for a given site locale, or null for English. */
 export function answerLanguage(locale: unknown): string | null {
-  return typeof locale === 'string' ? (ANSWER_LANGUAGES[locale] ?? null) : null;
+  return typeof locale === 'string' && Object.hasOwn(ANSWER_LANGUAGES, locale)
+    ? ANSWER_LANGUAGES[locale]!
+    : null;
 }
 
 /** Builds the grounded message list handed to the chat provider. */

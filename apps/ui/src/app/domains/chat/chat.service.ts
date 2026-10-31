@@ -1,4 +1,4 @@
-import { Injectable, LOCALE_ID, computed, inject, signal } from '@angular/core';
+import { Injectable, LOCALE_ID, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CHAT_API_URL } from './chat.config';
@@ -31,7 +31,6 @@ export class ChatService {
   readonly turns = signal<ChatTurn[]>([]);
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
-  readonly hasConversation = computed(() => this.turns().length > 0);
 
   /**
    * Whether the chat panel is showing. Lives here rather than in the widget so any
@@ -71,11 +70,6 @@ export class ChatService {
       history: recent(turns.slice(0, -1)),
       locale: this.locale,
     });
-  }
-
-  reset(): void {
-    this.turns.set([]);
-    this.error.set(null);
   }
 
   private async ask(request: ChatRequest): Promise<void> {

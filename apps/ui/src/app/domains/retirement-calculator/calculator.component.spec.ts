@@ -215,6 +215,21 @@ describe('RetirementCalculatorComponent', () => {
       expect(el().querySelector('mat-error')?.textContent).toContain('between 0.5% and 10%');
     });
 
+    it('flags part years, which the plan cannot be drawn for', async () => {
+      const input = el().querySelector<HTMLInputElement>(
+        'input[aria-label="Years until retirement"]',
+      )!;
+      input.value = '10.5';
+      input.dispatchEvent(new Event('input'));
+      input.dispatchEvent(new Event('blur'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(input.closest('mat-form-field')?.classList).toContain('mat-form-field-invalid');
+      expect(el().querySelector('mat-error')?.textContent).toContain('whole years');
+    });
+
     it('flags an emptied field as an error, not a quiet zero', async () => {
       targetMonthlyIncomeMockSignal.set(NaN);
       fixture.detectChanges();

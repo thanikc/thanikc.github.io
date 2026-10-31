@@ -62,7 +62,7 @@ Run it after the change is green in `pnpm --filter @thanikc/ui test`, before rep
   `background-image`, not `color` — check that property, not `color`, when verifying it.
 - **Layout shift has causes outside the component.** Record the shifted nodes and their
   timing. Text nodes shifting as `document.fonts` finishes loading means a web-font swap,
-  not a layout bug; confirm by re-running with `fonts.googleapis.com` blocked.
+  not a layout bug; confirm by re-running with the `.woff2` files blocked.
 
 ## The Matrix
 

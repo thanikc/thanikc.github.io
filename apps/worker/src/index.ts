@@ -21,6 +21,8 @@ app.use('/api/*', (c, next) =>
 app.get('/api/health', c => c.json({ status: 'ok' }));
 
 const MAX_MESSAGE_CHARS = 2000;
+/** Mirrors the widget's CHAT_HISTORY_LIMIT; anything longer is not our UI talking. */
+const MAX_HISTORY_TURNS = 6;
 
 app.post('/api/chat', async c => {
   const started = Date.now();
@@ -49,15 +51,19 @@ app.post('/api/chat', async c => {
     return c.json({ error: `message must be at most ${MAX_MESSAGE_CHARS} characters` }, 400);
   }
 
+  // Visitor input: a `system` turn here would otherwise reach the model as an instruction.
+  // Long turns are cut rather than dropped, since a real answer can exceed the message limit.
   const history: ChatMessage[] = Array.isArray(body?.history)
-    ? (body.history as unknown[]).filter(
-        (m): m is ChatMessage =>
-          typeof m === 'object' &&
-          m !== null &&
-          'role' in m &&
-          'content' in m &&
-          typeof (m as ChatMessage).content === 'string',
-      )
+    ? (body.history as unknown[])
+        .filter(
+          (m): m is ChatMessage =>
+            typeof m === 'object' &&
+            m !== null &&
+            ((m as ChatMessage).role === 'user' || (m as ChatMessage).role === 'assistant') &&
+            typeof (m as ChatMessage).content === 'string',
+        )
+        .slice(-MAX_HISTORY_TURNS)
+        .map(({ role, content }) => ({ role, content: content.slice(0, MAX_MESSAGE_CHARS) }))
     : [];
 
   // `locale` is visitor input; buildMessages and declineAnswer only honour a language
@@ -92,39 +98,40 @@ app.post('/api/chat', async c => {
     }
   }
 
-  // One embedding serves both the semantic lookup and retrieval.
-  const vector = await embed(message, c.env);
-  if (cacheable) {
-    const hit = await lookupSemantic(c.env, vector, lang);
-    if (hit) {
-      track({
-        provider: hit.provider,
-        cache: 'semantic',
-        outcome: 'ok',
-        answerLength: hit.answer.length,
-      });
-      return c.json({ ...hit, cached: 'semantic' });
-    }
-  }
-
-  const chunks = await search(vector, c.env);
-  const topScore = chunks[0]?.score ?? 0;
-
-  // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
-  // conversation, so the gate only applies to a conversation's opening message.
-  if (history.length === 0 && topScore < MIN_SCORE) {
-    const answer = declineAnswer(locale);
-    track({
-      provider: 'none',
-      cache: 'none',
-      outcome: 'refused',
-      topScore,
-      answerLength: answer.length,
-    });
-    return c.json({ answer, provider: 'none', sources: [] });
-  }
-
+  let topScore = -1;
   try {
+    // One embedding serves both the semantic lookup and retrieval.
+    const vector = await embed(message, c.env);
+    if (cacheable) {
+      const hit = await lookupSemantic(c.env, vector, lang);
+      if (hit) {
+        track({
+          provider: hit.provider,
+          cache: 'semantic',
+          outcome: 'ok',
+          answerLength: hit.answer.length,
+        });
+        return c.json({ ...hit, cached: 'semantic' });
+      }
+    }
+
+    const chunks = await search(vector, c.env);
+    topScore = chunks[0]?.score ?? 0;
+
+    // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
+    // conversation, so the gate only applies to a conversation's opening message.
+    if (history.length === 0 && topScore < MIN_SCORE) {
+      const answer = declineAnswer(locale);
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'refused',
+        topScore,
+        answerLength: answer.length,
+      });
+      return c.json({ answer, provider: 'none', sources: [] });
+    }
+
     const { answer, provider, failovers } = await generate(
       buildMessages(message, chunks, history, locale),
       c.env,
@@ -135,7 +142,6 @@ app.post('/api/chat', async c => {
         store(c.env, {
           key,
           locale: lang,
-          question: message,
           answer,
           provider,
           sources,
@@ -153,17 +159,17 @@ app.post('/api/chat', async c => {
     });
     return c.json({ answer, provider, sources });
   } catch (err) {
-    if (err instanceof ChatError) {
-      track({
-        provider: 'none',
-        cache: 'none',
-        outcome: 'failed',
-        topScore,
-        failovers: err.attempts.length,
-      });
-      return c.json({ error: err.message, attempts: err.attempts }, 502);
-    }
-    throw err;
+    // Provider errors can carry account details, so the reason goes to the logs only.
+    const attempts = err instanceof ChatError ? err.attempts : [];
+    console.error('chat failed', err instanceof ChatError ? attempts : err);
+    track({
+      provider: 'none',
+      cache: 'none',
+      outcome: 'failed',
+      topScore,
+      failovers: attempts.length,
+    });
+    return c.json({ error: 'could not generate an answer' }, 502);
   }
 });
 

@@ -91,15 +91,16 @@ See `content/README.md` for the file format.
 before any embedding; otherwise the query embedding is compared with the newest 200
 cached questions and a cosine similarity of 0.95 or more reuses that answer. Hits carry
 `cached: 'exact' | 'semantic'`. Follow-ups (non-empty `history`) and declines are never
-cached, and a missing or failing D1 just means no caching. Unlike the Vectorize index,
+cached, and a missing or failing D1 just means no caching (a failure logs a warning). Unlike the Vectorize index,
 a stored answer is reusable on the very next request.
 
 ```bash
-pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # once per new migration
+pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # CI also runs this before each deploy
 ```
 
 An ingest that changes the index empties the cache, so answers grounded on old content
-stop being served; a no-op ingest leaves it alone. Vectorize applies upserts 1–3 minutes
+stop being served; a no-op ingest leaves it alone. CI also empties it on every deploy, so
+a changed prompt or model takes effect at once. Vectorize applies upserts 1–3 minutes
 late, so an answer cached in that window can still reflect the old content. `CACHE_EPOCH`
 remains as a manual override: bump it and deploy to invalidate everything.
 

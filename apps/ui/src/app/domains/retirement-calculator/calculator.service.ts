@@ -38,6 +38,7 @@ export class CalculatorService {
     () =>
       this.currentNetWorth() >= 0 &&
       this.targetMonthlyIncome() >= 0 &&
+      Number.isInteger(this.yearsUntilRetirement()) &&
       within(this.yearsUntilRetirement(), INPUT_BOUNDS.years) &&
       within(this.estimatedAnnualReturn(), INPUT_BOUNDS.annualReturn) &&
       within(this.safeWithdrawalRate(), INPUT_BOUNDS.withdrawalRate),
@@ -76,7 +77,7 @@ export class CalculatorService {
     const monthlyRate = (this.estimatedAnnualReturn() || 0) / 100 / MONTHS_PER_YEAR;
     const totalMonths = years * MONTHS_PER_YEAR;
 
-    if (monthlyRate <= 0) {
+    if (monthlyRate === 0) {
       return gap / totalMonths;
     }
 

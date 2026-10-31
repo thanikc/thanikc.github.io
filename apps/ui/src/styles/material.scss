@@ -1,7 +1,7 @@
 @use '@angular/material' as mat;
 @use './theme-colors' as brand;
 
-// Metric-matched local fallback for Manrope, the site-wide face (index.html: the
+// Metric-matched local fallback for Manrope, the site-wide face (fonts.css: the
 // Google Fonts link uses display=swap). Overrides computed from @capsizecss/metrics:
 // Manrope (2000 unitsPerEm) vs Arial, the local fallback it swaps from, so the
 // swap causes ~0 reflow.
@@ -24,7 +24,7 @@
         tertiary: brand.$tertiary-palette,
       ),
       // "Noto Sans Thai" covers what Manrope has no glyphs for; the browser picks per
-      // glyph, so Latin still comes from Manrope in every locale (see index.html).
+      // glyph, so Latin still comes from Manrope in every locale (see fonts.css).
       typography: '"Manrope", "Noto Sans Thai", "Manrope Fallback", Arial, sans-serif',
       density: 0,
     )

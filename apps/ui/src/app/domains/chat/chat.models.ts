@@ -28,8 +28,3 @@ export interface ChatResponse {
   provider: string;
   sources: ChatSource[];
 }
-
-export interface ChatErrorResponse {
-  error: string;
-  attempts?: string[];
-}

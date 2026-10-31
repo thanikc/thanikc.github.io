@@ -10,7 +10,6 @@ export interface CachedAnswer {
 export interface CacheEntry extends CachedAnswer {
   key: string;
   locale: string;
-  question: string;
   /** The question's embedding, for the semantic tier. */
   vector: number[];
 }
@@ -55,7 +54,8 @@ async function guarded<T>(env: Env, fallback: T, run: (db: D1Database) => Promis
   if (!db) return fallback;
   try {
     return await run(db);
-  } catch {
+  } catch (err) {
+    console.warn('answer cache failed', err);
     return fallback;
   }
 }
@@ -129,13 +129,12 @@ export const store = (env: Env, entry: CacheEntry): Promise<void> =>
     await db.batch([
       db
         .prepare(
-          'INSERT OR REPLACE INTO answer_cache (key, epoch, locale, question, answer, provider, sources, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO answer_cache (key, epoch, locale, answer, provider, sources, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(
           entry.key,
           epoch,
           entry.locale,
-          entry.question,
           entry.answer,
           entry.provider,
           JSON.stringify(entry.sources),
