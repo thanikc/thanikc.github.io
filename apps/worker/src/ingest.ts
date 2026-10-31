@@ -4,7 +4,7 @@ import { embed, vectorize } from './rag';
  * Splits text into overlapping character windows on paragraph/whitespace boundaries.
  * Fixed-size splitting can still separate an idea from context it depends on (e.g. a
  * long paragraph cut mid-sentence). `ingest` mitigates this by storing each chunk's
- * neighbors in metadata so `retrieve` can stitch them back in on a match.
+ * neighbors in metadata so `search` can stitch them back in on a match.
  */
 export function chunk(text: string, size = 800, overlap = 100): string[] {
   const normalized = text.replace(/\r\n/g, '\n').trim();

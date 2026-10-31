@@ -22,7 +22,7 @@
     },
   ],
   // Answer cache. Created with `wrangler d1 create thanikc-cache`.
-  // Apply the schema with `wrangler d1 migrations apply CACHE_DB --remote`.
+  // CI applies migrations/ before each deploy (`wrangler d1 migrations apply CACHE_DB --remote`).
   "d1_databases": [
     {
       "binding": "CACHE_DB",
@@ -47,7 +47,7 @@
     "GROQ_MODEL": "openai/gpt-oss-20b",
     "GOOGLE_MODEL": "gemini-flash-latest",
     "OPENROUTER_MODEL": "openrouter/free",
-    // Bump after re-ingesting so cached answers grounded on old content stop being served.
+    // Bump to stop serving cached answers at once; CI also clears them on every deploy.
     "CACHE_EPOCH": "1",
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:

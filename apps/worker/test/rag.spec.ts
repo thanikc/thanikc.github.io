@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildMessages, retrieve } from '../src/rag';
+import { buildMessages, embed, search } from '../src/rag';
 
 function fakeEnv(overrides: Partial<Env> = {}): Env {
   return {
@@ -91,7 +91,10 @@ describe('buildMessages', () => {
   });
 });
 
-describe('retrieve', () => {
+describe('embed + search', () => {
+  const retrieve = async (query: string, env: Env, topK?: number) =>
+    search(await embed(query, env), env, topK);
+
   it('embeds the query and maps Vectorize matches with text metadata', async () => {
     const run = vi.fn().mockResolvedValue({ data: [[0.1, 0.2, 0.3]] });
     const query = vi.fn().mockResolvedValue({

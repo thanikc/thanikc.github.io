@@ -1,6 +1,7 @@
 import { env as testEnv } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import migration from '../migrations/0001_answer_cache.sql?raw';
+import createTable from '../migrations/0001_answer_cache.sql?raw';
+import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
 import app from '../src/index';
 
 const VARS = {
@@ -42,7 +43,7 @@ const json = async (res: Response) =>
 beforeEach(async () => {
   const db = (testEnv as unknown as { CACHE_DB: D1Database }).CACHE_DB;
   await db.prepare('DROP TABLE IF EXISTS answer_cache').run();
-  for (const statement of migration.split(';').filter(s => s.trim())) {
+  for (const statement of `${createTable};${dropQuestion}`.split(';').filter(s => s.trim())) {
     await db.prepare(statement).run();
   }
 
@@ -273,5 +274,35 @@ describe('purge on ingest', () => {
 
     expect(await res.json()).toEqual({ ok: true, chunks: 0, skipped: true });
     expect(await cachedRows()).toBe(1);
+  });
+});
+
+describe('answer cache: what it keeps', () => {
+  it("does not store the visitor's question", async () => {
+    await post({ message: 'My name is Ada, who is Thanik?' });
+    await settle();
+
+    const { results } = await (env as unknown as { CACHE_DB: D1Database }).CACHE_DB.prepare(
+      'SELECT * FROM answer_cache',
+    ).all();
+
+    expect(results).toHaveLength(1);
+    expect(JSON.stringify(results)).not.toContain('Ada');
+  });
+
+  it('warns when the database fails, and still answers', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const broken = {
+      prepare: () => {
+        throw new Error('no such table');
+      },
+    };
+
+    const res = await post({ message: 'Who is Thanik?' }, { CACHE_DB: broken });
+    await settle();
+
+    expect(res.status).toBe(200);
+    expect(warn.mock.calls.flat().map(String).join()).toContain('no such table');
+    warn.mockRestore();
   });
 });
