@@ -1,9 +1,10 @@
 import { Injectable, LOCALE_ID, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CHAT_API_URL } from './chat.config';
 import { CHAT_ERROR_MESSAGE, CHAT_HISTORY_LIMIT } from './chat.constants';
 import { ChatRequest, ChatResponse, ChatSource, ChatTurn } from './chat.models';
+import { TurnstileService } from './turnstile.service';
 import { DEFAULT_LOCALE, matchLocaleTag } from '../../shared/i18n/locales';
 
 /**
@@ -24,9 +25,13 @@ const titlesOf = (sources: ChatSource[] = []): string[] => [
 })
 export class ChatService {
   private readonly http = inject(HttpClient);
+  private readonly turnstile = inject(TurnstileService);
   private readonly endpoint = `${inject(CHAT_API_URL)}/api/chat`;
   /** The language the page is being read in; the worker answers in it. */
   private readonly locale = matchLocaleTag(inject(LOCALE_ID)) ?? DEFAULT_LOCALE;
+
+  /** Short-lived session the worker issues after a Turnstile check; nothing renders it. */
+  private session: string | null = null;
 
   readonly turns = signal<ChatTurn[]>([]);
   readonly pending = signal(false);
@@ -72,14 +77,33 @@ export class ChatService {
     });
   }
 
+  /** Posts with the session, or a fresh Turnstile token; a rejected session is retried once. */
+  private async post(request: ChatRequest): Promise<ChatResponse> {
+    const hadSession = this.session !== null;
+    const headers: Record<string, string> = this.session
+      ? { 'X-Chat-Session': this.session }
+      : { 'X-Turnstile-Token': await this.turnstile.token() };
+    try {
+      const res = await firstValueFrom(
+        this.http.post<ChatResponse>(this.endpoint, request, { headers, observe: 'response' }),
+      );
+      this.session = res.headers.get('X-Chat-Session') ?? this.session;
+      return res.body!;
+    } catch (error) {
+      if (hadSession && error instanceof HttpErrorResponse && error.status === 403) {
+        this.session = null;
+        return this.post(request);
+      }
+      throw error;
+    }
+  }
+
   private async ask(request: ChatRequest): Promise<void> {
     this.pending.set(true);
     this.error.set(null);
 
     try {
-      const { answer, sources } = await firstValueFrom(
-        this.http.post<ChatResponse>(this.endpoint, request),
-      );
+      const { answer, sources } = await this.post(request);
       const titles = titlesOf(sources);
       this.turns.update(turns => [
         ...turns,

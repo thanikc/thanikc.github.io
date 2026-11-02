@@ -9,11 +9,13 @@ import {
   withEventReplay,
   withI18nSupport,
 } from '@angular/platform-browser';
-import { CHAT_API_URL } from './domains/chat/chat.config';
+import { CHAT_API_URL, TURNSTILE_SITE_KEY } from './domains/chat/chat.config';
 
 /** `wrangler dev` default port. */
 const LOCAL_CHAT_API_URL = 'http://localhost:8787';
 const DEPLOYED_CHAT_API_URL = 'https://thanikc-worker.thanikc.workers.dev';
+// TODO(task 9): replace with the real Turnstile site key. This is Cloudflare's always-pass test key.
+const TURNSTILE_KEY = '1x00000000000000000000AA';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,5 +34,6 @@ export const appConfig: ApplicationConfig = {
     // 0.58 layout shift on the home page at 360px (e2e/design.e2e.ts).
     provideClientHydration(withEventReplay(), withI18nSupport()),
     { provide: CHAT_API_URL, useValue: isDevMode() ? LOCAL_CHAT_API_URL : DEPLOYED_CHAT_API_URL },
+    { provide: TURNSTILE_SITE_KEY, useValue: TURNSTILE_KEY },
   ],
 };
