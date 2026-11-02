@@ -32,6 +32,8 @@ async function openPage(browser: Browser, route: string, options: PageOptions): 
   const context = await browser.newContext({
     viewport: { width: options.width, height: HEIGHT[options.width] },
     reducedMotion: options.reducedMotion ?? 'no-preference',
+    // The page CSP forbids the eval Playwright's evaluate() needs; csp.e2e.ts covers the policy.
+    bypassCSP: true,
   });
   const page = await context.newPage();
 

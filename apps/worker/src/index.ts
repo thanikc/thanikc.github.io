@@ -1,9 +1,12 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
+import { buildMessages, busyAnswer, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
+import { takeGeneration } from './budget';
+import { issueSession, verifySession, verifyTurnstile } from './gate';
+import { CACHE_MARGIN, isCacheSafe, moderate } from './safety';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -12,8 +15,8 @@ app.use('/api/*', (c, next) =>
   cors({
     origin: c.env.ALLOWED_ORIGIN.split(','),
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['X-Request-Id'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Turnstile-Token', 'X-Chat-Session'],
+    exposeHeaders: ['X-Request-Id', 'X-Chat-Session'],
     maxAge: 86400,
   })(c, next),
 );
@@ -36,6 +39,24 @@ app.post('/api/chat', async c => {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   c.header('X-Request-Id', requestId);
+
+  // A visitor proves they are human once (Turnstile) and then holds a short session, so the
+  // challenge isn't re-run per message. Off unless both secrets are set (local dev, tests).
+  const { TURNSTILE_SECRET, SESSION_SECRET } = c.env;
+  if (TURNSTILE_SECRET && SESSION_SECRET) {
+    const session = c.req.header('X-Chat-Session');
+    const turnstile = c.req.header('X-Turnstile-Token');
+    if (session && (await verifySession(session, SESSION_SECRET))) {
+      // already verified
+    } else if (
+      turnstile &&
+      (await verifyTurnstile(turnstile, c.req.header('cf-connecting-ip'), c.env))
+    ) {
+      c.header('X-Chat-Session', await issueSession(SESSION_SECRET));
+    } else {
+      return c.json({ error: 'verification required' }, 403);
+    }
+  }
 
   // Absent bindings (local dev, tests) mean no limit. The shared one is checked second so a
   // client already over its own limit doesn't spend it.
@@ -143,12 +164,41 @@ app.post('/api/chat', async c => {
       return c.json({ answer, provider: 'none', sources: [] });
     }
 
-    const { answer, provider, failovers } = await generate(
+    if (!(await takeGeneration(c.env))) {
+      const answer = busyAnswer(locale);
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'budget',
+        topScore,
+        answerLength: answer.length,
+      });
+      return c.json({ answer, provider: 'none', sources: [] });
+    }
+
+    const { answer, provider, failovers, truncated } = await generate(
       buildMessages(message, chunks, history, locale),
       c.env,
     );
     const sources = chunks.map(({ title, score }) => ({ title, score }));
-    if (cacheable) {
+    const safeToCache = isCacheSafe(answer);
+    const wouldCache =
+      cacheable && !truncated && topScore >= MIN_SCORE + CACHE_MARGIN && safeToCache;
+    // Moderate what would be replayed to others, and anything carrying a link or image.
+    const verdict = wouldCache || !safeToCache ? await moderate(message, answer, c.env) : 'safe';
+    if (verdict === 'unsafe') {
+      const declined = declineAnswer(locale);
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'blocked',
+        topScore,
+        answerLength: declined.length,
+      });
+      return c.json({ answer: declined, provider: 'none', sources: [] });
+    }
+    if (verdict === 'error') console.warn('moderation failed; answer not cached');
+    if (wouldCache && verdict === 'safe') {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,

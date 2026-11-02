@@ -4,7 +4,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { LOCALE_ID } from '@angular/core';
 import { ChatService } from './chat.service';
 import { CHAT_API_URL } from './chat.config';
+import { CHAT_ERROR_MESSAGE } from './chat.constants';
 import { ChatResponse, ChatTurn } from './chat.models';
+import { TurnstileService } from './turnstile.service';
 
 const API_URL = 'https://chat.test';
 const CHAT_ENDPOINT = `${API_URL}/api/chat`;
@@ -14,14 +16,23 @@ const answer = (text: string): ChatResponse => ({ answer: text, provider: 'groq'
 describe('ChatService', () => {
   let service: ChatService;
   let httpMock: HttpTestingController;
+  const turnstile = { token: vi.fn() };
+
+  /** The request goes out after the Turnstile token resolves, so give that a turn first. */
+  const nextRequest = async () => {
+    await new Promise(resolve => setTimeout(resolve));
+    return httpMock.expectOne(CHAT_ENDPOINT);
+  };
 
   beforeEach(() => {
+    turnstile.token.mockReset().mockResolvedValue('tok');
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: CHAT_API_URL, useValue: API_URL },
         { provide: LOCALE_ID, useValue: 'de' },
+        { provide: TurnstileService, useValue: turnstile },
       ],
     });
 
@@ -36,7 +47,7 @@ describe('ChatService', () => {
   /** Sends `message` and answers it, leaving one completed exchange in the transcript. */
   const exchange = async (message: string, reply: string) => {
     const done = service.send(message);
-    httpMock.expectOne(CHAT_ENDPOINT).flush(answer(reply));
+    (await nextRequest()).flush(answer(reply));
     await done;
   };
 
@@ -49,7 +60,7 @@ describe('ChatService', () => {
   it('posts the message and an empty history to the configured chat endpoint', async () => {
     const done = service.send('Where does Thanik work?');
 
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       message: 'Where does Thanik work?',
@@ -64,7 +75,7 @@ describe('ChatService', () => {
   it('trims the message before sending it', async () => {
     const done = service.send('  Hello  ');
 
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     expect(req.request.body.message).toBe('Hello');
     expect(service.turns()).toEqual([{ role: 'user', content: 'Hello' }]);
 
@@ -77,13 +88,13 @@ describe('ChatService', () => {
 
     expect(service.turns()).toEqual([{ role: 'user', content: 'Hello' }]);
 
-    httpMock.expectOne(CHAT_ENDPOINT).flush(answer('Hi there'));
+    (await nextRequest()).flush(answer('Hi there'));
     await done;
   });
 
   it('records the distinct source titles an answer looked in, in retrieval order', async () => {
     const done = service.send('What has Thanik built?');
-    httpMock.expectOne(CHAT_ENDPOINT).flush({
+    (await nextRequest()).flush({
       answer: 'Two banking products.',
       provider: 'groq',
       sources: [
@@ -104,7 +115,7 @@ describe('ChatService', () => {
 
   it('keeps history free of source titles', async () => {
     const first = service.send('Hello');
-    httpMock.expectOne(CHAT_ENDPOINT).flush({
+    (await nextRequest()).flush({
       answer: 'Hi',
       provider: 'groq',
       sources: [{ score: 0.9, title: 'Summary' }],
@@ -112,7 +123,7 @@ describe('ChatService', () => {
     await first;
 
     const done = service.send('And then?');
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     expect(req.request.body.history).toEqual([
       { role: 'user', content: 'Hello' },
       { role: 'assistant', content: 'Hi' },
@@ -135,7 +146,7 @@ describe('ChatService', () => {
     const done = service.send('Hello');
     expect(service.pending()).toBe(true);
 
-    httpMock.expectOne(CHAT_ENDPOINT).flush(answer('Hi'));
+    (await nextRequest()).flush(answer('Hi'));
     await done;
 
     expect(service.pending()).toBe(false);
@@ -145,7 +156,7 @@ describe('ChatService', () => {
     const done = service.send('First');
     await service.send('Second');
 
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     expect(service.turns()).toEqual([{ role: 'user', content: 'First' }]);
 
     req.flush(answer('Reply'));
@@ -162,9 +173,10 @@ describe('ChatService', () => {
 
   it('sets an error when every provider fails (502) and stays idle', async () => {
     const done = service.send('Hello');
-    httpMock
-      .expectOne(CHAT_ENDPOINT)
-      .flush({ error: 'could not generate an answer' }, { status: 502, statusText: 'Bad Gateway' });
+    (await nextRequest()).flush(
+      { error: 'could not generate an answer' },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
     await done;
 
     expect(service.error()).toEqual(expect.any(String));
@@ -176,7 +188,7 @@ describe('ChatService', () => {
 
   it('sets an error on a network failure', async () => {
     const done = service.send('Hello');
-    httpMock.expectOne(CHAT_ENDPOINT).error(new ProgressEvent('error'));
+    (await nextRequest()).error(new ProgressEvent('error'));
     await done;
 
     expect(service.error()).toEqual(expect.any(String));
@@ -184,16 +196,14 @@ describe('ChatService', () => {
 
   it('clears the error on the next send', async () => {
     const failed = service.send('Hello');
-    httpMock
-      .expectOne(CHAT_ENDPOINT)
-      .flush({ error: 'down' }, { status: 502, statusText: 'Bad Gateway' });
+    (await nextRequest()).flush({ error: 'down' }, { status: 502, statusText: 'Bad Gateway' });
     await failed;
     expect(service.error()).not.toBeNull();
 
     const done = service.send('Hello again');
     expect(service.error()).toBeNull();
 
-    httpMock.expectOne(CHAT_ENDPOINT).flush(answer('Back up'));
+    (await nextRequest()).flush(answer('Back up'));
     await done;
     expect(service.error()).toBeNull();
   });
@@ -202,7 +212,7 @@ describe('ChatService', () => {
     await exchange('Hello', 'Hi there');
 
     const done = service.send('Where does Thanik work?');
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
 
     expect(req.request.body).toEqual({
       message: 'Where does Thanik work?',
@@ -223,7 +233,7 @@ describe('ChatService', () => {
     }
 
     const done = service.send('q5');
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     const history = req.request.body.history as ChatTurn[];
 
     expect(history).toHaveLength(6);
@@ -237,16 +247,14 @@ describe('ChatService', () => {
     await exchange('Hello', 'Hi there');
 
     const failed = service.send('Where does Thanik work?');
-    httpMock
-      .expectOne(CHAT_ENDPOINT)
-      .flush({ error: 'down' }, { status: 502, statusText: 'Bad Gateway' });
+    (await nextRequest()).flush({ error: 'down' }, { status: 502, statusText: 'Bad Gateway' });
     await failed;
 
     const retried = service.retry();
     expect(service.error()).toBeNull();
     expect(service.pending()).toBe(true);
 
-    const req = httpMock.expectOne(CHAT_ENDPOINT);
+    const req = await nextRequest();
     expect(req.request.body).toEqual({
       message: 'Where does Thanik work?',
       history: [
@@ -276,6 +284,77 @@ describe('ChatService', () => {
     httpMock.expectNone(CHAT_ENDPOINT);
   });
 
+  describe('Turnstile verification', () => {
+    const forbidden = { status: 403, statusText: 'Forbidden' };
+
+    it('sends a Turnstile token on the first request', async () => {
+      const done = service.send('Hello');
+      const req = await nextRequest();
+
+      expect(req.request.headers.get('X-Turnstile-Token')).toBe('tok');
+      expect(req.request.headers.has('X-Chat-Session')).toBe(false);
+
+      req.flush(answer('Hi'));
+      await done;
+    });
+
+    it('sends the session from the previous answer instead of a new token', async () => {
+      const first = service.send('Hello');
+      (await nextRequest()).flush(answer('Hi'), { headers: { 'X-Chat-Session': 's1' } });
+      await first;
+
+      const done = service.send('Again');
+      const req = await nextRequest();
+
+      expect(req.request.headers.get('X-Chat-Session')).toBe('s1');
+      expect(req.request.headers.has('X-Turnstile-Token')).toBe(false);
+      expect(turnstile.token).toHaveBeenCalledTimes(1);
+
+      req.flush(answer('Hi again'));
+      await done;
+    });
+
+    it('re-verifies once when the session is rejected', async () => {
+      const first = service.send('Hello');
+      (await nextRequest()).flush(answer('Hi'), { headers: { 'X-Chat-Session': 's1' } });
+      await first;
+
+      const done = service.send('Again');
+      (await nextRequest()).flush({ error: 'verification required' }, forbidden);
+      const retry = await nextRequest();
+
+      expect(retry.request.headers.get('X-Turnstile-Token')).toBe('tok');
+      expect(retry.request.headers.has('X-Chat-Session')).toBe(false);
+
+      retry.flush(answer('Back'));
+      await done;
+      expect(service.error()).toBeNull();
+      expect(service.turns().at(-1)).toEqual({ role: 'assistant', content: 'Back' });
+    });
+
+    it('shows the error when verification fails twice', async () => {
+      const first = service.send('Hello');
+      (await nextRequest()).flush(answer('Hi'), { headers: { 'X-Chat-Session': 's1' } });
+      await first;
+
+      const done = service.send('Again');
+      (await nextRequest()).flush({ error: 'verification required' }, forbidden);
+      (await nextRequest()).flush({ error: 'verification required' }, forbidden);
+      await done;
+
+      expect(service.error()).toBe(CHAT_ERROR_MESSAGE);
+    });
+
+    it('shows the error and stops pending when no token can be obtained', async () => {
+      turnstile.token.mockRejectedValue(new Error('Turnstile timed out'));
+
+      await service.send('Hello');
+
+      expect(service.error()).toBe(CHAT_ERROR_MESSAGE);
+      expect(service.pending()).toBe(false);
+    });
+  });
+
   describe('panel visibility', () => {
     it('starts closed', () => {
       expect(service.isOpen()).toBe(false);
@@ -294,7 +373,7 @@ describe('ChatService', () => {
       service.open('What has Thanik built from scratch?');
 
       expect(service.isOpen()).toBe(true);
-      const req = httpMock.expectOne(CHAT_ENDPOINT);
+      const req = await nextRequest();
       expect(req.request.body.message).toBe('What has Thanik built from scratch?');
 
       req.flush(answer('Two banking products.'));
@@ -324,6 +403,7 @@ describe('ChatService language', () => {
         provideHttpClientTesting(),
         { provide: CHAT_API_URL, useValue: API_URL },
         { provide: LOCALE_ID, useValue: 'th' },
+        { provide: TurnstileService, useValue: { token: vi.fn().mockResolvedValue('tok') } },
       ],
     });
 
@@ -331,6 +411,7 @@ describe('ChatService language', () => {
     const httpMock = TestBed.inject(HttpTestingController);
 
     const done = service.send('Hello');
+    await new Promise(resolve => setTimeout(resolve));
     const req = httpMock.expectOne(CHAT_ENDPOINT);
 
     expect(req.request.body.locale).toBe('th');

@@ -38,4 +38,30 @@ describe('CORS', () => {
   it('sends no allow-origin header when the request has no origin', async () => {
     expect(await originFor()).toBeNull();
   });
+
+  it('allows the verification headers and exposes the session header', async () => {
+    const res = await app.request(
+      '/api/chat',
+      {
+        method: 'OPTIONS',
+        headers: {
+          Origin: 'https://thanikc.dev',
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'x-turnstile-token,x-chat-session',
+        },
+      },
+      env,
+    );
+    const allowed = res.headers.get('Access-Control-Allow-Headers')!.toLowerCase();
+
+    expect(allowed).toContain('x-turnstile-token');
+    expect(allowed).toContain('x-chat-session');
+
+    const actual = await app.request(
+      '/api/health',
+      { headers: { Origin: 'https://thanikc.dev' } },
+      env,
+    );
+    expect(actual.headers.get('Access-Control-Expose-Headers')).toContain('X-Chat-Session');
+  });
 });

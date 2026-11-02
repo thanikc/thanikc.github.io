@@ -3,7 +3,7 @@ export interface ChatPoint {
   provider: string;
   locale: string;
   cache: 'none' | 'exact' | 'semantic';
-  outcome: 'ok' | 'refused' | 'failed';
+  outcome: 'ok' | 'refused' | 'failed' | 'budget' | 'blocked';
   latencyMs: number;
   /** Top retrieval score, or -1 when retrieval never ran (exact cache hit). */
   topScore: number;

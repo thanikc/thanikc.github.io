@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ChatError, generate } from '../src/chat/client';
+import { ChatError, generate, MAX_TOKENS } from '../src/chat/client';
 
 const MODELS = { GROQ_MODEL: 'groq-m', GOOGLE_MODEL: 'google-m', OPENROUTER_MODEL: 'or-m' };
 
@@ -37,7 +37,12 @@ describe('generate', () => {
       env({ GROQ_API_KEY: 'g', GOOGLE_AI_API_KEY: 'x', OPENROUTER_API_KEY: 'y' }),
     );
 
-    expect(result).toEqual({ answer: 'from groq', provider: 'groq', failovers: 0 });
+    expect(result).toEqual({
+      answer: 'from groq',
+      provider: 'groq',
+      failovers: 0,
+      truncated: false,
+    });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(String(fetchMock.mock.calls[0]?.[0])).toContain('api.groq.com');
   });
@@ -82,5 +87,32 @@ describe('generate', () => {
 
   it('throws ChatError when no provider is configured', async () => {
     await expect(generate(ASK, env())).rejects.toMatchObject({ name: 'ChatError' });
+  });
+
+  it('caps completion length', async () => {
+    const fetchMock = stubFetch(completion('ok'));
+    await generate(ASK, env({ GROQ_API_KEY: 'g' }));
+    expect(JSON.parse(fetchMock.mock.calls[0]?.[1].body).max_tokens).toBe(MAX_TOKENS);
+  });
+
+  it('flags a completion cut at the token cap', async () => {
+    const reply = (finish_reason: string) =>
+      new Response(JSON.stringify({ choices: [{ message: { content: 'x' }, finish_reason }] }), {
+        status: 200,
+      });
+    stubFetch(reply('length'), reply('stop'));
+    const e = env({ GROQ_API_KEY: 'g' });
+    expect((await generate(ASK, e)).truncated).toBe(true);
+    expect((await generate(ASK, e)).truncated).toBe(false);
+  });
+
+  it('does not fail over once the deadline has passed', async () => {
+    const fetchMock = stubFetch(new Error('boom'), completion('late'));
+    const now = vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValue(1_001);
+    await expect(
+      generate(ASK, env({ GROQ_API_KEY: 'g', GOOGLE_AI_API_KEY: 'x' }), 1_000),
+    ).rejects.toBeInstanceOf(ChatError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    now.mockRestore();
   });
 });

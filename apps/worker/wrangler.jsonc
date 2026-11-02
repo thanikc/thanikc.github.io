@@ -54,7 +54,11 @@
     "GROQ_MODEL": "openai/gpt-oss-20b",
     "GOOGLE_MODEL": "gemini-flash-latest",
     "OPENROUTER_MODEL": "openrouter/free",
+    // Uncached answers generated per UTC day; past it Ling answers "busy". Keep below the
+    // smallest free provider quota (confirm against the Groq console).
+    "DAILY_GENERATION_LIMIT": 1000,
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
-  //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN
+  //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN,
+  //   TURNSTILE_SECRET, SESSION_SECRET (the gate is on only when both are set)
 }

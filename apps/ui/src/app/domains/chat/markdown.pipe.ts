@@ -1,20 +1,52 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { marked } from 'marked';
+import { Marked } from 'marked';
+
+const SITE_ORIGIN = 'https://thanikc.github.io/';
+
+const escapeAttribute = (value: string): string =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+
+const isAllowedHref = (href: string): boolean =>
+  href.startsWith('mailto:') ||
+  (href.startsWith('/') && !href.startsWith('//') && !href.startsWith('/\\')) ||
+  href.startsWith('#') ||
+  href.startsWith(SITE_ORIGIN);
+
+// Own instance: the global `marked` could be configured elsewhere.
+const markdown = new Marked({
+  gfm: true,
+  breaks: true,
+  renderer: {
+    // Images never load from model output (tracking pixels, exfiltration): alt text only.
+    image: ({ text }) => text,
+    link({ href, tokens }) {
+      const text = this.parser.parseInline(tokens);
+      if (!isAllowedHref(href)) return text;
+      // Site links open in a new tab: following one must not end the conversation.
+      const target = href.startsWith(SITE_ORIGIN)
+        ? ' target="_blank" rel="noopener noreferrer"'
+        : '';
+      return `<a${target} href="${escapeAttribute(href)}">${text}</a>`;
+    },
+  },
+});
 
 /**
  * Converts an assistant turn's Markdown to HTML for `[innerHTML]` binding, which
  * runs Angular's `DomSanitizer` over the result: anything unsafe (scripts, event
- * handlers, `javascript:` URLs) is stripped before it reaches the DOM.
+ * handlers, `javascript:` URLs) is stripped before it reaches the DOM. Only site,
+ * site-relative, anchor and `mailto:` links survive; other links render as their text
+ * and images as their alt text.
  */
 @Pipe({ name: 'markdown' })
 export class MarkdownPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     const source = value?.trim();
     if (!source) return '';
-    // External links open in a new tab: following one must not navigate away from
-    // the page and end the conversation.
-    return marked
-      .parse(source, { async: false, gfm: true, breaks: true })
-      .replaceAll('<a href="http', '<a target="_blank" rel="noopener noreferrer" href="http');
+    return markdown.parse(source, { async: false });
   }
 }

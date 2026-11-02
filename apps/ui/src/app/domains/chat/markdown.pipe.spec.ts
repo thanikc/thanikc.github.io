@@ -19,16 +19,51 @@ describe('MarkdownPipe', () => {
   });
 
   it('renders links with their href', () => {
-    expect(renderMarkdown('[site](https://example.com)')).toContain(
-      'href="https://example.com">site</a>',
+    expect(renderMarkdown('[site](https://thanikc.github.io/en/)')).toContain(
+      'href="https://thanikc.github.io/en/">site</a>',
     );
   });
 
   // Following a link the assistant cites must not navigate away and end the chat.
   it('opens external links in a new tab', () => {
-    expect(renderMarkdown('[site](https://example.com)')).toContain(
-      '<a target="_blank" rel="noopener noreferrer" href="https://example.com">site</a>',
+    expect(renderMarkdown('[site](https://thanikc.github.io/en/)')).toContain(
+      '<a target="_blank" rel="noopener noreferrer" href="https://thanikc.github.io/en/">site</a>',
     );
+  });
+
+  it('renders an off-site link as its text only', () => {
+    const html = renderMarkdown('[click](https://evil.example)');
+
+    expect(html).toContain('click');
+    expect(html).not.toContain('evil.example');
+    expect(html).not.toContain('<a');
+  });
+
+  it('renders an image as its alt text only', () => {
+    const html = renderMarkdown('![Thanik](https://evil.example/p.png)');
+
+    expect(html).toContain('Thanik');
+    expect(html).not.toContain('<img');
+    expect(html).not.toContain('evil.example');
+  });
+
+  it('keeps site-relative links', () => {
+    expect(renderMarkdown('[cv](/en/#experience)')).toContain('<a href="/en/#experience">');
+  });
+
+  it('renders a protocol-relative link as its text only', () => {
+    const html = renderMarkdown('[x](//evil.example)');
+
+    expect(html).toContain('x');
+    expect(html).not.toContain('<a');
+    expect(html).not.toContain('evil.example');
+  });
+
+  it('escapes quotes in an href so it cannot break out of the attribute', () => {
+    const html = renderMarkdown('[x](/a"onmouseover="alert(1))');
+
+    expect(html).toContain('&quot;');
+    expect(html).not.toMatch(/"\s*onmouseover/);
   });
 
   it('keeps in-site and mailto links in the same tab', () => {
