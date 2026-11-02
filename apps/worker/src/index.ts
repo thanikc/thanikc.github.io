@@ -144,12 +144,12 @@ app.post('/api/chat', async c => {
       return c.json({ answer, provider: 'none', sources: [] });
     }
 
-    const { answer, provider, failovers } = await generate(
+    const { answer, provider, failovers, truncated } = await generate(
       buildMessages(message, chunks, history, locale),
       c.env,
     );
     const sources = chunks.map(({ title, score }) => ({ title, score }));
-    if (cacheable && topScore >= MIN_SCORE + CACHE_MARGIN && isCacheSafe(answer)) {
+    if (cacheable && topScore >= MIN_SCORE + CACHE_MARGIN && isCacheSafe(answer) && !truncated) {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,

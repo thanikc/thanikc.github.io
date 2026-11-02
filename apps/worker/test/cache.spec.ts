@@ -343,6 +343,21 @@ describe('answer cache: admission', () => {
     expect(await rows()).toBe(0);
   });
 
+  it('does not cache a truncated answer', async () => {
+    fetchMock.mockImplementation(
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [{ message: { content: 'cut off' }, finish_reason: 'length' }],
+          }),
+          { status: 200 },
+        ),
+    );
+    await post({ message: 'Who is Thanik?' });
+    await settle();
+    expect(await rows()).toBe(0);
+  });
+
   it('does not cache an answer grounded just above MIN_SCORE', async () => {
     withScore(MIN_SCORE + 0.01);
     await post({ message: 'Who is Thanik?' });
