@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
+import { buildMessages, busyAnswer, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
+import { takeGeneration } from './budget';
 import { CACHE_MARGIN, isCacheSafe } from './safety';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
@@ -138,6 +139,18 @@ app.post('/api/chat', async c => {
         provider: 'none',
         cache: 'none',
         outcome: 'refused',
+        topScore,
+        answerLength: answer.length,
+      });
+      return c.json({ answer, provider: 'none', sources: [] });
+    }
+
+    if (!(await takeGeneration(c.env))) {
+      const answer = busyAnswer(locale);
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'budget',
         topScore,
         answerLength: answer.length,
       });

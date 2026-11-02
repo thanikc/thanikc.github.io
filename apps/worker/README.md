@@ -105,6 +105,12 @@ a changed prompt or model takes effect at once. Vectorize applies upserts 1–3 
 late, so an answer cached in that window can still reflect the old content. The table
 keeps the newest 1000 rows.
 
+A daily generation budget (`DAILY_GENERATION_LIMIT`, table `generation_budget`, one row per
+UTC day) caps uncached answers so the free provider quotas can't run dry. Once spent,
+`/api/chat` answers with a polite "busy" message (`provider: 'none'`, outcome `budget`)
+without calling a provider; cache hits and declines don't count. An absent var, binding or
+a D1 error means no limit.
+
 Removing or renaming a file in `content/` leaves its vectors in the index (Vectorize
 cannot list by prefix); delete them with `wrangler vectorize delete-vectors`. A document
 that merely shrinks has its stale tail chunks deleted automatically.
@@ -114,7 +120,7 @@ that merely shrinks has its stale tail chunks deleted automatically.
 Each `/api/chat` request that passes validation writes one data point to the
 `ai_ling_chat` dataset (`ANALYTICS` binding; absent = nothing recorded) and returns an
 `X-Request-Id` header. Blobs: provider, locale, cache tier, outcome (`ok` / `refused` /
-`failed`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
+`failed` / `budget`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
 failover depth, answer length. The question, answer and IP are never recorded.
 
 ```sql

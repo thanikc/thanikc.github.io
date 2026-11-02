@@ -7,6 +7,7 @@ interface Env {
   OPENROUTER_API_KEY?: string;
   INGEST_TOKEN?: string;
   // Declared in wrangler.jsonc; optional here because the worker runs without it.
+  DAILY_GENERATION_LIMIT?: number;
   CHAT_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> };
   CHAT_LIMIT_GLOBAL?: { limit(options: { key: string }): Promise<{ success: boolean }> };
   ANALYTICS?: {

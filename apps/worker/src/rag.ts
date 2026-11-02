@@ -85,6 +85,19 @@ const DECLINE_ANSWERS: Record<string, string> = {
   th: 'เรื่องนี้ Ling ตอบให้ไม่ได้นะ เพราะรู้เรื่องคุณ Thanik และงานของเขาเท่านั้น ลองถามเรื่องโปรเจกต์หรือประสบการณ์ของเขาได้เลย หรือติดต่อเขาโดยตรงก็ได้ (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
 };
 
+const BUSY_ANSWERS: Record<string, string> = {
+  en: "I've had a lot of questions today and need a breather. Please try again tomorrow, or reach Thanik directly (email and LinkedIn are in the site footer).",
+  de: 'Heute wurden mir schon sehr viele Fragen gestellt, ich brauche eine Pause. Versuch es bitte morgen wieder oder schreib Thanik direkt (E-Mail und LinkedIn stehen im Footer der Seite).',
+  th: 'วันนี้ Ling ตอบคำถามไปเยอะมากแล้ว ขอพักก่อนนะ ลองใหม่พรุ่งนี้ หรือติดต่อคุณ Thanik โดยตรงได้เลย (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
+};
+
+/** Canned answer for when the day's generation budget is spent, in the site locale. */
+export function busyAnswer(locale: unknown): string {
+  return typeof locale === 'string' && Object.hasOwn(BUSY_ANSWERS, locale)
+    ? BUSY_ANSWERS[locale]!
+    : BUSY_ANSWERS['en']!;
+}
+
 /** Canned answer for a question the knowledge base can't ground, in the site locale. */
 export function declineAnswer(locale: unknown): string {
   return typeof locale === 'string' && Object.hasOwn(DECLINE_ANSWERS, locale)

@@ -50,7 +50,11 @@ const toCached = (row: { answer: string; provider: string; sources: string }): C
  * Best-effort by contract: no binding, or any D1 failure, is a plain miss/no-op —
  * the cache must never fail a request.
  */
-async function guarded<T>(env: Env, fallback: T, run: (db: D1Database) => Promise<T>): Promise<T> {
+export async function guarded<T>(
+  env: Env,
+  fallback: T,
+  run: (db: D1Database) => Promise<T>,
+): Promise<T> {
   const db = cacheDb(env);
   if (!db) return fallback;
   try {
