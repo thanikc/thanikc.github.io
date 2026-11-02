@@ -51,6 +51,21 @@ describe('MarkdownPipe', () => {
     expect(renderMarkdown('[cv](/en/#experience)')).toContain('<a href="/en/#experience">');
   });
 
+  it('renders a protocol-relative link as its text only', () => {
+    const html = renderMarkdown('[x](//evil.example)');
+
+    expect(html).toContain('x');
+    expect(html).not.toContain('<a');
+    expect(html).not.toContain('evil.example');
+  });
+
+  it('escapes quotes in an href so it cannot break out of the attribute', () => {
+    const html = renderMarkdown('[x](/a"onmouseover="alert(1))');
+
+    expect(html).toContain('&quot;');
+    expect(html).not.toMatch(/"\s*onmouseover/);
+  });
+
   it('keeps in-site and mailto links in the same tab', () => {
     expect(renderMarkdown('[mail](mailto:a@b.c)')).toContain('<a href="mailto:a@b.c">');
   });

@@ -3,9 +3,16 @@ import { Marked } from 'marked';
 
 const SITE_ORIGIN = 'https://thanikc.github.io/';
 
+const escapeAttribute = (value: string): string =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+
 const isAllowedHref = (href: string): boolean =>
   href.startsWith('mailto:') ||
-  href.startsWith('/') ||
+  (href.startsWith('/') && !href.startsWith('//') && !href.startsWith('/\\')) ||
   href.startsWith('#') ||
   href.startsWith(SITE_ORIGIN);
 
@@ -23,7 +30,7 @@ const markdown = new Marked({
       const target = href.startsWith(SITE_ORIGIN)
         ? ' target="_blank" rel="noopener noreferrer"'
         : '';
-      return `<a${target} href="${href}">${text}</a>`;
+      return `<a${target} href="${escapeAttribute(href)}">${text}</a>`;
     },
   },
 });
