@@ -17,6 +17,15 @@ Stack: Angular v22+, Standalone, Signals, `inject()`, `@if`/`@for`, Material, Ta
 
 Output: concise, code first, 1–2 sentence summary per step, no preambles.
 
+## Behavior
+
+Bias toward caution over speed; for trivial tasks use judgment.
+
+- **Think first**: state assumptions; if unclear or multiple interpretations exist, name them and ask rather than pick silently. Say so when a simpler approach exists.
+- **Simplicity**: minimum code for the request; no speculative features, single-use abstractions, unrequested configurability, or handling of impossible cases.
+- **Surgical**: every changed line traces to the request. Match existing style; don't refactor or reformat adjacent code. Remove only orphans your change created; mention unrelated dead code, don't delete it. (REFACTOR applies to code you wrote this task.)
+- **Multi-step tasks**: state a brief plan as `step → verify: check`.
+
 ## Architecture
 
 - Domain-driven layout (`portfolio/`, `retirement-calculator/`, `shared/`); UI, state and API layers strictly isolated.
