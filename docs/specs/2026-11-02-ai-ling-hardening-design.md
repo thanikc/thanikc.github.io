@@ -60,12 +60,13 @@ it gains accounts, private data, or tools/actions (§8).
 
 ### 1.2 Quota limits
 
-- `max_tokens: 600` on every provider call (`chat/client.ts`). Truncated output
+- `max_tokens: 1024` on every provider call (`chat/client.ts`); not lower, because Groq's
+  `gpt-oss` counts its reasoning tokens against it. Truncated output
   (`finish_reason: "length"`) still returns, and is never cached.
 - An **overall deadline** of 25 s for the whole chain. Each attempt gets `min(20 s, remaining)`.
   Once the deadline passes there is no further failover.
-- A **daily global budget**: a counter in D1, `DAILY_GENERATION_LIMIT` (var, default 2000, set
-  below the smallest provider's free daily quota). Over budget → the localized decline-style
+- A **daily global budget**: a counter in D1, `DAILY_GENERATION_LIMIT` (var, 1000, set
+  below the smallest provider's free daily quota; an absent var means no budget). Over budget → the localized decline-style
   "busy" answer, no model call, telemetry outcome `budget`. This keeps one abuser from using up
   the whole day's free quota at once, and keeps D1 writes far below the free limit.
 - Every API key stays on a free account with no payment method on file, so going over a quota
@@ -80,7 +81,8 @@ it gains accounts, private data, or tools/actions (§8).
   (phishing link, insult). It is then served to every visitor whose question matches exactly or
   semantically.
 - **Design:** only store an answer that passes `isCacheSafe(answer)`:
-  - no URLs, or only URLs on `LINK_ALLOWLIST` (site origin, `linkedin.com/in/…`, `github.com/thanikc`);
+  - no URLs at all (the knowledge base has none, so a grounded answer never needs one), and no
+    links other than `mailto:` and site-relative ones;
   - no Markdown images;
   - not truncated (1.2);
   - passes the output moderation check (1.5) once that exists.
@@ -92,20 +94,12 @@ it gains accounts, private data, or tools/actions (§8).
 
 ### 1.4 Render hardening (UI)
 
-- `MarkdownPipe` drops images (rendered as their alt text) and turns links to hosts not on the
-  allowlist into plain text. The allowlist lives in `chat.constants.ts` and is kept in sync by hand
-  with the worker's `LINK_ALLOWLIST`; there is one test on each side.
-- A Content-Security-Policy `<meta>` in `apps/ui/src/index.html` (GitHub Pages can't set
-  headers), starting from:
-
-  ```
-  default-src 'self'; connect-src 'self' <worker origin> challenges.cloudflare.com;
-  img-src 'self' data:; frame-src challenges.cloudflare.com; script-src 'self' challenges.cloudflare.com
-  ```
-
-  plus whatever the existing build needs (check analytics and fonts before shipping). It must be
-  verified against a `build:pages` output, not dev.
-
+- `MarkdownPipe` drops images (rendered as their alt text) and turns links into plain text unless
+  they are `mailto:`, site-relative, or on `https://thanikc.github.io/`.
+- CSP comes from Angular's `security.autoCsp` (hashed inline scripts, `strict-dynamic`,
+  `object-src 'none'`, `base-uri 'self'`). GitHub Pages can't set headers, and `autoCsp` writes
+  the policy into the built HTML with no list of origins to maintain (analytics and Turnstile load
+  through `strict-dynamic`). It must be verified against a `build:pages` output, not dev.
 - **Acceptance:** pipe specs for image stripping and off-allowlist links; e2e smoke test that the
   site loads with no CSP violations in the console.
 
