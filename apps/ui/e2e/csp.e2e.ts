@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-// autoCsp ships the policy as a <meta> tag; a violation here means a hashed/inline asset slipped through.
+// add-csp.mjs injects the policy at build time as a <meta> tag; a violation here means a hashed/inline asset slipped through.
 const ROUTES = ['/en/', '/de/', '/th/', '/en/calculator', '/en/privacy-policy'] as const;
 
 for (const route of ROUTES) {

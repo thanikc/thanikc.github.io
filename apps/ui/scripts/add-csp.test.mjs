@@ -30,3 +30,7 @@ test('hashes modulepreload links too', () => {
     addCsp(page, read).includes(`<link integrity="sha256-${h('bundle')}" rel="modulepreload"`),
   );
 });
+
+test('throws when the page has no <head> to carry the policy', () => {
+  assert.throws(() => addCsp('<html><body></body></html>', read), /no <head>/);
+});

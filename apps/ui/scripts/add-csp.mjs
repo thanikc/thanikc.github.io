@@ -74,7 +74,9 @@ export function addCsp(html, readExternal) {
   ].join('; ');
   const meta = `<meta http-equiv="Content-Security-Policy" content="${policy}">`;
   // First in <head>, so it governs everything after it.
-  return withPreloads.replace(/<head>/, `<head>${meta}`);
+  const out = withPreloads.replace(/<head>/, `<head>${meta}`);
+  if (out === withPreloads) throw new Error('add-csp: page has no <head> to inject the policy into');
+  return out;
 }
 
 async function* htmlFiles(dir) {
