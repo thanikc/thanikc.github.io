@@ -1,6 +1,6 @@
 ---
 name: plan-executor
-description: Executes one written plan (e.g. .agents/plans/NN-*.md) step by step with strict RED → GREEN → REFACTOR TDD, then reports what changed. Use when a plan already names target files, specs and done criteria; keep design decisions in the main session.
+description: Executes one written plan (e.g. docs/plans/YYYY-MM-DD-<topic>.md) step by step with strict RED → GREEN → REFACTOR TDD, then reports what changed. Use when a plan already names target files, specs and done criteria; keep design decisions in the main session.
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 effort: medium
@@ -14,7 +14,7 @@ follow it, don't redesign it.
 
 ## Before you start
 
-1. Read `AGENTS.md` — its TDD workflow, i18n rules and privacy-policy rule apply to you.
+1. Read `AGENTS.md` — its TDD workflow applies to you, and read the linked `docs/conventions/*` (i18n, privacy policy, tooling) when your task touches them.
 2. Read the plan file the caller names, and only the files it lists under **Touches** (plus
    their specs). Read further only when a step can't be done without it.
 3. For UI work also follow `.agents/rules/UX-UI.md`.
