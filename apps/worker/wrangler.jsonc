@@ -33,22 +33,27 @@
   ],
   // One data point per chat request; query with the Analytics Engine SQL API.
   "analytics_engine_datasets": [{ "binding": "ANALYTICS", "dataset": "ai_ling_chat" }],
-  // Native rate limiter: 10 chat requests per minute per client IP.
+  // Native rate limiters: 10 chat requests per minute per client IP, and 60 per minute
+  // for everyone together, so many IPs can't drain the free-tier provider quotas.
   "ratelimits": [
     {
       "name": "CHAT_LIMIT",
       "namespace_id": "1001",
       "simple": { "limit": 10, "period": 60 },
     },
+    {
+      "name": "CHAT_LIMIT_GLOBAL",
+      "namespace_id": "1002",
+      "simple": { "limit": 60, "period": 60 },
+    },
   ],
   "vars": {
+    // Comma-separated; add http://localhost:4200 in .dev.vars for local UI work.
     "ALLOWED_ORIGIN": "https://thanikc.github.io",
     "EMBEDDING_MODEL": "@cf/baai/bge-m3",
     "GROQ_MODEL": "openai/gpt-oss-20b",
     "GOOGLE_MODEL": "gemini-flash-latest",
     "OPENROUTER_MODEL": "openrouter/free",
-    // Bump to stop serving cached answers at once; CI also clears them on every deploy.
-    "CACHE_EPOCH": "1",
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
   //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN

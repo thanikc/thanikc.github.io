@@ -22,10 +22,11 @@ export const CACHE_MIN_SIMILARITY = 0.95;
 /** Newest rows the semantic tier compares against. */
 const SCAN_LIMIT = 200;
 
-// Read through a cast so this compiles whether or not `wrangler types` emitted them.
-type CacheEnv = { CACHE_DB?: D1Database; CACHE_EPOCH?: string };
-const cacheEnv = (env: Env) => env as unknown as CacheEnv;
-const epochOf = (env: Env) => cacheEnv(env).CACHE_EPOCH ?? '1';
+/** Rows kept; older ones go on the next write, so junk questions can't grow the table. */
+export const MAX_ROWS = 1000;
+
+// Read through a cast so this compiles whether or not `wrangler types` emitted it.
+const cacheDb = (env: Env) => (env as unknown as { CACHE_DB?: D1Database }).CACHE_DB;
 
 /** The locales the cache keeps apart: a published one, else English. */
 export const cacheLocale = (locale: unknown): string =>
@@ -50,7 +51,7 @@ const toCached = (row: { answer: string; provider: string; sources: string }): C
  * the cache must never fail a request.
  */
 async function guarded<T>(env: Env, fallback: T, run: (db: D1Database) => Promise<T>): Promise<T> {
-  const db = cacheEnv(env).CACHE_DB;
+  const db = cacheDb(env);
   if (!db) return fallback;
   try {
     return await run(db);
@@ -64,9 +65,9 @@ export const lookupExact = (env: Env, key: string): Promise<CachedAnswer | null>
   guarded(env, null, async db => {
     const row = await db
       .prepare(
-        'SELECT answer, provider, sources FROM answer_cache WHERE key = ? AND epoch = ? AND created_at >= ?',
+        'SELECT answer, provider, sources FROM answer_cache WHERE key = ? AND created_at >= ?',
       )
-      .bind(key, epochOf(env), cutoff())
+      .bind(key, cutoff())
       .first<{ answer: string; provider: string; sources: string }>();
     return row ? toCached(row) : null;
   });
@@ -92,7 +93,7 @@ function cosine(a: ArrayLike<number>, b: ArrayLike<number>): number {
 }
 
 /**
- * The most similar cached question for this locale and epoch, if it clears
+ * The most similar cached question for this locale, if it clears
  * `CACHE_MIN_SIMILARITY`.
  * ponytail: linear scan over the newest SCAN_LIMIT rows; if the table outgrows that,
  * move only the embeddings back to Vectorize.
@@ -105,9 +106,9 @@ export const lookupSemantic = (
   guarded(env, null, async db => {
     const { results } = await db
       .prepare(
-        'SELECT answer, provider, sources, embedding FROM answer_cache WHERE epoch = ? AND locale = ? AND created_at >= ? AND embedding IS NOT NULL ORDER BY created_at DESC LIMIT ?',
+        'SELECT answer, provider, sources, embedding FROM answer_cache WHERE locale = ? AND created_at >= ? AND embedding IS NOT NULL ORDER BY created_at DESC LIMIT ?',
       )
-      .bind(epochOf(env), locale, cutoff(), SCAN_LIMIT)
+      .bind(locale, cutoff(), SCAN_LIMIT)
       .all<{ answer: string; provider: string; sources: string; embedding: string }>();
 
     let best: (typeof results)[number] | null = null;
@@ -122,18 +123,16 @@ export const lookupSemantic = (
     return best ? toCached(best) : null;
   });
 
-/** Upserts the entry, and drops rows from other epochs or past the TTL while there. */
+/** Upserts the entry, and drops rows past the TTL or beyond the newest `MAX_ROWS` while there. */
 export const store = (env: Env, entry: CacheEntry): Promise<void> =>
   guarded(env, undefined, async db => {
-    const epoch = epochOf(env);
     await db.batch([
       db
         .prepare(
-          'INSERT OR REPLACE INTO answer_cache (key, epoch, locale, answer, provider, sources, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+          'INSERT OR REPLACE INTO answer_cache (key, locale, answer, provider, sources, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
         )
         .bind(
           entry.key,
-          epoch,
           entry.locale,
           entry.answer,
           entry.provider,
@@ -142,8 +141,10 @@ export const store = (env: Env, entry: CacheEntry): Promise<void> =>
           Math.floor(Date.now() / 1000),
         ),
       db
-        .prepare('DELETE FROM answer_cache WHERE epoch != ? OR created_at < ?')
-        .bind(epoch, cutoff()),
+        .prepare(
+          'DELETE FROM answer_cache WHERE created_at < ? OR key NOT IN (SELECT key FROM answer_cache ORDER BY created_at DESC LIMIT ?)',
+        )
+        .bind(cutoff(), MAX_ROWS),
     ]);
   });
 

@@ -13,13 +13,14 @@ The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from th
 
 ## Endpoints
 
-| Method | Path          | Purpose                                                                   |
-| ------ | ------------- | ------------------------------------------------------------------------- |
-| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                                     |
-| POST   | `/api/chat`   | `{ message, history?, locale? }` → `{ answer, provider, sources }` (RAG)  |
-| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks         |
+| Method | Path          | Purpose                                                                  |
+| ------ | ------------- | ------------------------------------------------------------------------ |
+| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                                    |
+| POST   | `/api/chat`   | `{ message, history?, locale? }` → `{ answer, provider, sources }` (RAG) |
+| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks        |
 
-CORS allows `https://thanikc.github.io` and `http://localhost:4200`.
+CORS allows `ALLOWED_ORIGIN` (comma-separated). For local UI work, put
+`ALLOWED_ORIGIN=https://thanikc.github.io,http://localhost:4200` in `.dev.vars`.
 
 ### Answer language
 
@@ -101,8 +102,8 @@ pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # CI also runs this b
 An ingest that changes the index empties the cache, so answers grounded on old content
 stop being served; a no-op ingest leaves it alone. CI also empties it on every deploy, so
 a changed prompt or model takes effect at once. Vectorize applies upserts 1–3 minutes
-late, so an answer cached in that window can still reflect the old content. `CACHE_EPOCH`
-remains as a manual override: bump it and deploy to invalidate everything.
+late, so an answer cached in that window can still reflect the old content. The table
+keeps the newest 1000 rows.
 
 Removing or renaming a file in `content/` leaves its vectors in the index (Vectorize
 cannot list by prefix); delete them with `wrangler vectorize delete-vectors`. A document

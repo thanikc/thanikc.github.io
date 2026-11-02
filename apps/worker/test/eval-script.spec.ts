@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error — plain .mjs ops script, no types
-import { EVAL_QUESTIONS, grade, parseArgs, summarize, verdict } from '../scripts/eval.mjs';
+import {
+  CONTRAST_PAIRS,
+  EVAL_QUESTIONS,
+  grade,
+  parseArgs,
+  summarize,
+  verdict,
+} from '../scripts/eval.mjs';
 
 interface EvalQuestion {
   question: string;
@@ -147,5 +154,22 @@ describe('verdict', () => {
 
     expect(result.ok).toBe(false);
     expect(result.reason).toContain('injection');
+  });
+
+  it('fails when a contrast pair was answered from the cache, regardless of the pass rate', () => {
+    const result = verdict([ok, ok, ok, ok, { ...bad, contrast: true }], 0.5);
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain('contrast');
+  });
+});
+
+describe('CONTRAST_PAIRS', () => {
+  // Questions that read alike but mean different things: the cache must not treat one as the other.
+  it('holds pairs of different questions', () => {
+    expect(CONTRAST_PAIRS.length).toBeGreaterThanOrEqual(2);
+    for (const [first, second] of CONTRAST_PAIRS as [string, string][]) {
+      expect(first).not.toBe(second);
+    }
   });
 });

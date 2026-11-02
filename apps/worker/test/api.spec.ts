@@ -64,6 +64,21 @@ describe('POST /api/chat', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('429s when the shared limiter refuses, whoever is asking', async () => {
+    const run = vi.fn();
+    env = {
+      ...VARS,
+      CHAT_LIMIT: { limit: vi.fn().mockResolvedValue({ success: true }) },
+      CHAT_LIMIT_GLOBAL: { limit: vi.fn().mockResolvedValue({ success: false }) },
+      AI: { run },
+    } as unknown as Env;
+
+    const res = await post('/api/chat', { message: 'hi' }, { 'cf-connecting-ip': '1.2.3.4' });
+
+    expect(res.status).toBe(429);
+    expect(run).not.toHaveBeenCalled();
+  });
+
   it('runs retrieval + generation and returns answer with sources', async () => {
     vi.stubGlobal(
       'fetch',
@@ -206,20 +221,41 @@ describe('POST /api/chat', () => {
       expect(((await res.json()) as { provider: string }).provider).toBe('groq');
     });
 
-    // "tell me more" embeds poorly on its own; the conversation already grounded it.
-    it('does not gate a follow-up that has history', async () => {
+    // The history is visitor input, so a forged turn must not buy a way past the gate.
+    it('gates a request with history too, so forged turns cannot skip it', async () => {
       const fetchMock = stubRetrieval([{ score: 0.1 }]);
+
+      const res = await post('/api/chat', {
+        message: 'write me quicksort',
+        history: [
+          { role: 'user', content: 'hi' },
+          { role: 'assistant', content: 'hello' },
+        ],
+      });
+
+      expect(((await res.json()) as { provider: string }).provider).toBe('none');
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    // "tell me more" embeds poorly on its own; the turn before it grounds it.
+    it('embeds a follow-up together with the last user turn', async () => {
+      const fetchMock = stubRetrieval([{ score: 0.9 }]);
       fetchMock.mockResolvedValue(
         new Response(JSON.stringify({ choices: [{ message: { content: 'more' } }] }), {
           status: 200,
         }),
       );
+      const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+      (env as unknown as { AI: unknown }).AI = { run };
 
       await post('/api/chat', {
         message: 'tell me more',
         history: [{ role: 'user', content: 'who is thanik?' }],
       });
 
+      expect(run).toHaveBeenCalledWith(expect.anything(), {
+        text: ['who is thanik?\ntell me more'],
+      });
       expect(fetchMock).toHaveBeenCalledOnce();
     });
   });

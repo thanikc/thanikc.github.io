@@ -56,6 +56,14 @@ jobs:
       - name: Production Build
         run: pnpm --filter @thanikc/ui build:pages
 
+      # Only the e2e covers the root redirect and CI doesn't run it: a build missing these still deploys.
+      - name: Check deployment root
+        working-directory: apps/ui/dist/thanikc/browser
+        run: |
+          for f in index.html 404.html robots.txt sitemap.xml en/index.html de/index.html th/index.html; do
+            test -s "$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+
       - name: Upload Build Artifact to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:

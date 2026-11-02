@@ -10,7 +10,7 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use('/api/*', (c, next) =>
   cors({
-    origin: [c.env.ALLOWED_ORIGIN, 'http://localhost:4200'],
+    origin: c.env.ALLOWED_ORIGIN.split(','),
     allowMethods: ['GET', 'POST', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['X-Request-Id'],
@@ -21,6 +21,14 @@ app.use('/api/*', (c, next) =>
 app.get('/api/health', c => c.json({ status: 'ok' }));
 
 const MAX_MESSAGE_CHARS = 2000;
+
+/** Constant-time comparison; digests first so the two inputs always have the same length. */
+async function sameSecret(a: string, b: string): Promise<boolean> {
+  const [x, y] = await Promise.all(
+    [a, b].map(s => crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))),
+  );
+  return crypto.subtle.timingSafeEqual(x!, y!);
+}
 /** Mirrors the widget's CHAT_HISTORY_LIMIT; anything longer is not our UI talking. */
 const MAX_HISTORY_TURNS = 6;
 
@@ -29,11 +37,14 @@ app.post('/api/chat', async c => {
   const requestId = crypto.randomUUID();
   c.header('X-Request-Id', requestId);
 
-  // Absent binding (local dev, tests) means no limit.
-  const verdict = await c.env.CHAT_LIMIT?.limit({
+  // Absent bindings (local dev, tests) mean no limit. The shared one is checked second so a
+  // client already over its own limit doesn't spend it.
+  const perClient = await c.env.CHAT_LIMIT?.limit({
     key: c.req.header('cf-connecting-ip') ?? 'anon',
   });
-  if (verdict && !verdict.success) {
+  const shared =
+    perClient?.success === false ? undefined : await c.env.CHAT_LIMIT_GLOBAL?.limit({ key: 'all' });
+  if (perClient?.success === false || shared?.success === false) {
     return c.json({ error: 'rate limited' }, 429);
   }
 
@@ -73,6 +84,8 @@ app.post('/api/chat', async c => {
   // A follow-up's answer depends on the turns before it, so only a conversation's
   // opening message goes through the cache.
   const cacheable = history.length === 0;
+  // A follow-up ("tell me more") embeds poorly alone, so it is searched with the turn before it.
+  const lastUserTurn = history.filter(m => m.role === 'user').at(-1)?.content ?? '';
   const lang = cacheLocale(locale);
   const key = await cacheKey(message, lang);
   const track = (p: Pick<ChatPoint, 'provider' | 'cache' | 'outcome'> & Partial<ChatPoint>) =>
@@ -101,7 +114,7 @@ app.post('/api/chat', async c => {
   let topScore = -1;
   try {
     // One embedding serves both the semantic lookup and retrieval.
-    const vector = await embed(message, c.env);
+    const vector = await embed(cacheable ? message : [lastUserTurn, message].join('\n'), c.env);
     if (cacheable) {
       const hit = await lookupSemantic(c.env, vector, lang);
       if (hit) {
@@ -118,9 +131,7 @@ app.post('/api/chat', async c => {
     const chunks = await search(vector, c.env);
     topScore = chunks[0]?.score ?? 0;
 
-    // A follow-up ("tell me more") embeds poorly on its own but is grounded by the
-    // conversation, so the gate only applies to a conversation's opening message.
-    if (history.length === 0 && topScore < MIN_SCORE) {
+    if (topScore < MIN_SCORE) {
       const answer = declineAnswer(locale);
       track({
         provider: 'none',
@@ -175,7 +186,7 @@ app.post('/api/chat', async c => {
 
 app.post('/api/ingest', async c => {
   const token = c.env.INGEST_TOKEN;
-  if (!token || c.req.header('Authorization') !== `Bearer ${token}`) {
+  if (!token || !(await sameSecret(c.req.header('Authorization') ?? '', `Bearer ${token}`))) {
     return c.json({ error: 'unauthorized' }, 401);
   }
 
@@ -197,7 +208,7 @@ app.post('/api/ingest', async c => {
   const { chunks, skipped } = await ingest(body.id, body.text, metadata, c.env);
   // Answers cached against the old content are stale as soon as the index changes.
   // ponytail: Vectorize upserts land in 1–3 min, so an answer cached in that window can
-  // still be grounded on old content; bump CACHE_EPOCH if that ever matters.
+  // still be grounded on old content; re-run the ingest if that ever matters.
   if (chunks > 0) await purgeCache(c.env);
   return c.json({ ok: true, chunks, ...(skipped && { skipped }) });
 });

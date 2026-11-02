@@ -2,7 +2,9 @@ import { env as testEnv } from 'cloudflare:test';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import createTable from '../migrations/0001_answer_cache.sql?raw';
 import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
+import dropEpoch from '../migrations/0003_drop_epoch.sql?raw';
 import app from '../src/index';
+import { MAX_ROWS } from '../src/cache';
 
 const VARS = {
   ALLOWED_ORIGIN: 'https://thanikc.github.io',
@@ -10,7 +12,6 @@ const VARS = {
   GROQ_MODEL: 'groq-m',
   GOOGLE_MODEL: 'google-m',
   OPENROUTER_MODEL: 'or-m',
-  CACHE_EPOCH: '1',
 };
 
 const MATCH = { score: 0.9, metadata: { text: 'Full-stack engineer.', title: 'Summary' } };
@@ -43,7 +44,9 @@ const json = async (res: Response) =>
 beforeEach(async () => {
   const db = (testEnv as unknown as { CACHE_DB: D1Database }).CACHE_DB;
   await db.prepare('DROP TABLE IF EXISTS answer_cache').run();
-  for (const statement of `${createTable};${dropQuestion}`.split(';').filter(s => s.trim())) {
+  for (const statement of `${createTable};${dropQuestion};${dropEpoch}`
+    .split(';')
+    .filter(s => s.trim())) {
     await db.prepare(statement).run();
   }
 
@@ -138,16 +141,6 @@ describe('answer cache: exact tier', () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it('ignores rows written under another CACHE_EPOCH', async () => {
-    await post({ message: 'Who is Thanik?' });
-    await settle();
-
-    const res = await json(await post({ message: 'Who is Thanik?' }, { CACHE_EPOCH: '2' }));
-
-    expect(res.cached).toBeUndefined();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
   it('answers normally when D1 throws', async () => {
     const broken = {
       prepare: () => {
@@ -216,15 +209,28 @@ describe('answer cache: semantic tier', () => {
 
     expect(res.cached).toBeUndefined();
   });
+});
 
-  it('does not serve rows from another epoch', async () => {
-    await askWith('Who is Thanik?', [1, 0, 0]);
+describe('answer cache: size', () => {
+  it('keeps only the newest MAX_ROWS rows', async () => {
+    const db = (env as unknown as { CACHE_DB: D1Database }).CACHE_DB;
+    await db
+      .prepare(
+        `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < ?)
+         INSERT INTO answer_cache (key, locale, answer, provider, sources, created_at)
+         SELECT 'old' || i, 'en', 'a', 'groq', '[]', strftime('%s', 'now') - 100000 + i FROM n`,
+      )
+      .bind(MAX_ROWS)
+      .run();
+
+    await post({ message: 'Who is Thanik?' });
     await settle();
-    embedding = [1, 0, 0];
 
-    const res = await json(await post({ message: 'Tell me about Thanik' }, { CACHE_EPOCH: '2' }));
-
-    expect(res.cached).toBeUndefined();
+    const { n } = (await db
+      .prepare('SELECT COUNT(*) AS n FROM answer_cache')
+      .first<{ n: number }>())!;
+    expect(n).toBe(MAX_ROWS);
+    expect(await db.prepare("SELECT 1 FROM answer_cache WHERE key = 'old1'").first()).toBeNull();
   });
 });
 

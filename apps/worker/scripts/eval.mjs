@@ -9,6 +9,9 @@
 //   node scripts/eval.mjs --url https://thanikc-worker.<sub>.workers.dev
 //   node scripts/eval.mjs --delay 7000        # pace requests under CHAT_LIMIT (10/min)
 //
+// Contrast pairs ask a question, then a look-alike with another meaning, and fail if the
+// look-alike comes back from the answer cache.
+//
 // Hits the live providers, so it runs in CI only for worker/content PRs.
 
 import { fileURLToPath } from 'node:url';
@@ -105,6 +108,16 @@ export const EVAL_QUESTIONS = [
   })),
 ];
 
+/**
+ * Questions that read alike but ask for opposite or different things. The second must never
+ * be served from the answer cache that the first filled; if it is, raise CACHE_MIN_SIMILARITY.
+ */
+export const CONTRAST_PAIRS = [
+  ['Does Thanik have Java experience?', 'Does Thanik lack Java experience?'],
+  ['Is Thanik open to senior roles?', 'Is Thanik not open to senior roles?'],
+  ['What has Thanik built with Angular?', 'What has Thanik built with Spring Boot?'],
+];
+
 /** Passes when the answer mentions any expected keyword and leaks no forbidden phrase (case-insensitive). */
 export function grade(item, answer) {
   const text = answer.toLowerCase();
@@ -133,9 +146,9 @@ export function parseArgs(argv, env = process.env) {
 
 /** Gate: any injection failure, or a pass rate under `minPass`, fails the run. */
 export function verdict(results, minPass) {
-  const injection = results.filter(result => result.injection && !result.pass);
-  if (injection.length > 0)
-    return { ok: false, reason: `${injection.length} injection case(s) failed` };
+  const hard = results.filter(result => (result.injection || result.contrast) && !result.pass);
+  if (hard.length > 0)
+    return { ok: false, reason: `${hard.length} injection or contrast case(s) failed` };
 
   const rate = results.filter(result => result.pass).length / results.length;
   return rate >= minPass
@@ -160,6 +173,15 @@ export function summarize(results) {
   return [`${passed}/${results.length} passed`, ...failures].join('\n');
 }
 
+async function ask(url, question, locale) {
+  const res = await fetch(`${url}/api/chat`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ message: question, history: [], locale }),
+  });
+  return { res, payload: await res.json().catch(() => ({})) };
+}
+
 async function main() {
   const { url, delayMs, minPass } = parseArgs(process.argv.slice(2));
   console.log(`Evaluating ${EVAL_QUESTIONS.length} question(s) → ${url}/api/chat\n`);
@@ -167,12 +189,7 @@ async function main() {
 
   for (const [i, item] of EVAL_QUESTIONS.entries()) {
     if (i > 0 && delayMs > 0) await new Promise(done => setTimeout(done, delayMs));
-    const res = await fetch(`${url}/api/chat`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ message: item.question, history: [], locale: item.locale }),
-    });
-    const payload = await res.json().catch(() => ({}));
+    const { res, payload } = await ask(url, item.question, item.locale);
     const answer = typeof payload.answer === 'string' ? payload.answer : '';
     const result = { question: item.question, injection: item.injection, ...grade(item, answer) };
     if (!res.ok) Object.assign(result, { pass: false, missing: [`HTTP ${res.status}`] });
@@ -181,6 +198,18 @@ async function main() {
     console.log(
       `${result.pass ? 'ok  ' : 'FAIL'}  ${item.question}\n      ${answer.replace(/\s+/g, ' ')}\n`,
     );
+  }
+
+  for (const [first, second] of CONTRAST_PAIRS) {
+    for (const question of [first, second]) {
+      if (delayMs > 0) await new Promise(done => setTimeout(done, delayMs));
+      const { res, payload } = await ask(url, question);
+      if (question === first) continue;
+      // An exact hit is a repeat run; only a paraphrase match can be the mix-up.
+      const pass = res.ok && payload.cached !== 'semantic';
+      results.push({ question, contrast: true, pass, missing: ['a fresh answer'] });
+      console.log(`${pass ? 'ok  ' : 'FAIL'}  ${question} (cache: ${payload.cached ?? 'none'})\n`);
+    }
   }
 
   console.log(summarize(results));
