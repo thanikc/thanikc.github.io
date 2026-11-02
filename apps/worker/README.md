@@ -133,7 +133,7 @@ that merely shrinks has its stale tail chunks deleted automatically.
 Each `/api/chat` request that passes validation writes one data point to the
 `ai_ling_chat` dataset (`ANALYTICS` binding; absent = nothing recorded) and returns an
 `X-Request-Id` header. Blobs: provider, locale, cache tier, outcome (`ok` / `refused` /
-`failed` / `budget`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
+`failed` / `budget` / `blocked`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
 failover depth, answer length. The question, answer and IP are never recorded.
 
 ```sql
@@ -141,6 +141,12 @@ failover depth, answer length. The question, answer and IP are never recorded.
 SELECT blob1 AS provider, blob4 AS outcome, count() AS n, quantileWeighted(0.95, double1, _sample_interval) AS p95_ms
 FROM ai_ling_chat WHERE timestamp > NOW() - INTERVAL '7' DAY GROUP BY provider, outcome
 ```
+
+Answer moderation: each answer is checked with Llama Guard via Workers AI before it is
+cached or shown with links. It fails open (a moderation error lets the answer through);
+the response shape is unverified and must be confirmed in the deployed eval. An answer
+is admitted to the cache only if it is link-free, not truncated, scored >= `MIN_SCORE` + 0.05
+and moderated safe.
 
 ## Commands (run from repo root or this directory)
 
