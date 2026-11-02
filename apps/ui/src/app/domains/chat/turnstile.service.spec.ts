@@ -3,8 +3,8 @@ import { TurnstileService } from './turnstile.service';
 import { TURNSTILE_SITE_KEY } from './chat.config';
 
 describe('TurnstileService', () => {
-  const render = vi.fn((_el: HTMLElement, opts: { callback: (token: string) => void }) => {
-    queueMicrotask(() => opts.callback('tok'));
+  const render = vi.fn((_el: HTMLElement, opts: Record<string, (token?: string) => void>) => {
+    queueMicrotask(() => opts['callback']('tok'));
     return 'w1';
   });
   const execute = vi.fn();
@@ -45,12 +45,43 @@ describe('TurnstileService', () => {
     await service.token();
     reset.mockImplementation(() => {
       const opts = render.mock.calls[0][1];
-      queueMicrotask(() => opts.callback('tok2'));
+      queueMicrotask(() => opts['callback']('tok2'));
     });
 
     expect(await service.token()).toBe('tok2');
     expect(render).toHaveBeenCalledTimes(1);
     expect(reset).toHaveBeenCalledWith('w1');
     expect(execute).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects when Turnstile reports an error', async () => {
+    render.mockImplementationOnce((_el, opts) => {
+      queueMicrotask(() => opts['error-callback']());
+      return 'w1';
+    });
+
+    await expect(TestBed.inject(TurnstileService).token()).rejects.toThrow('Turnstile failed');
+  });
+
+  it.each(['timeout-callback', 'expired-callback'] as const)('rejects on %s', async name => {
+    render.mockImplementationOnce((_el, opts) => {
+      queueMicrotask(() => opts[name]());
+      return 'w1';
+    });
+
+    await expect(TestBed.inject(TurnstileService).token()).rejects.toThrow('Turnstile failed');
+  });
+
+  it('rejects when Turnstile never calls back', async () => {
+    vi.useFakeTimers();
+    try {
+      render.mockImplementationOnce(() => 'w1');
+      const result = TestBed.inject(TurnstileService).token();
+      const assertion = expect(result).rejects.toThrow('Turnstile timed out');
+      await vi.advanceTimersByTimeAsync(15_000);
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

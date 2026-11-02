@@ -344,6 +344,15 @@ describe('ChatService', () => {
 
       expect(service.error()).toBe(CHAT_ERROR_MESSAGE);
     });
+
+    it('shows the error and stops pending when no token can be obtained', async () => {
+      turnstile.token.mockRejectedValue(new Error('Turnstile timed out'));
+
+      await service.send('Hello');
+
+      expect(service.error()).toBe(CHAT_ERROR_MESSAGE);
+      expect(service.pending()).toBe(false);
+    });
   });
 
   describe('panel visibility', () => {

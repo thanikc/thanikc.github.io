@@ -10,12 +10,15 @@ interface TurnstileApi {
       appearance: 'interaction-only';
       callback: (token: string) => void;
       'error-callback': () => void;
+      'timeout-callback': () => void;
+      'expired-callback': () => void;
     },
   ): string;
   execute(widgetId: string): void;
   reset(widgetId: string): void;
 }
 
+const TOKEN_TIMEOUT_MS = 15_000;
 const SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
 
 const turnstileApi = (): TurnstileApi | undefined =>
@@ -32,8 +35,14 @@ export class TurnstileService {
   async token(): Promise<string> {
     const api = await this.load();
     return new Promise<string>((resolve, reject) => {
-      this.waiting = { resolve, reject };
+      // Without a deadline a silent widget would leave the chat pending forever.
+      const timer = setTimeout(() => reject(new Error('Turnstile timed out')), TOKEN_TIMEOUT_MS);
+      this.waiting = {
+        resolve: token => (clearTimeout(timer), resolve(token)),
+        reject: error => (clearTimeout(timer), reject(error)),
+      };
       if (this.widgetId === undefined) {
+        const fail = () => this.waiting?.reject(new Error('Turnstile failed'));
         const host = document.body.appendChild(document.createElement('div'));
         host.hidden = true;
         this.widgetId = api.render(host, {
@@ -41,7 +50,9 @@ export class TurnstileService {
           execution: 'execute',
           appearance: 'interaction-only',
           callback: token => this.waiting?.resolve(token),
-          'error-callback': () => this.waiting?.reject(new Error('Turnstile failed')),
+          'error-callback': fail,
+          'timeout-callback': fail,
+          'expired-callback': fail,
         });
       } else {
         api.reset(this.widgetId);
