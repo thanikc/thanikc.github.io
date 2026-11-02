@@ -6,7 +6,7 @@ import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
 import { takeGeneration } from './budget';
 import { issueSession, verifySession, verifyTurnstile } from './gate';
-import { CACHE_MARGIN, isCacheSafe } from './safety';
+import { CACHE_MARGIN, isCacheSafe, moderate } from './safety';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -181,7 +181,24 @@ app.post('/api/chat', async c => {
       c.env,
     );
     const sources = chunks.map(({ title, score }) => ({ title, score }));
-    if (cacheable && topScore >= MIN_SCORE + CACHE_MARGIN && isCacheSafe(answer) && !truncated) {
+    const safeToCache = isCacheSafe(answer);
+    const wouldCache =
+      cacheable && !truncated && topScore >= MIN_SCORE + CACHE_MARGIN && safeToCache;
+    // Moderate what would be replayed to others, and anything carrying a link or image.
+    const verdict = wouldCache || !safeToCache ? await moderate(message, answer, c.env) : 'safe';
+    if (verdict === 'unsafe') {
+      const declined = declineAnswer(locale);
+      track({
+        provider: 'none',
+        cache: 'none',
+        outcome: 'blocked',
+        topScore,
+        answerLength: declined.length,
+      });
+      return c.json({ answer: declined, provider: 'none', sources: [] });
+    }
+    if (verdict === 'error') console.warn('moderation failed; answer not cached');
+    if (wouldCache && verdict === 'safe') {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,

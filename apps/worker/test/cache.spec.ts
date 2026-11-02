@@ -5,8 +5,8 @@ import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
 import dropEpoch from '../migrations/0003_drop_epoch.sql?raw';
 import app from '../src/index';
 import { MAX_ROWS } from '../src/cache';
-import { MIN_SCORE } from '../src/rag';
-import { CACHE_MARGIN } from '../src/safety';
+import { declineAnswer, MIN_SCORE } from '../src/rag';
+import { CACHE_MARGIN, MODERATION_MODEL } from '../src/safety';
 
 const VARS = {
   ALLOWED_ORIGIN: 'https://thanikc.github.io',
@@ -21,6 +21,7 @@ const MATCH = { score: 0.9, metadata: { text: 'Full-stack engineer.', title: 'Su
 let env: Env;
 let fetchMock: ReturnType<typeof vi.fn>;
 let embedding: number[];
+let verdict: () => unknown;
 
 function post(body: unknown, overrides: Partial<Record<string, unknown>> = {}) {
   return app.request(
@@ -40,6 +41,11 @@ const settle = async () => {
   await Promise.all(pending.splice(0));
 };
 
+const embedCalls = () =>
+  (env.AI as unknown as { run: ReturnType<typeof vi.fn> }).run.mock.calls.filter(
+    ([model]) => model !== MODERATION_MODEL,
+  ).length;
+
 const json = async (res: Response) =>
   (await res.json()) as { answer: string; provider: string; cached?: string; sources: unknown[] };
 
@@ -53,6 +59,7 @@ beforeEach(async () => {
   }
 
   embedding = [1, 0, 0];
+  verdict = () => ({ response: { safe: true } });
   fetchMock = vi.fn().mockImplementation(
     async () =>
       new Response(
@@ -67,7 +74,13 @@ beforeEach(async () => {
     ...VARS,
     GROQ_API_KEY: 'g',
     CACHE_DB: db,
-    AI: { run: vi.fn().mockImplementation(async () => ({ data: [embedding] })) },
+    AI: {
+      run: vi
+        .fn()
+        .mockImplementation(async (model: string) =>
+          model === MODERATION_MODEL ? verdict() : { data: [embedding] },
+        ),
+    },
     VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [MATCH] }) },
   } as unknown as Env;
 });
@@ -83,7 +96,7 @@ describe('answer cache: exact tier', () => {
     expect(first.cached).toBeUndefined();
     expect(second).toEqual({ ...first, cached: 'exact' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(1);
+    expect(embedCalls()).toBe(1);
   });
 
   it('records the tier a cached answer came from', async () => {
@@ -184,13 +197,13 @@ describe('answer cache: semantic tier', () => {
     expect(second).toEqual({ ...first, cached: 'semantic' });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(vectorize).toHaveBeenCalledTimes(1);
-    expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(2);
+    expect(embedCalls()).toBe(2);
   });
 
   it('embeds a cache miss only once', async () => {
     await askWith('Who is Thanik?', [1, 0, 0]);
 
-    expect((env.AI as unknown as { run: unknown }).run).toHaveBeenCalledTimes(1);
+    expect(embedCalls()).toBe(1);
   });
 
   it('does not serve a question that is only loosely similar', async () => {
@@ -370,5 +383,48 @@ describe('answer cache: admission', () => {
     await post({ message: 'Who is Thanik?' });
     await settle();
     expect(await rows()).toBe(1);
+  });
+
+  it('blocks an unsafe answer with the decline and caches nothing', async () => {
+    verdict = () => ({ response: { safe: false, categories: ['S1'] } });
+    const writeDataPoint = vi.fn();
+
+    const res = await json(
+      await post({ message: 'Who is Thanik?' }, { ANALYTICS: { writeDataPoint } }),
+    );
+    await settle();
+
+    expect(res.answer).toBe(declineAnswer('en'));
+    expect(res.provider).toBe('none');
+    expect(await rows()).toBe(0);
+    expect(writeDataPoint.mock.calls[0]![0].blobs[3]).toBe('blocked');
+  });
+
+  it('returns but does not cache when moderation errors', async () => {
+    verdict = () => {
+      throw new Error('boom');
+    };
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const res = await json(await post({ message: 'Who is Thanik?' }));
+    await settle();
+
+    expect(res.answer).toBe('Thanik is an engineer.');
+    expect(await rows()).toBe(0);
+  });
+
+  it('skips moderation for a follow-up without links', async () => {
+    await post({
+      message: 'Tell me more',
+      history: [
+        { role: 'user', content: 'Who is Thanik?' },
+        { role: 'assistant', content: 'An engineer.' },
+      ],
+    });
+
+    const models = (env.AI as unknown as { run: ReturnType<typeof vi.fn> }).run.mock.calls.map(
+      ([m]) => m,
+    );
+    expect(models).not.toContain(MODERATION_MODEL);
   });
 });

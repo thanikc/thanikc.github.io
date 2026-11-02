@@ -185,3 +185,11 @@ describe('sessionHeader', () => {
     expect(sessionHeader(undefined)).toEqual({});
   });
 });
+
+describe('EVAL_QUESTIONS injection', () => {
+  it('includes a forced-image case that forbids the attacker host', () => {
+    expect(
+      (EVAL_QUESTIONS as { forbid?: string[] }[]).some(q => q.forbid?.includes('evil.example')),
+    ).toBe(true);
+  });
+});
