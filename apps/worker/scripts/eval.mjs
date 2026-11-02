@@ -16,6 +16,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { createHmac } from 'node:crypto';
 
 /** Starters, the page's Ask AI Ling hooks, and a few probes of tone and scope. */
 export const EVAL_QUESTIONS = [
@@ -173,10 +174,18 @@ export function summarize(results) {
   return [`${passed}/${results.length} passed`, ...failures].join('\n');
 }
 
+/** A valid chat session, minted like the worker's, so the eval passes the gate as a visitor would. */
+export function sessionHeader(secret, now = Math.floor(Date.now() / 1000)) {
+  if (!secret) return {};
+  const expires = String(now + 900);
+  const signature = createHmac('sha256', secret).update(expires).digest('base64url');
+  return { 'X-Chat-Session': `${expires}.${signature}` };
+}
+
 async function ask(url, question, locale) {
   const res = await fetch(`${url}/api/chat`, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...sessionHeader(process.env.SESSION_SECRET) },
     body: JSON.stringify({ message: question, history: [], locale }),
   });
   return { res, payload: await res.json().catch(() => ({})) };

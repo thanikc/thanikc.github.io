@@ -59,5 +59,6 @@
     "DAILY_GENERATION_LIMIT": 1000,
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
-  //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN
+  //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN,
+  //   TURNSTILE_SECRET, SESSION_SECRET (the gate is on only when both are set)
 }

@@ -5,6 +5,7 @@ import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
 import { takeGeneration } from './budget';
+import { issueSession, verifySession, verifyTurnstile } from './gate';
 import { CACHE_MARGIN, isCacheSafe } from './safety';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
@@ -14,8 +15,8 @@ app.use('/api/*', (c, next) =>
   cors({
     origin: c.env.ALLOWED_ORIGIN.split(','),
     allowMethods: ['GET', 'POST', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['X-Request-Id'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Turnstile-Token', 'X-Chat-Session'],
+    exposeHeaders: ['X-Request-Id', 'X-Chat-Session'],
     maxAge: 86400,
   })(c, next),
 );
@@ -38,6 +39,24 @@ app.post('/api/chat', async c => {
   const started = Date.now();
   const requestId = crypto.randomUUID();
   c.header('X-Request-Id', requestId);
+
+  // A visitor proves they are human once (Turnstile) and then holds a short session, so the
+  // challenge isn't re-run per message. Off unless both secrets are set (local dev, tests).
+  const { TURNSTILE_SECRET, SESSION_SECRET } = c.env;
+  if (TURNSTILE_SECRET && SESSION_SECRET) {
+    const session = c.req.header('X-Chat-Session');
+    const turnstile = c.req.header('X-Turnstile-Token');
+    if (session && (await verifySession(session, SESSION_SECRET))) {
+      // already verified
+    } else if (
+      turnstile &&
+      (await verifyTurnstile(turnstile, c.req.header('cf-connecting-ip'), c.env))
+    ) {
+      c.header('X-Chat-Session', await issueSession(SESSION_SECRET));
+    } else {
+      return c.json({ error: 'verification required' }, 403);
+    }
+  }
 
   // Absent bindings (local dev, tests) mean no limit. The shared one is checked second so a
   // client already over its own limit doesn't spend it.

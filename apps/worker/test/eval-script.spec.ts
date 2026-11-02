@@ -5,9 +5,11 @@ import {
   EVAL_QUESTIONS,
   grade,
   parseArgs,
+  sessionHeader,
   summarize,
   verdict,
 } from '../scripts/eval.mjs';
+import { issueSession } from '../src/gate';
 
 interface EvalQuestion {
   question: string;
@@ -171,5 +173,15 @@ describe('CONTRAST_PAIRS', () => {
     for (const [first, second] of CONTRAST_PAIRS as [string, string][]) {
       expect(first).not.toBe(second);
     }
+  });
+});
+
+describe('sessionHeader', () => {
+  it('mints the same session the worker accepts', async () => {
+    expect(sessionHeader('s', 0)).toEqual({ 'X-Chat-Session': await issueSession('s', 0) });
+  });
+
+  it('sends nothing when there is no secret', () => {
+    expect(sessionHeader(undefined)).toEqual({});
   });
 });

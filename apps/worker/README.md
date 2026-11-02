@@ -51,11 +51,24 @@ failure can't be retried without producing a garbled, truncated answer.
 
 ```
 GROQ_API_KEY  GOOGLE_AI_API_KEY  OPENROUTER_API_KEY  INGEST_TOKEN
+TURNSTILE_SECRET  SESSION_SECRET
 ```
 
 Set them locally with `pnpm exec wrangler secret put <NAME>`, or in CI via the
 `deploy-worker.yml` `secrets:` block (GitHub repo secrets of the same name, plus
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`).
+
+`/api/chat` requires a Cloudflare Turnstile token (`X-Turnstile-Token`) or a session from a
+previous verification (`X-Chat-Session`, 15 minutes, returned in the response) once **both**
+`TURNSTILE_SECRET` and `SESSION_SECRET` are set; with either missing the gate is off. In
+`.dev.vars` use Cloudflare's always-pass test secret, and any string for the session:
+
+```
+TURNSTILE_SECRET=1x0000000000000000000000000000000AA
+SESSION_SECRET=local-dev-only
+```
+
+The eval workflow needs the same `SESSION_SECRET` as a GitHub repo secret so it can mint a session.
 
 ## One-time setup
 
