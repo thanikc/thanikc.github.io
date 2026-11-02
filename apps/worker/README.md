@@ -20,7 +20,7 @@ The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from th
 | POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks        |
 
 CORS allows `ALLOWED_ORIGIN` (comma-separated). For local UI work, put
-`ALLOWED_ORIGIN=https://thanikc.github.io,http://localhost:4200` in `.dev.vars`.
+`ALLOWED_ORIGIN=https://thanikc.github.io,http://localhost:4200` in `.env` (alongside the provider keys; `wrangler dev` reads `.env` only when no `.dev.vars` exists).
 
 ### Answer language
 
