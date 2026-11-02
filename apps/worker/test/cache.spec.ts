@@ -5,6 +5,8 @@ import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
 import dropEpoch from '../migrations/0003_drop_epoch.sql?raw';
 import app from '../src/index';
 import { MAX_ROWS } from '../src/cache';
+import { MIN_SCORE } from '../src/rag';
+import { CACHE_MARGIN } from '../src/safety';
 
 const VARS = {
   ALLOWED_ORIGIN: 'https://thanikc.github.io',
@@ -310,5 +312,48 @@ describe('answer cache: what it keeps', () => {
     expect(res.status).toBe(200);
     expect(warn.mock.calls.flat().map(String).join()).toContain('no such table');
     warn.mockRestore();
+  });
+});
+
+describe('answer cache: admission', () => {
+  const rows = async () =>
+    (
+      await (env as unknown as { CACHE_DB: D1Database }).CACHE_DB.prepare(
+        'SELECT COUNT(*) AS n FROM answer_cache',
+      ).first<{ n: number }>()
+    )?.n;
+  const withScore = (score: number) =>
+    (env.VECTORIZE as unknown as { query: ReturnType<typeof vi.fn> }).query.mockResolvedValue({
+      matches: [{ ...MATCH, score }],
+    });
+
+  it('does not cache an answer that carries a link, but still returns it', async () => {
+    const answer = 'See [here](https://evil.example).';
+    fetchMock.mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: answer } }] }), {
+          status: 200,
+        }),
+    );
+
+    const res = await post({ message: 'Who is Thanik?' });
+    await settle();
+
+    expect((await json(res)).answer).toBe(answer);
+    expect(await rows()).toBe(0);
+  });
+
+  it('does not cache an answer grounded just above MIN_SCORE', async () => {
+    withScore(MIN_SCORE + 0.01);
+    await post({ message: 'Who is Thanik?' });
+    await settle();
+    expect(await rows()).toBe(0);
+  });
+
+  it('caches a plain answer grounded at MIN_SCORE + CACHE_MARGIN', async () => {
+    withScore(MIN_SCORE + CACHE_MARGIN);
+    await post({ message: 'Who is Thanik?' });
+    await settle();
+    expect(await rows()).toBe(1);
   });
 });

@@ -4,6 +4,7 @@ import { buildMessages, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
+import { CACHE_MARGIN, isCacheSafe } from './safety';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -148,7 +149,7 @@ app.post('/api/chat', async c => {
       c.env,
     );
     const sources = chunks.map(({ title, score }) => ({ title, score }));
-    if (cacheable) {
+    if (cacheable && topScore >= MIN_SCORE + CACHE_MARGIN && isCacheSafe(answer)) {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,
