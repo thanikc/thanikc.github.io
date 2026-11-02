@@ -7,8 +7,7 @@ title: Experience
 ## Lead Programmer, attempto GmbH & Co. KG (March 2016 – present)
 
 Since March 2016, Thanik Cheowtirakul has been a Lead Programmer at attempto
-GmbH & Co. KG, a role he has held for roughly ten years. At attempto, Thanik
-works on mobile architecture and development and on web applications in the
+GmbH & Co. KG. At attempto, Thanik works on mobile architecture and development and on web applications in the
 finance sector, leading implementation work and technical decisions for
 finance-industry clients.
 

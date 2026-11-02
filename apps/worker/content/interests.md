@@ -24,5 +24,4 @@ Thanik plays chess occasionally.
 
 ## Learning Mandarin
 
-Thanik has recently started learning Mandarin Chinese, adding to the German,
-English, and Thai he already speaks.
+Thanik has recently started learning Mandarin Chinese.

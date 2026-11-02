@@ -11,9 +11,7 @@ before he changes it. On the Angular homepage framework for cooperative banks at
 a German cooperative-banking IT service provider, he uncovered a timing problem
 in a marketing interface, traced it back to an original quick fix made for
 time-to-market, and proposed a durable
-architectural solution instead of another patch. The same habit helped when he
-came back from holiday and solved a front-end problem the team had been stuck on
-for a week, using a solution he had worked out earlier in a different context.
+architectural solution instead of another patch.
 
 ## Tests first, even with AI
 
@@ -23,15 +21,6 @@ Cypress, and Jest. His own website is built with strict red-green-refactor test-
 driven development in both the Angular app and the AI Ling API, and his AI coding
 assistants are required to follow the same workflow: write the failing test, make
 it pass, then refactor.
-
-## Give the AI rules, not just prompts
-
-Thanik treats AI assistants like a new team member who needs to know the team's
-standards. At a German cooperative-banking IT service provider he and the tech
-lead introduced AI-assisted development with a binding set of AI rules that
-serves as an architectural guideline and
-minimum standard for the whole team. His public website repository contains the
-same kind of rules for his own AI assistants.
 
 ## Pick the boring option when it's the right one
 

@@ -61,5 +61,4 @@ Material, Tailwind CSS), prerendered and hosted on GitHub Pages, with the AI Lin
 API as a separate Cloudflare Worker in the same pnpm monorepo. Both are built
 strictly test-first. The repository includes the written rules Thanik gives his AI
 coding assistants — architecture, testing workflow, and UI standards — and the
-source is public at github.com/thanikc/thanikc.github.io. Thanik uses the site to
-try new Angular and AI patterns on something real but low-stakes.
+source is public at github.com/thanikc/thanikc.github.io.

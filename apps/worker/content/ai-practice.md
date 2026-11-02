@@ -56,16 +56,15 @@ edge-case coverage before or during generation rather than line-by-line
 afterward, and treating the test suite itself as the specification an agent
 must satisfy so it can refactor safely. His website repository contains the
 rules his AI coding assistants must follow under this approach: a strict
-test-driven workflow, the architecture and coding standards, and a set of UI
-and accessibility standards. He also builds AI into products: AI Ling, the
-assistant on his website, and the AI-generated roast in his BJJ Belt Quiz.
+test-driven workflow, architecture and coding standards, and UI and
+accessibility standards. He also builds AI into products: AI Ling and the
+roast in his BJJ Belt Quiz.
 
 ## What Thanik looks for in a developer using AI
 
-When Thanik evaluates a developer who uses AI, speed of output isn't what he's
-looking for. He wants to see them write specifications precise enough that an
-agent can't misinterpret them, review AI-generated code for architectural
-intent and edge-case coverage rather than skim a green build, treat the test
-suite as the real specification instead of an afterthought, and know when to
-challenge an agent's answer rather than trust it by default. Someone who can
-only prompt and accept isn't enough — the judgment still has to be theirs.
+Speed of output isn't what Thanik looks for in a developer who uses AI. He
+wants someone who reviews AI-generated code for architectural intent rather
+than skimming a green build, treats the test suite as the real specification,
+and knows when to challenge an agent's answer instead of trusting it by
+default. Someone who can only prompt and accept isn't enough — the judgment
+still has to be theirs.
