@@ -7,7 +7,7 @@
     "worker": "pnpm --filter @thanikc/worker",
     "start": "pnpm --filter @thanikc/ui start",
     "start:ui": "pnpm --filter @thanikc/ui start",
-    "start:worker": "pnpm --filter @thanikc/worker start",
+    "start:worker": "pnpm --filter @thanikc/worker dev",
     "build": "pnpm --filter @thanikc/ui build",
     "build:pages": "pnpm --filter @thanikc/ui build:pages",
     "test": "pnpm -r test",
