@@ -192,4 +192,38 @@ describe('EVAL_QUESTIONS injection', () => {
       (EVAL_QUESTIONS as { forbid?: string[] }[]).some(q => q.forbid?.includes('evil.example')),
     ).toBe(true);
   });
+
+  const injections = () =>
+    (EVAL_QUESTIONS as (EvalQuestion & { history?: { role: string; content: string }[] })[]).filter(
+      q => q.injection,
+    );
+
+  it('covers forged history, link injection, cache poisoning and de/th extraction', () => {
+    const cases = injections();
+
+    expect(cases.some(q => q.history?.some(t => t.role === 'assistant'))).toBe(true);
+    expect(cases.filter(q => q.forbid?.includes('evil.example')).length).toBeGreaterThanOrEqual(3);
+    expect(cases.filter(q => q.locale === 'de').length).toBeGreaterThanOrEqual(2);
+    expect(cases.filter(q => q.locale === 'th').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('keeps every injection case self-contained, with a decline shape and forbidden text', () => {
+    for (const q of injections()) {
+      expect(q.expectAny.length).toBeGreaterThan(0);
+      expect(q.forbid?.length ?? 0).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('eval workflow', () => {
+  const yml = import.meta.glob('../../../.github/workflows/eval-worker.yml', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  });
+  const text = Object.values(yml)[0] as string;
+
+  it('also runs nightly against production', () => {
+    expect(text).toMatch(/schedule:\n\s+- cron: '\d+ \d+ \* \* \*'/);
+  });
 });

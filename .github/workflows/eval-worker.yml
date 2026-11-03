@@ -9,10 +9,14 @@ on:
       - 'apps/worker/content/**'
       - 'apps/worker/src/**'
       - 'apps/worker/scripts/eval.mjs'
+  # Nightly, against production: catches a provider or model changing underneath us.
+  schedule:
+    - cron: '30 2 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
+  issues: write # nightly failures open or update the ai-ling-alert issue
 
 jobs:
   eval:
@@ -29,3 +33,11 @@ jobs:
         env:
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         run: node apps/worker/scripts/eval.mjs --url https://thanikc-worker.thanikc.workers.dev --delay 7000
+
+      - name: Raise alert
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf 'The nightly AI Ling eval failed: %s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > "$RUNNER_TEMP/body.md"
+          .github/scripts/alert-issue.sh raise "AI Ling alert" "$RUNNER_TEMP/body.md"
