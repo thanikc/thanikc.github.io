@@ -57,6 +57,9 @@
     // Uncached answers generated per UTC day; past it Ling answers "busy". Keep below the
     // smallest free provider quota (confirm against the Groq console).
     "DAILY_GENERATION_LIMIT": 1000,
+    // Kill switch: set to "true" (dashboard var or `wrangler deploy --var CHAT_DISABLED:true`) and
+    // /api/chat answers 503 with a localized message, touching no binding. See RUNBOOK.md.
+    // "CHAT_DISABLED": "false",
   },
   // Secrets (set with `wrangler secret put` or via CI), never committed:
   //   GROQ_API_KEY, GOOGLE_AI_API_KEY, OPENROUTER_API_KEY, INGEST_TOKEN,

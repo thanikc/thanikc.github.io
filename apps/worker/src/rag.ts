@@ -91,6 +91,19 @@ const BUSY_ANSWERS: Record<string, string> = {
   th: 'วันนี้ Ling ตอบคำถามไปเยอะมากแล้ว ขอพักก่อนนะ ลองใหม่พรุ่งนี้ หรือติดต่อคุณ Thanik โดยตรงได้เลย (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
 };
 
+const DISABLED_ANSWERS: Record<string, string> = {
+  en: 'AI Ling is switched off for now. Please check back later, or reach Thanik directly (email and LinkedIn are in the site footer).',
+  de: 'AI Ling ist vorübergehend abgeschaltet. Schau später noch einmal vorbei oder schreib Thanik direkt (E-Mail und LinkedIn stehen im Footer der Seite).',
+  th: 'ตอนนี้ AI Ling ปิดให้บริการชั่วคราว ลองกลับมาใหม่ภายหลัง หรือติดต่อคุณ Thanik โดยตรงได้เลย (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
+};
+
+/** Canned answer for when the kill switch is on, in the site locale. */
+export function disabledAnswer(locale: unknown): string {
+  return typeof locale === 'string' && Object.hasOwn(DISABLED_ANSWERS, locale)
+    ? DISABLED_ANSWERS[locale]!
+    : DISABLED_ANSWERS['en']!;
+}
+
 /** Canned answer for when the day's generation budget is spent, in the site locale. */
 export function busyAnswer(locale: unknown): string {
   return typeof locale === 'string' && Object.hasOwn(BUSY_ANSWERS, locale)

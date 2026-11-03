@@ -132,13 +132,18 @@ Removing or renaming a file in `content/` leaves its vectors in the index (Vecto
 cannot list by prefix); delete them with `wrangler vectorize delete-vectors`. A document
 that merely shrinks has its stale tail chunks deleted automatically.
 
+## Kill switch
+
+`CHAT_DISABLED=true` (a var) makes `/api/chat` answer `503 { error: 'disabled', answer }` with
+a localized message before the gate, limiter or any binding runs (outcome `disabled`).
+
 ## Telemetry (Analytics Engine)
 
 Each `/api/chat` request that passes validation writes one data point to the
 `ai_ling_chat` dataset (`ANALYTICS` binding; absent = nothing recorded) and returns an
 `X-Request-Id` header. Blobs: provider, locale, cache tier, outcome (`ok` / `refused` /
-`failed` / `budget` / `blocked`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
-failover depth, answer length. The question, answer and IP are never recorded.
+`failed` / `budget` / `blocked` / `forbidden` / `disabled`), request id. Doubles: latency ms, top retrieval score (-1 = retrieval skipped),
+failover depth, answer length, cache-eligible (1 = stored in the shared cache). The question, answer and IP are never recorded.
 
 ```sql
 -- POST https://api.cloudflare.com/client/v4/accounts/<id>/analytics_engine/sql

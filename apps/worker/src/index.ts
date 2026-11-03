@@ -1,7 +1,15 @@
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
-import { buildMessages, busyAnswer, declineAnswer, embed, MIN_SCORE, search } from './rag';
+import {
+  buildMessages,
+  busyAnswer,
+  declineAnswer,
+  disabledAnswer,
+  embed,
+  MIN_SCORE,
+  search,
+} from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
@@ -57,6 +65,27 @@ app.post('/api/chat', async c => {
   const requestId = crypto.randomUUID();
   c.header('X-Request-Id', requestId);
 
+  // Only the locale is read this early, so the kill switch can answer in the visitor's language.
+  const requestLocale = ((await c.req.json().catch(() => null)) as { locale?: unknown } | null)
+    ?.locale;
+  const track = (p: Pick<ChatPoint, 'provider' | 'cache' | 'outcome'> & Partial<ChatPoint>) =>
+    record(c.env, {
+      requestId,
+      locale: cacheLocale(requestLocale),
+      latencyMs: Date.now() - started,
+      topScore: -1,
+      failovers: 0,
+      answerLength: 0,
+      cacheEligible: false,
+      ...p,
+    });
+
+  if (c.env.CHAT_DISABLED === 'true') {
+    const answer = disabledAnswer(requestLocale);
+    track({ provider: 'none', cache: 'none', outcome: 'disabled', answerLength: answer.length });
+    return c.json({ error: 'disabled', answer }, 503);
+  }
+
   // A visitor proves they are human once (Turnstile) and then holds a short session, so the
   // challenge isn't re-run per message. Off unless both secrets are set (local dev, tests).
   const { TURNSTILE_SECRET, SESSION_SECRET } = c.env;
@@ -71,6 +100,7 @@ app.post('/api/chat', async c => {
     ) {
       c.header('X-Chat-Session', await issueSession(SESSION_SECRET));
     } else {
+      track({ provider: 'none', cache: 'none', outcome: 'forbidden' });
       return c.json({ error: 'verification required' }, 403);
     }
   }
@@ -143,16 +173,6 @@ app.post('/api/chat', async c => {
     );
   const lang = cacheLocale(locale);
   const key = await cacheKey(message, lang);
-  const track = (p: Pick<ChatPoint, 'provider' | 'cache' | 'outcome'> & Partial<ChatPoint>) =>
-    record(c.env, {
-      requestId,
-      locale: lang,
-      latencyMs: Date.now() - started,
-      topScore: -1,
-      failovers: 0,
-      answerLength: 0,
-      ...p,
-    });
   if (cacheable) {
     const hit = await lookupExact(c.env, key);
     if (hit) {
@@ -232,7 +252,8 @@ app.post('/api/chat', async c => {
       return reply({ answer: declined, provider: 'none', sources: [] });
     }
     if (verdict === 'error') console.warn('moderation failed; answer not cached');
-    if (wouldCache && verdict === 'safe') {
+    const stored = wouldCache && verdict === 'safe';
+    if (stored) {
       c.executionCtx.waitUntil(
         store(c.env, {
           key,
@@ -251,6 +272,7 @@ app.post('/api/chat', async c => {
       topScore,
       failovers,
       answerLength: answer.length,
+      cacheEligible: stored,
     });
     return reply({ answer, provider, sources });
   } catch (err) {
