@@ -157,6 +157,8 @@ the response shape is unverified and must be confirmed in the deployed eval. An 
 is admitted to the cache only if it is link-free, not truncated, scored >= `MIN_SCORE` + 0.05
 and moderated safe.
 
+Operations (alerts, kill switch, key rotation, cache purge): see [RUNBOOK.md](RUNBOOK.md).
+
 ## Commands (run from repo root or this directory)
 
 ```bash
