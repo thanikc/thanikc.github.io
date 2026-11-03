@@ -13,11 +13,15 @@ The Angular chat widget (`apps/ui/src/app/domains/chat/`) reads this URL from th
 
 ## Endpoints
 
-| Method | Path          | Purpose                                                                  |
-| ------ | ------------- | ------------------------------------------------------------------------ |
-| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                                    |
-| POST   | `/api/chat`   | `{ message, history?, locale? }` → `{ answer, provider, sources }` (RAG) |
-| POST   | `/api/ingest` | `Bearer $INGEST_TOKEN`; `{ id, text, metadata? }` → upsert chunks        |
+| Method | Path          | Purpose                                                                                                                                        |
+| ------ | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/health` | Liveness check → `{ "status": "ok" }`                                                                                                          |
+| POST   | `/api/chat`   | `{ message, history?, locale? }` → `{ answer, provider, sources, answerSig? }` (RAG)                                                           |
+| POST   | `/api/ingest` | `Bearer <expires>.<hmac(INGEST_TOKEN)>` (10 min, `pnpm ingest` mints it); `{ id, text, metadata? }` (`id` = `[a-z0-9-]{1,64}`) → upsert chunks |
+
+Bodies are capped (chat 32 KiB, ingest 1 MiB → 413). An unknown `locale` or more than 6 `history`
+turns → 400. With `SESSION_SECRET` set, each answer carries `answerSig` (HMAC of the answer) and
+assistant turns in `history` without a valid one are dropped with the user turn before them.
 
 CORS allows `ALLOWED_ORIGIN` (comma-separated). For local UI work, put
 `ALLOWED_ORIGIN=https://thanikc.github.io,http://localhost:4200` in `.env` (alongside the provider keys; `wrangler dev` reads `.env` only when no `.dev.vars` exists).

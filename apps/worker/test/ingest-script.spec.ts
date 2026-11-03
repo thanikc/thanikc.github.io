@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error — plain .mjs ops script, no types
-import { parseDoc } from '../scripts/ingest.mjs';
+import { mintToken, parseDoc } from '../scripts/ingest.mjs';
+import { verifySession } from '../src/gate';
 
 describe('parseDoc', () => {
   it('derives id and metadata from the file name', () => {
@@ -35,5 +36,16 @@ describe('parseDoc', () => {
 
   it('trims surrounding whitespace from the body', () => {
     expect(parseDoc('a.md', '\n\n  hello  \n\n').text).toBe('hello');
+  });
+});
+
+describe('mintToken', () => {
+  it('produces a 10-minute token the worker accepts', async () => {
+    const now = 1_000_000;
+    const token = mintToken('secret', now);
+
+    expect(await verifySession(token, 'secret', now + 599)).toBe(true);
+    expect(await verifySession(token, 'secret', now + 600)).toBe(false);
+    expect(await verifySession(token, 'other', now)).toBe(false);
   });
 });

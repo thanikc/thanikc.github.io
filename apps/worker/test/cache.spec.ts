@@ -4,6 +4,7 @@ import createTable from '../migrations/0001_answer_cache.sql?raw';
 import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
 import dropEpoch from '../migrations/0003_drop_epoch.sql?raw';
 import app from '../src/index';
+import { issueSession } from '../src/gate';
 import { MAX_ROWS } from '../src/cache';
 import { declineAnswer, MIN_SCORE } from '../src/rag';
 import { CACHE_MARGIN, MODERATION_MODEL } from '../src/safety';
@@ -252,12 +253,15 @@ describe('answer cache: size', () => {
 describe('purge on ingest', () => {
   const db = () => (env as unknown as { CACHE_DB: D1Database }).CACHE_DB;
 
-  const ingestDoc = (vectors: { getByIds: unknown; upsert: unknown }) =>
+  const ingestDoc = async (vectors: { getByIds: unknown; upsert: unknown }) =>
     app.request(
       'https://worker.test/api/ingest',
       {
         method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: 'Bearer secret' },
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${await issueSession('secret', undefined, 600)}`,
+        },
         body: JSON.stringify({ id: 'doc', text: 'Thanik builds things.' }),
       },
       {

@@ -9,6 +9,8 @@ export interface ChatTurn {
   content: string;
   /** Distinct titles of the knowledge-base documents an answer looked in. Display only. */
   sources?: string[];
+  /** The worker's proof that it wrote this assistant turn; sent back with the history. */
+  answerSig?: string;
 }
 
 export interface ChatSource {
@@ -27,4 +29,6 @@ export interface ChatResponse {
   answer: string;
   provider: string;
   sources: ChatSource[];
+  /** Present when the worker signs answers; echoed on the assistant turn in later history. */
+  answerSig?: string;
 }

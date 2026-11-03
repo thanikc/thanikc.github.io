@@ -1,16 +1,32 @@
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import { cors } from 'hono/cors';
 import { buildMessages, busyAnswer, declineAnswer, embed, MIN_SCORE, search } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
 import { record, type ChatPoint } from './telemetry';
 import { takeGeneration } from './budget';
-import { issueSession, verifySession, verifyTurnstile } from './gate';
+import {
+  dropForgedTurns,
+  type SignedTurn,
+  issueSession,
+  signAnswer,
+  verifySession,
+  verifyTurnstile,
+} from './gate';
 import { CACHE_MARGIN, isCacheSafe, moderate } from './safety';
 import { redactPii } from './pii';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
+
+// Set after the handler ran, so errors and 404s carry them too.
+app.use('*', async (c, next) => {
+  await next();
+  c.res.headers.set('X-Content-Type-Options', 'nosniff');
+  c.res.headers.set('Cache-Control', 'no-store');
+  c.res.headers.set('Referrer-Policy', 'no-referrer');
+});
 
 app.use('/api/*', (c, next) =>
   cors({
@@ -22,19 +38,19 @@ app.use('/api/*', (c, next) =>
   })(c, next),
 );
 
+const tooLarge = (maxSize: number) =>
+  bodyLimit({ maxSize, onError: c => c.json({ error: 'payload too large' }, 413) });
+app.use('/api/chat', tooLarge(32 * 1024));
+app.use('/api/ingest', tooLarge(1024 * 1024));
+
 app.get('/api/health', c => c.json({ status: 'ok' }));
 
 const MAX_MESSAGE_CHARS = 2000;
 
-/** Constant-time comparison; digests first so the two inputs always have the same length. */
-async function sameSecret(a: string, b: string): Promise<boolean> {
-  const [x, y] = await Promise.all(
-    [a, b].map(s => crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))),
-  );
-  return crypto.subtle.timingSafeEqual(x!, y!);
-}
 /** Mirrors the widget's CHAT_HISTORY_LIMIT; anything longer is not our UI talking. */
 const MAX_HISTORY_TURNS = 6;
+/** The languages the site is published in. */
+const LOCALES: readonly unknown[] = ['en', 'de', 'th'];
 
 app.post('/api/chat', async c => {
   const started = Date.now();
@@ -84,27 +100,33 @@ app.post('/api/chat', async c => {
     return c.json({ error: `message must be at most ${MAX_MESSAGE_CHARS} characters` }, 400);
   }
 
+  if (body?.locale !== undefined && !LOCALES.includes(body.locale)) {
+    return c.json({ error: 'unsupported locale' }, 400);
+  }
+  if (Array.isArray(body?.history) && body.history.length > MAX_HISTORY_TURNS) {
+    return c.json({ error: 'history is too long' }, 400);
+  }
+
   // Visitor input: a `system` turn here would otherwise reach the model as an instruction.
   // Long turns are cut rather than dropped, since a real answer can exceed the message limit.
-  const rawHistory: ChatMessage[] = Array.isArray(body?.history)
-    ? (body.history as unknown[])
-        .filter(
-          (m): m is ChatMessage =>
-            typeof m === 'object' &&
-            m !== null &&
-            ((m as ChatMessage).role === 'user' || (m as ChatMessage).role === 'assistant') &&
-            typeof (m as ChatMessage).content === 'string',
-        )
-        .slice(-MAX_HISTORY_TURNS)
-        .map(({ role, content }) => ({ role, content: content.slice(0, MAX_MESSAGE_CHARS) }))
+  const turns: SignedTurn[] = Array.isArray(body?.history)
+    ? (body.history as unknown[]).filter(
+        (m): m is SignedTurn =>
+          typeof m === 'object' &&
+          m !== null &&
+          ((m as SignedTurn).role === 'user' || (m as SignedTurn).role === 'assistant') &&
+          typeof (m as SignedTurn).content === 'string',
+      )
     : [];
+  // The signature covers the answer as we sent it, so check before cutting or redacting.
+  const rawHistory: ChatMessage[] = (
+    SESSION_SECRET ? await dropForgedTurns(turns, SESSION_SECRET) : turns
+  ).map(({ role, content }) => ({ role, content: content.slice(0, MAX_MESSAGE_CHARS) }));
 
   // Personal data stays out of providers, embeddings, moderation and the shared cache.
   const { text: message, found: hasPii } = redactPii(rawMessage);
   const history = rawHistory.map(m => ({ ...m, content: redactPii(m.content).text }));
 
-  // `locale` is visitor input; buildMessages and declineAnswer only honour a language
-  // the site is actually published in and ignore anything else.
   const locale = typeof body?.locale === 'string' ? body.locale : undefined;
 
   // A follow-up's answer depends on the turns before it, so only a conversation's
@@ -112,6 +134,13 @@ app.post('/api/chat', async c => {
   const cacheable = history.length === 0 && !hasPii;
   // A follow-up ("tell me more") embeds poorly alone, so it is searched with the turn before it.
   const lastUserTurn = history.filter(m => m.role === 'user').at(-1)?.content ?? '';
+  // Every answer goes back signed, so the client can prove its assistant turns on follow-ups.
+  const reply = async <T extends { answer: string }>(payload: T) =>
+    c.json(
+      SESSION_SECRET
+        ? { ...payload, answerSig: await signAnswer(SESSION_SECRET, payload.answer) }
+        : payload,
+    );
   const lang = cacheLocale(locale);
   const key = await cacheKey(message, lang);
   const track = (p: Pick<ChatPoint, 'provider' | 'cache' | 'outcome'> & Partial<ChatPoint>) =>
@@ -133,7 +162,7 @@ app.post('/api/chat', async c => {
         outcome: 'ok',
         answerLength: hit.answer.length,
       });
-      return c.json({ ...hit, cached: 'exact' });
+      return reply({ ...hit, cached: 'exact' });
     }
   }
 
@@ -150,7 +179,7 @@ app.post('/api/chat', async c => {
           outcome: 'ok',
           answerLength: hit.answer.length,
         });
-        return c.json({ ...hit, cached: 'semantic' });
+        return reply({ ...hit, cached: 'semantic' });
       }
     }
 
@@ -166,7 +195,7 @@ app.post('/api/chat', async c => {
         topScore,
         answerLength: answer.length,
       });
-      return c.json({ answer, provider: 'none', sources: [] });
+      return reply({ answer, provider: 'none', sources: [] });
     }
 
     if (!(await takeGeneration(c.env))) {
@@ -178,7 +207,7 @@ app.post('/api/chat', async c => {
         topScore,
         answerLength: answer.length,
       });
-      return c.json({ answer, provider: 'none', sources: [] });
+      return reply({ answer, provider: 'none', sources: [] });
     }
 
     const { answer, provider, failovers, truncated } = await generate(
@@ -200,7 +229,7 @@ app.post('/api/chat', async c => {
         topScore,
         answerLength: declined.length,
       });
-      return c.json({ answer: declined, provider: 'none', sources: [] });
+      return reply({ answer: declined, provider: 'none', sources: [] });
     }
     if (verdict === 'error') console.warn('moderation failed; answer not cached');
     if (wouldCache && verdict === 'safe') {
@@ -223,7 +252,7 @@ app.post('/api/chat', async c => {
       failovers,
       answerLength: answer.length,
     });
-    return c.json({ answer, provider, sources });
+    return reply({ answer, provider, sources });
   } catch (err) {
     // Provider errors can carry account details, so the reason goes to the logs only.
     const attempts = err instanceof ChatError ? err.attempts : [];
@@ -239,9 +268,15 @@ app.post('/api/chat', async c => {
   }
 });
 
+const DOC_ID = /^[a-z0-9-]{1,64}$/;
+
 app.post('/api/ingest', async c => {
-  const token = c.env.INGEST_TOKEN;
-  if (!token || !(await sameSecret(c.req.header('Authorization') ?? '', `Bearer ${token}`))) {
+  const requestId = crypto.randomUUID();
+  c.header('X-Request-Id', requestId);
+  // CI mints a short-lived token from INGEST_TOKEN, so a captured request can't be replayed later.
+  const secret = c.env.INGEST_TOKEN;
+  const bearer = c.req.header('Authorization')?.match(/^Bearer (\S+)$/)?.[1];
+  if (!secret || !bearer || !(await verifySession(bearer, secret))) {
     return c.json({ error: 'unauthorized' }, 401);
   }
 
@@ -251,8 +286,11 @@ app.post('/api/ingest', async c => {
     metadata?: unknown;
   } | null;
 
-  if (typeof body?.id !== 'string' || typeof body?.text !== 'string' || body.text.trim() === '') {
-    return c.json({ error: 'id and non-empty text are required' }, 400);
+  if (typeof body?.id !== 'string' || !DOC_ID.test(body.id)) {
+    return c.json({ error: 'id must match [a-z0-9-]{1,64}' }, 400);
+  }
+  if (typeof body?.text !== 'string' || body.text.trim() === '') {
+    return c.json({ error: 'non-empty text is required' }, 400);
   }
 
   const metadata =
@@ -260,7 +298,8 @@ app.post('/api/ingest', async c => {
       ? (body.metadata as Record<string, unknown>)
       : {};
 
-  const { chunks, skipped } = await ingest(body.id, body.text, metadata, c.env);
+  const { chunks, skipped, hash } = await ingest(body.id, body.text, metadata, c.env);
+  console.log(JSON.stringify({ event: 'ingest', id: body.id, chunks, skipped, hash, requestId }));
   // Answers cached against the old content are stale as soon as the index changes.
   // ponytail: Vectorize upserts land in 1–3 min, so an answer cached in that window can
   // still be grounded on old content; re-run the ingest if that ever matters.

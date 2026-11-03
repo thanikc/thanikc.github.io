@@ -60,7 +60,7 @@ describe('ingest', () => {
 
     const result = await ingest('doc', 'unchanged text', {}, env);
 
-    expect(result).toEqual({ chunks: 0, skipped: true });
+    expect(result).toEqual({ chunks: 0, skipped: true, hash: expect.any(String) });
     expect(run).not.toHaveBeenCalled();
     expect(upsert).not.toHaveBeenCalled();
   });
@@ -69,7 +69,11 @@ describe('ingest', () => {
     const stored = await storedChunkZero('old text');
     const { env, upsert } = fakeEnv(stored);
 
-    expect(await ingest('doc', 'new text', {}, env)).toEqual({ chunks: 1, skipped: false });
+    expect(await ingest('doc', 'new text', {}, env)).toEqual({
+      chunks: 1,
+      skipped: false,
+      hash: expect.any(String),
+    });
     expect(upsert).toHaveBeenCalledOnce();
   });
 

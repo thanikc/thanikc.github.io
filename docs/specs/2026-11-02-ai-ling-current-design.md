@@ -71,8 +71,9 @@ missing token → 401; a missing `INGEST_TOKEN` secret disables the endpoint.
 1. **Rate limit.** Per-IP `CHAT_LIMIT` (10/min, key `cf-connecting-ip`) is checked first, then global
    `CHAT_LIMIT_GLOBAL` (60/min). A client already over its own limit doesn't use up the global one.
 2. **Validate.** `message` is trimmed, required, and capped at 2000 chars. `history` keeps only
-   `user`/`assistant` turns with string content (so no injected `system` turns), keeps the last
-   6, and truncates each turn to 2000 chars. `locale` passes through but only `de`/`th` change behavior.
+   `user`/`assistant` turns with string content (so no injected `system` turns), rejects more
+   than 6 turns (400), and truncates each turn to 2000 chars. With `SESSION_SECRET`, assistant turns
+   without a valid `answerSig` are dropped. `locale` must be `en`/`de`/`th` (else 400).
 3. **Exact cache** (opening messages only, i.e. `history` empty): key =
    `SHA-256(locale + "\n" + lowercase(trim(message)))`.
 4. **Embed** once with `bge-m3`. A follow-up embeds the previous user turn plus the message.
@@ -165,18 +166,18 @@ base64 float32, created_at)`.
 
 ## 10. Security controls in place
 
-| Threat                              | Control                                                                     |
-| ----------------------------------- | --------------------------------------------------------------------------- |
-| Quota/cost drain                    | Per-IP and global native rate limits; decline gate; answer cache            |
-| Oversized input                     | 2000-char message cap; 6-turn history cap with per-turn truncation          |
-| System-role injection via history   | History filtered to `user`/`assistant`                                      |
-| Prompt injection / jailbreak        | Scope rules in the system prompt; injection cases in `eval.mjs` (hard gate) |
-| XSS from model output               | Angular `DomSanitizer` on `[innerHTML]`                                     |
-| Unauthorized ingest                 | Bearer token, constant-time compare; endpoint off without a secret          |
-| Cross-origin browser use            | CORS allowlist (`ALLOWED_ORIGIN`)                                           |
-| Secret leakage                      | Wrangler/GitHub secrets; provider error detail only in logs                 |
-| Stale/poisoned answers after change | Cache cleared on ingest and on deploy                                       |
-| Privacy                             | No question/answer/IP in telemetry; question text not cached                |
+| Threat                              | Control                                                                      |
+| ----------------------------------- | ---------------------------------------------------------------------------- |
+| Quota/cost drain                    | Per-IP and global native rate limits; decline gate; answer cache             |
+| Oversized input                     | 32 KiB body cap; 2000-char message cap; 6-turn history limit (400)           |
+| System-role injection via history   | History filtered to `user`/`assistant`; assistant turns signed (`answerSig`) |
+| Prompt injection / jailbreak        | Scope rules in the system prompt; injection cases in `eval.mjs` (hard gate)  |
+| XSS from model output               | Angular `DomSanitizer` on `[innerHTML]`                                      |
+| Unauthorized ingest                 | Bearer token, constant-time compare; endpoint off without a secret           |
+| Cross-origin browser use            | CORS allowlist (`ALLOWED_ORIGIN`)                                            |
+| Secret leakage                      | Wrangler/GitHub secrets; provider error detail only in logs                  |
+| Stale/poisoned answers after change | Cache cleared on ingest and on deploy                                        |
+| Privacy                             | No question/answer/IP in telemetry; question text not cached                 |
 
 ## 11. Delivery
 

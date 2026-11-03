@@ -113,6 +113,28 @@ describe('ChatService', () => {
     });
   });
 
+  it("sends the worker's signature back with the assistant turn it belongs to", async () => {
+    const first = service.send('Hello');
+    (await nextRequest()).flush({ ...answer('Hi'), answerSig: 'sig-1' });
+    await first;
+
+    expect(service.turns().at(-1)).toEqual({
+      role: 'assistant',
+      content: 'Hi',
+      answerSig: 'sig-1',
+    });
+
+    const done = service.send('And then?');
+    const req = await nextRequest();
+    expect(req.request.body.history).toEqual([
+      { role: 'user', content: 'Hello' },
+      { role: 'assistant', content: 'Hi', answerSig: 'sig-1' },
+    ]);
+
+    req.flush(answer('More'));
+    await done;
+  });
+
   it('keeps history free of source titles', async () => {
     const first = service.send('Hello');
     (await nextRequest()).flush({

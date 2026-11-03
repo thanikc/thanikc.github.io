@@ -49,16 +49,16 @@ export async function ingest(
   text: string,
   metadata: Record<string, unknown>,
   env: Env,
-): Promise<{ chunks: number; skipped: boolean }> {
+): Promise<{ chunks: number; skipped: boolean; hash: string }> {
+  const hash = await contentHash(text, metadata);
   const chunks = chunk(text);
   if (chunks.length === 0) {
-    return { chunks: 0, skipped: false };
+    return { chunks: 0, skipped: false, hash };
   }
 
-  const hash = await contentHash(text, metadata);
   const [first] = await vectorize(env).getByIds([`${docId}:0`]);
   if (first?.metadata?.contentHash === hash) {
-    return { chunks: 0, skipped: true };
+    return { chunks: 0, skipped: true, hash };
   }
 
   const vectors = await Promise.all(
@@ -88,5 +88,5 @@ export async function ingest(
     );
     await vectorize(env).deleteByIds(stale);
   }
-  return { chunks: vectors.length, skipped: false };
+  return { chunks: vectors.length, skipped: false, hash };
 }

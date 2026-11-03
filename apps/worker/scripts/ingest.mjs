@@ -12,6 +12,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { createHmac } from 'node:crypto';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = resolve(HERE, '..', 'content');
@@ -35,6 +36,14 @@ export function parseDoc(fileName, raw) {
 
   const id = typeof metadata.id === 'string' && metadata.id ? metadata.id : base;
   return { id, text: body.trim(), metadata };
+}
+
+const TOKEN_TTL_SECONDS = 600;
+
+/** `${expires}.${hmac}`: what the worker's verifySession accepts, valid for 10 minutes. */
+export function mintToken(secret, now = Math.floor(Date.now() / 1000)) {
+  const expires = String(now + TOKEN_TTL_SECONDS);
+  return `${expires}.${createHmac('sha256', secret).update(expires).digest('base64url')}`;
 }
 
 async function loadEnvFile(path) {
@@ -94,7 +103,7 @@ async function main() {
 
     const res = await fetch(`${url}/api/ingest`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${mintToken(token)}` },
       body: JSON.stringify(doc),
     });
     const payload = await res.json().catch(() => ({}));

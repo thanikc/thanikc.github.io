@@ -9,10 +9,13 @@ import { DEFAULT_LOCALE, matchLocaleTag } from '../../shared/i18n/locales';
 
 /**
  * The last `CHAT_HISTORY_LIMIT` turns, which is all the worker needs for follow-ups —
- * as plain role/content pairs: source titles are for display, not for the model.
+ * as plain role/content pairs plus the worker's signature on its own answers: source
+ * titles are for display, not for the model.
  */
 const recent = (turns: ChatTurn[]): ChatTurn[] =>
-  turns.slice(-CHAT_HISTORY_LIMIT).map(({ role, content }) => ({ role, content }));
+  turns
+    .slice(-CHAT_HISTORY_LIMIT)
+    .map(({ role, content, answerSig }) => ({ role, content, ...(answerSig && { answerSig }) }));
 
 /** Distinct source titles in retrieval order; chunks without a title are skipped. */
 const titlesOf = (sources: ChatSource[] = []): string[] => [
@@ -103,11 +106,16 @@ export class ChatService {
     this.error.set(null);
 
     try {
-      const { answer, sources } = await this.post(request);
+      const { answer, sources, answerSig } = await this.post(request);
       const titles = titlesOf(sources);
       this.turns.update(turns => [
         ...turns,
-        { role: 'assistant', content: answer, ...(titles.length > 0 && { sources: titles }) },
+        {
+          role: 'assistant',
+          content: answer,
+          ...(titles.length > 0 && { sources: titles }),
+          ...(answerSig && { answerSig }),
+        },
       ]);
     } catch {
       this.error.set(CHAT_ERROR_MESSAGE);
