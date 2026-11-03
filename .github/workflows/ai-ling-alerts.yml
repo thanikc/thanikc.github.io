@@ -1,0 +1,47 @@
+name: AI Ling alerts
+
+# Hourly health check on the Analytics Engine dataset. Opens (or comments on) one issue
+# labelled ai-ling-alert while a threshold is breached, and closes it when all pass.
+# GitHub's notification email is the alert channel.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: 'ai-ling-alerts'
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+
+      - name: Evaluate thresholds
+        id: alerts
+        run: node apps/worker/scripts/alerts.mjs > "$RUNNER_TEMP/alerts.json"
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+          # Keep in step with DAILY_GENERATION_LIMIT in apps/worker/wrangler.jsonc.
+          DAILY_LIMIT: '1000'
+
+      - name: Open, update or close the alert issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(jq -r .breached "$RUNNER_TEMP/alerts.json")" = "true" ]; then
+            jq -r .body "$RUNNER_TEMP/alerts.json" > "$RUNNER_TEMP/body.md"
+            .github/scripts/alert-issue.sh raise "$(jq -r .title "$RUNNER_TEMP/alerts.json")" "$RUNNER_TEMP/body.md"
+          else
+            .github/scripts/alert-issue.sh clear
+          fi
