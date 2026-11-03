@@ -155,8 +155,20 @@ describe('PrivacyPolicyComponent', () => {
     it('no longer claims the backend writes nothing, and names what the cache keeps', () => {
       expect(text()).not.toContain('nothing is written to a database');
       expect(text()).not.toContain('not stored by us at all');
-      expect(text()).toContain('30 days');
+      expect(text()).toContain('7 days');
+      expect(text()).not.toContain('30 days');
       expect(text()).toContain('fingerprint');
+    });
+
+    it('says personal details are masked before reaching AI providers', () => {
+      expect(text()).toContain('email addresses, phone numbers');
+      expect(text()).toContain('replaced with a placeholder');
+    });
+
+    it('states the free-tier terms of the Google and OpenRouter providers', () => {
+      expect(text()).toContain('free tier');
+      expect(text()).toContain('improve its products');
+      expect(text()).toContain('log prompts');
     });
 
     it('discloses the per-request metrics', () => {

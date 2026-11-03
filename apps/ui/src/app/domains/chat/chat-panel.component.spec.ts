@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { type Mock, vi } from 'vitest';
 import { ChatPanelComponent } from './chat-panel.component';
 import { ChatTurn } from './chat.models';
@@ -58,7 +59,7 @@ describe('ChatPanelComponent', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [ChatPanelComponent],
-      providers: [{ provide: SpeechRecognitionService, useValue: speech }],
+      providers: [provideRouter([]), { provide: SpeechRecognitionService, useValue: speech }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatPanelComponent);
@@ -269,6 +270,27 @@ describe('ChatPanelComponent', () => {
       expect(el().querySelector('.chat-transcript')!.lastElementChild).toBe(note);
       expect(el().querySelector('ol')!.contains(note)).toBe(false);
       expect(el().querySelector('.chat-composer')!.textContent).not.toMatch(/\bAI\b/);
+    });
+  });
+
+  describe('personal-data notice', () => {
+    it('warns against sharing personal data and links to the chat section of the privacy policy', () => {
+      setInputs({ turns: TURNS });
+      const note = el().querySelector('.chat-disclaimer')!;
+      const link = note.querySelector('a')!;
+
+      expect(note.textContent).toContain("Don't share personal data");
+      expect(link.getAttribute('href')).toBe('/privacy-policy#privacy-s4');
+    });
+
+    it('closes the panel when the link is followed, so the policy is not hidden behind it', () => {
+      const closed = vi.fn();
+      setInputs({ turns: TURNS });
+      fixture.componentInstance.close.subscribe(closed);
+
+      el().querySelector<HTMLAnchorElement>('.chat-disclaimer a')!.click();
+
+      expect(closed).toHaveBeenCalled();
     });
   });
 

@@ -215,10 +215,10 @@
       sent from your browser to our own backend, a serverless function running on Cloudflare Workers
       (Cloudflare, Inc.). The backend does not store the text of your messages or log their content.
       If a message opens a conversation, we keep the generated answer, along with a hash and a
-      numeric fingerprint (an embedding) of the question, in a Cloudflare D1 database for 30 days,
-      so that the same or a very similar question can be answered without asking an AI provider
-      again. That answer may therefore be shown to other visitors, and it could repeat something you
-      wrote, so please don't include personal details in your messages.
+      numeric fingerprint (an embedding) of the question, in a Cloudflare D1 database for 7 days, so
+      that the same or a very similar question can be answered without asking an AI provider again.
+      That answer may therefore be shown to other visitors, and it could repeat something you wrote,
+      so please don't include personal details in your messages.
     </p>
     <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.p2">
       To generate a reply, our backend forwards your message and conversation history to one
@@ -248,6 +248,19 @@
         >OpenRouter's Privacy Policy</a
       >.
     </p>
+    <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.pii">
+      Before your message is forwarded, email addresses, phone numbers and long number sequences
+      (such as card or bank-account numbers) are replaced with a placeholder like [email], so the AI
+      providers never receive them, and a message containing them is never cached. This filter works
+      on patterns and cannot catch everything, such as a name or an address, so please still don't
+      share personal data.
+    </p>
+    <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.free">
+      We use the free tier of each provider. Under the free tier terms, Google may use submitted
+      prompts and responses to improve its products, including through human review, and free models
+      on OpenRouter may log prompts and responses. Groq retains requests briefly under its own
+      policy. This is why we mask personal details first.
+    </p>
     <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.p3">
       The chat widget itself does not use cookies or local storage: your conversation lives only in
       your browser's memory for the current page view and is lost on refresh. Because this
@@ -257,9 +270,9 @@
       This processing is not gated by the cookie banner, which controls only Google Analytics.
     </p>
     <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.p4">
-      Because Groq and OpenRouter are based in the United States, using the assistant involves an
-      international transfer of your message data outside the European Economic Area; see
-      "International Data Transfers" below.
+      Because Groq, Google and OpenRouter are based in the United States, using the assistant
+      involves an international transfer of your message data outside the European Economic Area;
+      see "International Data Transfers" below.
     </p>
     <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s4.metrics">
       For every chat request we also record technical metrics in Cloudflare Analytics Engine: a
@@ -366,12 +379,12 @@
     </h2>
     <p class="policy-body leading-relaxed" i18n="Privacy policy paragraph@@privacy.s9.p1">
       Google Analytics is operated by Google, whose corporate group includes entities in the United
-      States. If you use the AI chat assistant, Groq, Inc. and OpenRouter, Inc. (both US-based) may
-      also process your message data, and Cloudflare, Inc. (also US-based) runs the backend that
-      relays it and holds the answer cache. Where personal data is transferred outside the European
-      Economic Area, these providers rely on safeguards such as the EU-U.S. Data Privacy Framework
-      and/or the European Commission's Standard Contractual Clauses. GitHub similarly relies on
-      comparable safeguards for any transfers related to hosting this site.
+      States. If you use the AI chat assistant, Groq, Inc., Google LLC and OpenRouter, Inc. (all
+      US-based) may also process your message data, and Cloudflare, Inc. (also US-based) runs the
+      backend that relays it and holds the answer cache. Where personal data is transferred outside
+      the European Economic Area, these providers rely on safeguards such as the EU-U.S. Data
+      Privacy Framework and/or the European Commission's Standard Contractual Clauses. GitHub
+      similarly relies on comparable safeguards for any transfers related to hosting this site.
     </p>
   </section>
 
@@ -387,10 +400,10 @@
       Your cookie consent choice stays in your browser's local storage until you clear it or click
       "Manage Cookie Preferences" above. The text of your chat messages is not stored by us: it
       exists only in your browser's memory during your session and in the backend's memory for the
-      duration of a single request. Cached answers and question fingerprints expire after 30 days
-      and are deleted the next time the cache is written to, and the per-request metrics are kept
-      for as long as Cloudflare Analytics Engine retains them. We do not control retention periods
-      for hosting logs or third-party services directly; see the linked provider policies above for
+      duration of a single request. Cached answers and question fingerprints expire after 7 days and
+      are deleted the next time the cache is written to, and the per-request metrics are kept for as
+      long as Cloudflare Analytics Engine retains them. We do not control retention periods for
+      hosting logs or third-party services directly; see the linked provider policies above for
       their specific retention practices.
     </p>
   </section>

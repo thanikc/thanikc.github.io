@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { signal } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
@@ -72,6 +73,7 @@ describe('ChatWidgetComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ChatWidgetComponent],
       providers: [
+        provideRouter([]),
         { provide: ChatService, useValue: mockChatService },
         { provide: CookieConsentService, useValue: { showBanner, bannerHeight } },
       ],

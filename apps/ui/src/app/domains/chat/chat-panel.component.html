@@ -139,11 +139,18 @@
       </div>
     }
 
-    <p
-      class="chat-disclaimer chat-muted mt-auto pt-6 text-center text-xs italic"
-      i18n="Standing disclaimer at the bottom of the transcript@@chat.disclaimer"
-    >
-      I'm an AI, so check anything that matters.
+    <p class="chat-disclaimer chat-muted mt-auto pt-6 text-center text-xs italic">
+      <span i18n="Standing disclaimer at the bottom of the transcript@@chat.disclaimer"
+        >AI answers can be wrong. Don't share personal data.</span
+      >
+      <a
+        class="underline"
+        routerLink="/privacy-policy"
+        fragment="privacy-s4"
+        i18n="Link from the chat disclaimer to the privacy policy@@chat.privacyLink"
+        (click)="close.emit()"
+        >Privacy policy</a
+      >
     </p>
   </div>
 

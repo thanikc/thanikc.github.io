@@ -1,3 +1,4 @@
+import { RouterLink } from '@angular/router';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -50,6 +51,7 @@ const MIC_ERROR_MESSAGES: Record<string, string> = {
     MatInputModule,
     TextFieldModule,
     MarkdownPipe,
+    RouterLink,
   ],
   templateUrl: './chat-panel.component.html',
   styleUrl: './chat-panel.component.scss',
