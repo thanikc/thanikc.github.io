@@ -18,8 +18,5 @@
       "Read(**/.env.*)"
     ]
   },
-  "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true,
-    "ponytail@ponytail": true
-  }
+  "enabledPlugins": {}
 }
