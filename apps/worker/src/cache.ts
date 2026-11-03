@@ -14,7 +14,7 @@ export interface CacheEntry extends CachedAnswer {
   vector: number[];
 }
 
-const TTL_SECONDS = 30 * 24 * 60 * 60;
+const TTL_SECONDS = 7 * 24 * 60 * 60;
 
 /** Cosine similarity at or above which a paraphrase counts as the same question. */
 export const CACHE_MIN_SIMILARITY = 0.95;

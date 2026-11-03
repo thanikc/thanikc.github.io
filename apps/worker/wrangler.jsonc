@@ -52,7 +52,7 @@
     "ALLOWED_ORIGIN": "https://thanikc.github.io",
     "EMBEDDING_MODEL": "@cf/baai/bge-m3",
     "GROQ_MODEL": "openai/gpt-oss-20b",
-    "GOOGLE_MODEL": "gemini-flash-latest",
+    "GOOGLE_MODEL": "gemini-2.5-flash",
     "OPENROUTER_MODEL": "openrouter/free",
     // Uncached answers generated per UTC day; past it Ling answers "busy". Keep below the
     // smallest free provider quota (confirm against the Groq console).

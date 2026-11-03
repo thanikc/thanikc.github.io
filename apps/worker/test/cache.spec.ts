@@ -428,3 +428,50 @@ describe('answer cache: admission', () => {
     expect(models).not.toContain(MODERATION_MODEL);
   });
 });
+
+describe('personal data', () => {
+  const sentToProvider = () => JSON.parse(fetchMock.mock.calls[0]![1].body).messages;
+
+  it('redacts the message and history before providers see them, and does not cache', async () => {
+    const res = await post({
+      message: 'write to jane@example.com',
+      history: [{ role: 'user', content: 'call me on +49 170 1234567' }],
+    });
+    expect(res.status).toBe(200);
+    const body = JSON.stringify(sentToProvider());
+    expect(body).toContain('[email]');
+    expect(body).toContain('[phone]');
+    expect(body).not.toContain('jane@example.com');
+    expect(body).not.toContain('1234567');
+  });
+
+  it('does not cache an opening message that contains personal data', async () => {
+    await post({ message: 'My email is jane@example.com, who is Thanik?' });
+    await settle();
+    expect(JSON.stringify(sentToProvider())).not.toContain('jane@example.com');
+
+    await post({ message: 'My email is jane@example.com, who is Thanik?' });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('answer cache: retention', () => {
+  const ageRow = (days: number) =>
+    (testEnv as unknown as { CACHE_DB: D1Database }).CACHE_DB.prepare(
+      'UPDATE answer_cache SET created_at = created_at - ?',
+    )
+      .bind(days * 86400)
+      .run();
+
+  it('serves an entry aged 6 days but not one aged 8', async () => {
+    await post({ message: 'Who is Thanik?' });
+    await settle();
+
+    await ageRow(6);
+    expect((await json(await post({ message: 'Who is Thanik?' }))).cached).toBe('exact');
+
+    await ageRow(2);
+    expect((await json(await post({ message: 'Who is Thanik?' }))).cached).toBeUndefined();
+  });
+});

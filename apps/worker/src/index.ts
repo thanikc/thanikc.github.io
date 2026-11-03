@@ -7,6 +7,7 @@ import { record, type ChatPoint } from './telemetry';
 import { takeGeneration } from './budget';
 import { issueSession, verifySession, verifyTurnstile } from './gate';
 import { CACHE_MARGIN, isCacheSafe, moderate } from './safety';
+import { redactPii } from './pii';
 import { cacheKey, cacheLocale, lookupExact, lookupSemantic, purgeCache, store } from './cache';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -75,17 +76,17 @@ app.post('/api/chat', async c => {
     locale?: unknown;
   } | null;
 
-  const message = typeof body?.message === 'string' ? body.message.trim() : '';
-  if (message === '') {
+  const rawMessage = typeof body?.message === 'string' ? body.message.trim() : '';
+  if (rawMessage === '') {
     return c.json({ error: 'message is required' }, 400);
   }
-  if (message.length > MAX_MESSAGE_CHARS) {
+  if (rawMessage.length > MAX_MESSAGE_CHARS) {
     return c.json({ error: `message must be at most ${MAX_MESSAGE_CHARS} characters` }, 400);
   }
 
   // Visitor input: a `system` turn here would otherwise reach the model as an instruction.
   // Long turns are cut rather than dropped, since a real answer can exceed the message limit.
-  const history: ChatMessage[] = Array.isArray(body?.history)
+  const rawHistory: ChatMessage[] = Array.isArray(body?.history)
     ? (body.history as unknown[])
         .filter(
           (m): m is ChatMessage =>
@@ -98,13 +99,17 @@ app.post('/api/chat', async c => {
         .map(({ role, content }) => ({ role, content: content.slice(0, MAX_MESSAGE_CHARS) }))
     : [];
 
+  // Personal data stays out of providers, embeddings, moderation and the shared cache.
+  const { text: message, found: hasPii } = redactPii(rawMessage);
+  const history = rawHistory.map(m => ({ ...m, content: redactPii(m.content).text }));
+
   // `locale` is visitor input; buildMessages and declineAnswer only honour a language
   // the site is actually published in and ignore anything else.
   const locale = typeof body?.locale === 'string' ? body.locale : undefined;
 
   // A follow-up's answer depends on the turns before it, so only a conversation's
   // opening message goes through the cache.
-  const cacheable = history.length === 0;
+  const cacheable = history.length === 0 && !hasPii;
   // A follow-up ("tell me more") embeds poorly alone, so it is searched with the turn before it.
   const lastUserTurn = history.filter(m => m.role === 'user').at(-1)?.content ?? '';
   const lang = cacheLocale(locale);
