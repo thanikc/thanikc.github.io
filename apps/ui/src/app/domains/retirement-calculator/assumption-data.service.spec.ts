@@ -73,7 +73,16 @@ describe('AssumptionDataService', () => {
     );
 
     expect(service.estimatedAnnualReturn()).toBe(10);
-    expect(service.returnPeriod()).toEqual({ from: 2023, to: 2024 });
+    expect(service.returnPeriod()).toEqual({ from: 2023, to: 2024, years: 2 });
+  });
+
+  it('counts the years both series report', async () => {
+    await flush(
+      { '2024': 10, '2023': 10, '2022': 10, '2021': null },
+      { '2024': 1, '2023': 1, '2022': 1, '2021': 1 },
+    );
+
+    expect(service.returnPeriod()).toEqual({ from: 2022, to: 2024, years: 3 });
   });
 
   it('asks for 30 years of each series', () => {

@@ -53,6 +53,25 @@ describe('AssumptionsInfoCardComponent', () => {
     expect(statusChip()?.querySelector('mat-icon')).not.toBeNull();
   });
 
+  describe('thin data', () => {
+    it('warns when the live return covers fewer years than a market cycle', () => {
+      fixture.componentRef.setInput('returnPeriod', { from: 2011, to: 2024, years: 14 });
+      fixture.detectChanges();
+
+      expect(host().querySelector('.thin-data')?.textContent).toContain('14 years');
+    });
+
+    it('does not warn with 20+ years or on the baseline', () => {
+      fixture.componentRef.setInput('returnPeriod', { from: 1995, to: 2024, years: 30 });
+      fixture.detectChanges();
+      expect(host().querySelector('.thin-data')).toBeNull();
+
+      fixture.componentRef.setInput('returnPeriod', null);
+      fixture.detectChanges();
+      expect(host().querySelector('.thin-data')).toBeNull();
+    });
+  });
+
   it('colours the card from theme tokens, not the Tailwind palette', () => {
     for (const isLive of [true, false]) {
       fixture.componentRef.setInput('isLive', isLive);

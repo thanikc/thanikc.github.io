@@ -18,6 +18,7 @@ describe('RetirementCalculatorComponent', () => {
   let inputsValidMockSignal: WritableSignal<boolean>;
   let isReturnOptimisticMockSignal: WritableSignal<boolean>;
   let monthlyMockSignal: WritableSignal<number>;
+  let rangeMockSignal: WritableSignal<{ low: number; high: number } | null>;
   const resetSpy = vi.fn();
 
   let mockAssumptionService: Partial<AssumptionDataService>;
@@ -35,12 +36,13 @@ describe('RetirementCalculatorComponent', () => {
     inputsValidMockSignal = signal(true);
     isReturnOptimisticMockSignal = signal(false);
     monthlyMockSignal = signal(410.82);
+    rangeMockSignal = signal<{ low: number; high: number } | null>({ low: 300, high: 560 });
     resetSpy.mockClear();
 
     mockAssumptionService = {
       isLive: signal(true),
       isLoading: signal(false),
-      returnPeriod: signal({ from: 1995, to: 2024 }),
+      returnPeriod: signal({ from: 1995, to: 2024, years: 30 }),
     };
 
     mockCalculatorService = {
@@ -53,6 +55,7 @@ describe('RetirementCalculatorComponent', () => {
       futureNetWorth: signal(0),
       remainingTargetNestEgg: signal(1200000),
       requiredMonthlyContribution: monthlyMockSignal,
+      contributionRange: rangeMockSignal,
       inputsValid: inputsValidMockSignal,
       isReturnOptimistic: isReturnOptimisticMockSignal,
       currency: 'USD',
@@ -105,6 +108,27 @@ describe('RetirementCalculatorComponent', () => {
   it('should expose live status and loading state from AssumptionDataService', () => {
     expect(component.isLive()).toBeTruthy();
     expect(component.isLoading()).toBeFalsy();
+  });
+
+  describe('uncertainty', () => {
+    it('shows the saving range under the answer, outside the live region', () => {
+      const range = el().querySelector('.calc-range');
+
+      expect(range?.textContent).toContain('$300');
+      expect(range?.textContent).toContain('$560');
+      expect(range?.closest('[aria-live]')).toBeNull();
+    });
+
+    it('shows the estimate note', () => {
+      expect(el().querySelector('.calc-note')?.textContent).toContain('not financial advice');
+    });
+
+    it('hides the range when on track', () => {
+      rangeMockSignal.set(null);
+      fixture.detectChanges();
+
+      expect(el().querySelector('.calc-range')).toBeNull();
+    });
   });
 
   describe('Select on focus', () => {

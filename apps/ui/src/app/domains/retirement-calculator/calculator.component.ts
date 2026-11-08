@@ -15,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CalculatorService } from './calculator.service';
 import { AssumptionsInfoCardComponent } from './assumptions-info-card.component';
 import { AssumptionDataService } from './assumption-data.service';
-import { INPUT_BOUNDS, LONG_RUN_REAL_RETURN } from './calculator.constants';
+import { INPUT_BOUNDS, LONG_RUN_REAL_RETURN, RETURN_SPREAD } from './calculator.constants';
 /** The chart's drawing space; the SVG stretches it to the frame (non-scaling strokes). */
 const CHART_W = 1000;
 const CHART_H = 400;
@@ -64,6 +64,8 @@ export class RetirementCalculatorComponent {
   readonly futureNetWorth = this.calculator.futureNetWorth;
   readonly remainingTargetNestEgg = this.calculator.remainingTargetNestEgg;
   readonly requiredMonthlyContribution = this.calculator.requiredMonthlyContribution;
+  readonly contributionRange = this.calculator.contributionRange;
+  readonly returnSpread = RETURN_SPREAD;
 
   // Live data status.
   readonly isLive = this.assumptions.isLive;

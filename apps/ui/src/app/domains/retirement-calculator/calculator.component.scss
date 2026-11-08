@@ -27,6 +27,16 @@
   }
 }
 
+// What the answer leaves out: the range under it and the estimate caveat, quieter than it.
+.calc-range,
+.calc-note {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  max-width: 62ch;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
 // Gold on charcoal: the figures the sentence is about.
 .calc-figure {
   color: var(--mat-sys-tertiary-container);

@@ -17,6 +17,12 @@ export const LONG_RUN_REAL_RETURN = 7;
 
 export const MONTHS_PER_YEAR = 12;
 
+/** ± points of real return the range shows: a plausible band, not a confidence interval. */
+export const RETURN_SPREAD = 2;
+
+/** Fewer reported years than this miss at least one full market cycle (2000, 2008, 2022). */
+export const MIN_RELIABLE_YEARS = 20;
+
 /** Valid ranges for each input; the template's min/max mirror these. */
 export const INPUT_BOUNDS = {
   years: { min: 1, max: 80 },

@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { DEFAULT_ANNUAL_RETURN, DEFAULT_SAFE_WITHDRAWAL_RATE } from './calculator.constants';
+import {
+  DEFAULT_ANNUAL_RETURN,
+  DEFAULT_SAFE_WITHDRAWAL_RATE,
+  MIN_RELIABLE_YEARS,
+} from './calculator.constants';
 
 @Component({
   selector: 'app-assumptions-info-card',
@@ -17,7 +21,8 @@ export class AssumptionsInfoCardComponent {
   readonly safeWithdrawalRate = input(DEFAULT_SAFE_WITHDRAWAL_RATE);
   readonly estimatedAnnualReturn = input(DEFAULT_ANNUAL_RETURN);
   /** Years the live return covers; null when the baseline is in use. */
-  readonly returnPeriod = input<{ from: number; to: number } | null>(null);
+  readonly returnPeriod = input<{ from: number; to: number; years: number } | null>(null);
 
   readonly baselineReturn = DEFAULT_ANNUAL_RETURN;
+  readonly minReliableYears = MIN_RELIABLE_YEARS;
 }

@@ -44,6 +44,7 @@ describe('CalculatorShellComponent', () => {
       futureNetWorth: signal(0),
       remainingTargetNestEgg: signal(1200000),
       requiredMonthlyContribution: signal(410.82),
+      contributionRange: signal(null),
       inputsValid: signal(true),
       isReturnOptimistic: signal(false),
       currency: 'USD',

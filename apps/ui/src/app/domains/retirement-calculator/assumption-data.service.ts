@@ -69,6 +69,7 @@ const realReturnOf = (market: Map<number, number>, inflation: Map<number, number
     rate: (Math.pow(growth, 1 / years.length) - 1) * 100,
     from: Math.min(...years),
     to: Math.max(...years),
+    years: years.length,
   };
 };
 
@@ -97,10 +98,10 @@ export class AssumptionDataService {
     Number((this.realReturn()?.rate ?? DEFAULT_ANNUAL_RETURN).toFixed(1)),
   );
 
-  /** The years the live return was computed over, or null on the baseline. */
+  /** The span and number of years the live return was computed over, or null on the baseline. */
   readonly returnPeriod = computed(() => {
     const real = this.realReturn();
-    return real ? { from: real.from, to: real.to } : null;
+    return real ? { from: real.from, to: real.to, years: real.years } : null;
   });
 
   readonly safeWithdrawalRate = signal(DEFAULT_SAFE_WITHDRAWAL_RATE);

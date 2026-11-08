@@ -44,6 +44,17 @@
       }
     </p>
 
+    @if (contributionRange(); as range) {
+      <p class="calc-range" i18n="Range of the saving if returns differ@@calculator.answer.range">
+        Between {{ range.low | currency: currency : 'symbol' : '1.0-0' }} and
+        {{ range.high | currency: currency : 'symbol' : '1.0-0' }} if returns run
+        {{ returnSpread }} points higher or lower.
+      </p>
+    }
+    <p class="calc-note" i18n="The result is an estimate@@calculator.answer.note">
+      An estimate from past market data, not financial advice.
+    </p>
+
     <!-- While an input is invalid the last valid chart stays, dimmed: the frame keeps
          its meaning instead of turning into an empty block. -->
     <div

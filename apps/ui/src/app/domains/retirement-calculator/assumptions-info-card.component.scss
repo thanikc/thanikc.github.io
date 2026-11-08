@@ -60,3 +60,9 @@
   width: 0.875rem;
   height: 0.875rem;
 }
+
+// A caution about the data's coverage reads stronger than the prose around it.
+.thin-data {
+  color: var(--mat-sys-on-surface);
+  font-weight: 600;
+}

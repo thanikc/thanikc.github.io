@@ -4,7 +4,8 @@ pnpm monorepo for [thanikc.github.io](https://thanikc.github.io):
 
 - **`apps/ui`** — personal portfolio site built with Angular (Standalone, Signals,
   Angular Material, Tailwind CSS). Full-Stack Engineer profile, an interactive
-  retirement calculator that uses live World Bank API data for nest-egg projections,
+  retirement calculator that uses live World Bank API data for nest-egg projections
+  (with a saving range if returns differ and a warning when the data covers too few years),
   and AI Ling (floating chat widget on every page, answering about Thanik and his
   work) that asks `apps/worker`. Published in English, German and Thai. Deploys to
   GitHub Pages.

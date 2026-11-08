@@ -5,6 +5,7 @@ import {
   INPUT_BOUNDS,
   LONG_RUN_REAL_RETURN,
   MONTHS_PER_YEAR,
+  RETURN_SPREAD,
 } from './calculator.constants';
 
 const within = (value: number, { min, max }: { min: number; max: number }) =>
@@ -67,14 +68,18 @@ export class CalculatorService {
     Math.max(0, this.totalNestEggNeeded() - this.futureNetWorth()),
   );
 
-  /** Monthly contribution that closes the remaining gap by the retirement date. */
-  readonly requiredMonthlyContribution = computed(() => {
+  /** Monthly contribution that closes the gap by the retirement date at the given real return (%). */
+  private contributionAt(returnPct: number): number {
     const years = this.yearsUntilRetirement();
-    const gap = this.remainingTargetNestEgg();
+    const rate = (returnPct || 0) / 100;
+    const gap = Math.max(
+      0,
+      this.totalNestEggNeeded() - this.currentNetWorth() * Math.pow(1 + rate, years),
+    );
 
     if (years <= 0 || gap <= 0) return 0;
 
-    const monthlyRate = (this.estimatedAnnualReturn() || 0) / 100 / MONTHS_PER_YEAR;
+    const monthlyRate = rate / MONTHS_PER_YEAR;
     const totalMonths = years * MONTHS_PER_YEAR;
 
     if (monthlyRate === 0) {
@@ -83,6 +88,24 @@ export class CalculatorService {
 
     // Payment of an annuity whose future value is the gap: PMT = FV * r / ((1 + r)^n - 1)
     return gap * (monthlyRate / (Math.pow(1 + monthlyRate, totalMonths) - 1));
+  }
+
+  /** Monthly contribution that closes the remaining gap by the retirement date. */
+  readonly requiredMonthlyContribution = computed(() =>
+    this.contributionAt(this.estimatedAnnualReturn()),
+  );
+
+  /**
+   * The saving if real returns run RETURN_SPREAD points higher (low) or lower (high) than
+   * chosen. Null while an input is invalid or when even the lower return reaches the goal.
+   */
+  readonly contributionRange = computed(() => {
+    if (!this.inputsValid()) return null;
+
+    const high = this.contributionAt(this.estimatedAnnualReturn() - RETURN_SPREAD);
+    if (high === 0) return null;
+
+    return { low: this.contributionAt(this.estimatedAnnualReturn() + RETURN_SPREAD), high };
   });
 
   /**

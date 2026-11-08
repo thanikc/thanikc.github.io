@@ -1,7 +1,11 @@
 import { LOCALE_ID, signal, WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { AssumptionDataService } from './assumption-data.service';
-import { DEFAULT_ANNUAL_RETURN, DEFAULT_SAFE_WITHDRAWAL_RATE } from './calculator.constants';
+import {
+  DEFAULT_ANNUAL_RETURN,
+  DEFAULT_SAFE_WITHDRAWAL_RATE,
+  RETURN_SPREAD,
+} from './calculator.constants';
 import { CalculatorService } from './calculator.service';
 
 describe('CalculatorService', () => {
@@ -204,6 +208,38 @@ describe('CalculatorService', () => {
     expect(service.futureNetWorth()).toBeGreaterThan(service.totalNestEggNeeded());
     expect(service.remainingTargetNestEgg()).toBe(0);
     expect(service.requiredMonthlyContribution()).toBe(0);
+  });
+
+  // --- Range: the same saving at a better and a worse real return ---
+
+  describe('contributionRange', () => {
+    const requiredAt = (returnPct: number) => {
+      service.estimatedAnnualReturn.set(returnPct);
+      return service.requiredMonthlyContribution();
+    };
+
+    it('brackets the required saving', () => {
+      const required = requiredAt(DEFAULT_ANNUAL_RETURN);
+      const low = requiredAt(DEFAULT_ANNUAL_RETURN + RETURN_SPREAD);
+      const high = requiredAt(DEFAULT_ANNUAL_RETURN - RETURN_SPREAD);
+      service.estimatedAnnualReturn.set(DEFAULT_ANNUAL_RETURN);
+
+      expect(service.contributionRange()).toEqual({ low, high });
+      expect(low).toBeLessThan(required);
+      expect(required).toBeLessThan(high);
+    });
+
+    it('is null when inputs are invalid', () => {
+      service.yearsUntilRetirement.set(0);
+
+      expect(service.contributionRange()).toBeNull();
+    });
+
+    it('is null when even the pessimistic return is on track', () => {
+      service.currentNetWorth.set(10_000_000);
+
+      expect(service.contributionRange()).toBeNull();
+    });
   });
 });
 

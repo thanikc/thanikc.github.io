@@ -62,6 +62,15 @@
         inflation, both from the World Bank's open data. It leaves out dividends, so it errs low. US
         data is the reference whatever currency you plan in.
       </p>
+      @if (period.years < minReliableYears) {
+        <p
+          class="thin-data"
+          i18n="Warning when the live data covers few years@@calculator.info.thinData"
+        >
+          Only {{ period.years }} years of data were available, fewer than a full market cycle, so
+          treat this return with caution.
+        </p>
+      }
     } @else {
       <p i18n="Where the baseline return comes from@@calculator.info.sourceBaseline">
         <strong>Where the return comes from:</strong> live World Bank data is not available right
