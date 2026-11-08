@@ -106,7 +106,7 @@ describe('chat telemetry', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(completion('Hello there')));
     const writeDataPoint = vi.fn();
 
-    const AI = { run: vi.fn().mockResolvedValue({ data: [[0.1]], response: { safe: true } }) };
+    const AI = { run: vi.fn().mockResolvedValue({ data: [[0.1]], response: '\n\nsafe' }) };
 
     await post(setup(0.99, { writeDataPoint }, { AI }), { message: 'hi' });
 

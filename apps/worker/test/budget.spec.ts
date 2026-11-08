@@ -63,7 +63,7 @@ beforeEach(async () => {
     ...VARS,
     GROQ_API_KEY: 'g',
     CACHE_DB: db,
-    AI: { run: vi.fn().mockResolvedValue({ data: [[1, 0, 0]], response: { safe: true } }) },
+    AI: { run: vi.fn().mockResolvedValue({ data: [[1, 0, 0]], response: '\n\nsafe' }) },
     VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [MATCH] }) },
   } as unknown as Env;
 });

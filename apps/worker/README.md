@@ -182,8 +182,9 @@ FROM ai_ling_chat WHERE timestamp > NOW() - INTERVAL '7' DAY GROUP BY provider, 
 ```
 
 Answer moderation: each answer is checked with Llama Guard via Workers AI before it is
-cached or shown with links. It fails open (a moderation error lets the answer through);
-the response shape is unverified and must be confirmed in the deployed eval. An answer
+cached or shown with links. It fails open (a moderation error lets the answer through, uncached).
+The model returns its raw text, `{ response: "\n\nsafe" }` or `{ response: "\n\nunsafe\nS1" }`
+(confirmed against the REST API on 2026-11-08); the first line is the verdict. An answer
 is admitted to the cache only if it is link-free, not truncated, scored >= `MIN_SCORE` + 0.05
 and moderated safe.
 

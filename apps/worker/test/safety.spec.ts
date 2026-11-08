@@ -20,7 +20,7 @@ describe('moderate', () => {
   const envWith = (run: unknown) => ({ AI: { run } }) as unknown as Env;
 
   it('asks the moderation model about the question and answer', async () => {
-    const run = vi.fn().mockResolvedValue({ response: { safe: true } });
+    const run = vi.fn().mockResolvedValue({ response: '\n\nsafe' });
     await moderate('q', 'a', envWith(run));
     expect(run).toHaveBeenCalledWith(MODERATION_MODEL, {
       messages: [
@@ -30,19 +30,23 @@ describe('moderate', () => {
     });
   });
 
-  it('returns safe', async () =>
-    expect(
-      await moderate('q', 'a', envWith(vi.fn().mockResolvedValue({ response: { safe: true } }))),
-    ).toBe('safe'));
+  // Recorded from the REST API (2026-11-08); the binding returns the envelope's `result`.
+  const SAFE = { response: '\n\nsafe', usage: { prompt_tokens: 206, completion_tokens: 3 } };
+  const UNSAFE = {
+    response: '\n\nunsafe\nS1',
+    usage: { prompt_tokens: 226, completion_tokens: 6 },
+  };
 
-  it('returns unsafe', async () =>
+  it('returns safe for the recorded safe verdict', async () =>
+    expect(await moderate('q', 'a', envWith(vi.fn().mockResolvedValue(SAFE)))).toBe('safe'));
+
+  it('returns unsafe for the recorded unsafe verdict with a category', async () =>
+    expect(await moderate('q', 'a', envWith(vi.fn().mockResolvedValue(UNSAFE)))).toBe('unsafe'));
+
+  it('returns error for a verdict it does not know', async () =>
     expect(
-      await moderate(
-        'q',
-        'a',
-        envWith(vi.fn().mockResolvedValue({ response: { safe: false, categories: ['S1'] } })),
-      ),
-    ).toBe('unsafe'));
+      await moderate('q', 'a', envWith(vi.fn().mockResolvedValue({ response: 'maybe' }))),
+    ).toBe('error'));
 
   it('returns error when the call rejects', async () =>
     expect(await moderate('q', 'a', envWith(vi.fn().mockRejectedValue(new Error('x'))))).toBe(

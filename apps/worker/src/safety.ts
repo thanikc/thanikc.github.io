@@ -10,8 +10,9 @@ export const MODERATION_MODEL = '@cf/meta/llama-guard-3-8b';
 
 /**
  * Asks Llama Guard whether the answer is safe. Fails open: an error is reported, not thrown.
- * Output shape `{ response: { safe: boolean, categories?: string[] } }` is taken from Cloudflare's
- * docs and is UNVERIFIED against a live call (confirm in the Task 9 eval); anything else is 'error'.
+ * Output is the model's raw text, e.g. `{ response: '\n\nsafe' }` or
+ * `{ response: '\n\nunsafe\nS1' }` (recorded from the REST API, 2026-11-08); the first line is
+ * the verdict, the rest the categories. Anything else is 'error'.
  */
 export async function moderate(
   question: string,
@@ -26,9 +27,9 @@ export async function moderate(
         { role: 'user', content: question },
         { role: 'assistant', content: answer },
       ],
-    })) as { response?: { safe?: unknown } } | null;
-    const safe = out?.response?.safe;
-    return typeof safe === 'boolean' ? (safe ? 'safe' : 'unsafe') : 'error';
+    })) as { response?: unknown } | null;
+    const verdict = typeof out?.response === 'string' ? out.response.trim().split('\n')[0] : '';
+    return verdict === 'safe' || verdict === 'unsafe' ? verdict : 'error';
   } catch {
     return 'error';
   }

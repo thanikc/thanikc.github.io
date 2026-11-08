@@ -60,7 +60,7 @@ beforeEach(async () => {
   }
 
   embedding = [1, 0, 0];
-  verdict = () => ({ response: { safe: true } });
+  verdict = () => ({ response: '\n\nsafe' });
   fetchMock = vi.fn().mockImplementation(
     async () =>
       new Response(
@@ -390,7 +390,7 @@ describe('answer cache: admission', () => {
   });
 
   it('blocks an unsafe answer with the decline and caches nothing', async () => {
-    verdict = () => ({ response: { safe: false, categories: ['S1'] } });
+    verdict = () => ({ response: '\n\nunsafe\nS1' });
     const writeDataPoint = vi.fn();
 
     const res = await json(
