@@ -14,8 +14,7 @@ import { CHAT_API_URL, TURNSTILE_SITE_KEY } from './domains/chat/chat.config';
 /** `wrangler dev` default port. */
 const LOCAL_CHAT_API_URL = 'http://localhost:8787';
 const DEPLOYED_CHAT_API_URL = 'https://thanikc-worker.thanikc.workers.dev';
-// TODO(task 9): replace with the real Turnstile site key. This is Cloudflare's always-pass test key.
-const TURNSTILE_KEY = '1x00000000000000000000AA';
+const TURNSTILE_KEY = '0x4AAAAAAF5FSlJUMfrKvx5g';
 
 export const appConfig: ApplicationConfig = {
   providers: [
