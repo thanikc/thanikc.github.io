@@ -14,6 +14,7 @@ yarn-error.log
 # Cloudflare Worker
 .wrangler/
 apps/worker/worker-configuration.d.ts
+apps/worker/eval.log
 
 # IDEs and editors
 .idea/

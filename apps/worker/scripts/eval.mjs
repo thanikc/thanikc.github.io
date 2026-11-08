@@ -19,6 +19,7 @@
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { createHmac } from 'node:crypto';
+import { appendFileSync, writeFileSync } from 'node:fs';
 
 /** Starters, the page's Ask AI Ling hooks, and a few probes of tone and scope. */
 export const EVAL_QUESTIONS = [
@@ -272,6 +273,7 @@ export function parseArgs(argv, env = process.env) {
     'min-pass': '0.85',
     // Observed 14/14 against the production index (2026-11-08); 0.9 allows one miss.
     'min-recall': '0.9',
+    log: '',
   };
   for (let i = 0; i < argv.length; i++) {
     const [flag, inline] = argv[i].split('=');
@@ -283,6 +285,7 @@ export function parseArgs(argv, env = process.env) {
     delayMs: Number(opts.delay),
     minPass: Number(opts['min-pass']),
     minRecall: Number(opts['min-recall']),
+    logFile: opts.log || undefined,
   };
 }
 
@@ -370,8 +373,14 @@ async function ask(url, question, locale, history = []) {
 }
 
 async function main() {
-  const { url, delayMs, minPass, minRecall } = parseArgs(process.argv.slice(2));
-  console.log(`Evaluating ${EVAL_QUESTIONS.length} question(s) → ${url}/api/chat\n`);
+  const { url, delayMs, minPass, minRecall, logFile } = parseArgs(process.argv.slice(2));
+  // Each line also goes to --log as it happens, so the run can be followed with tail -f.
+  if (logFile) writeFileSync(logFile, '');
+  const log = line => {
+    console.log(line);
+    if (logFile) appendFileSync(logFile, `${line}\n`);
+  };
+  log(`Evaluating ${EVAL_QUESTIONS.length} question(s) → ${url}/api/chat\n`);
   const results = [];
 
   for (const [i, item] of EVAL_QUESTIONS.entries()) {
@@ -397,7 +406,7 @@ async function main() {
       });
 
     results.push(result);
-    console.log(
+    log(
       `${result.pass ? 'ok  ' : 'FAIL'}  ${item.question}\n      ${answer.replace(/\s+/g, ' ')}\n`,
     );
   }
@@ -410,13 +419,13 @@ async function main() {
       // An exact hit is a repeat run; only a paraphrase match can be the mix-up.
       const pass = res.ok && payload.cached !== 'semantic';
       results.push({ question, contrast: true, pass, missing: ['a fresh answer'] });
-      console.log(`${pass ? 'ok  ' : 'FAIL'}  ${question} (cache: ${payload.cached ?? 'none'})\n`);
+      log(`${pass ? 'ok  ' : 'FAIL'}  ${question} (cache: ${payload.cached ?? 'none'})\n`);
     }
   }
 
-  console.log(summarize(results));
+  log(summarize(results));
   const { ok, reason } = verdict(results, minPass, minRecall);
-  console.log(`${ok ? 'PASS' : 'FAIL'}: ${reason}`);
+  log(`${ok ? 'PASS' : 'FAIL'}: ${reason}`);
   process.exit(ok ? 0 : 1);
 }
 

@@ -236,6 +236,11 @@ describe('parseArgs', () => {
     });
   });
 
+  it('writes no log file by default and takes --log', () => {
+    expect(parseArgs([], {}).logFile).toBeUndefined();
+    expect(parseArgs(['--log', 'eval.log'], {})).toMatchObject({ logFile: 'eval.log' });
+  });
+
   it('defaults --min-recall to 0.9 and takes --min-recall=0.8', () => {
     expect(parseArgs([], {})).toMatchObject({ minRecall: 0.9 });
     expect(parseArgs(['--min-recall=0.8'], {})).toMatchObject({ minRecall: 0.8 });
