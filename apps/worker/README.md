@@ -51,14 +51,42 @@ failure can't be retried without producing a garbled, truncated answer.
 ## Configuration
 
 `wrangler.jsonc` declares the bindings (`AI`, `VECTORIZE`) and non-secret `vars`
-(allowed origin, model ids). Secrets are **not** committed:
+(allowed origin, model ids). Secrets are **not** committed. Each one is a Worker secret,
+and also a GitHub repo secret of the same name so CI can deploy and test.
 
-| Secret                                                    | Where it comes from                                                                                            |
-| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `GROQ_API_KEY`, `GOOGLE_AI_API_KEY`, `OPENROUTER_API_KEY` | API key from each provider's console                                                                           |
-| `INGEST_TOKEN`                                            | You generate it: `openssl rand -base64 32`. CI mints short-lived ingest tokens from it                         |
-| `TURNSTILE_SECRET`                                        | Secret key of a Cloudflare Turnstile widget for the site's domain. Its public site key goes in `app.config.ts` |
-| `SESSION_SECRET`                                          | You generate it: `openssl rand -base64 32`. Signs chat sessions and answers                                    |
+### Deploy credentials (Cloudflare)
+
+Used by wrangler in CI and locally; the running worker never reads them.
+
+| Secret                  | What it is                                                                                                                                                 |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_ACCOUNT_ID` | Identifies your Cloudflare account (not sensitive). Tells wrangler where to deploy                                                                         |
+| `CLOUDFLARE_API_TOKEN`  | Lets CI deploy the worker. Create it in the Cloudflare dashboard, scoped to this account only; required permissions are listed in [RUNBOOK.md](RUNBOOK.md) |
+
+### LLM provider keys
+
+`chat/client.ts` tries Groq, then Google AI, then OpenRouter, so at least one is required.
+Embeddings and retrieval use the `AI` / `VECTORIZE` bindings and need no key.
+
+| Secret               | Where it comes from                    |
+| -------------------- | -------------------------------------- |
+| `GROQ_API_KEY`       | API key from the Groq console (first)  |
+| `GOOGLE_AI_API_KEY`  | API key from Google AI Studio (second) |
+| `OPENROUTER_API_KEY` | API key from OpenRouter (last resort)  |
+
+### Security secrets (you generate these)
+
+Generate each with `openssl rand -base64 32`, except `TURNSTILE_SECRET`.
+
+| Secret             | Purpose                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `INGEST_TOKEN`     | Protects `POST /api/ingest`. It is never sent itself: `pnpm ingest` and CI mint a 10-minute bearer token (`<expires>.<hmac>`) from it, so a captured request can't be replayed later |
+| `SESSION_SECRET`   | HMAC key that signs chat sessions (`X-Chat-Session`) and each answer (`answerSig`); forged conversation turns are dropped                                                            |
+| `TURNSTILE_SECRET` | Secret key of a Cloudflare Turnstile widget for the site's domain, used to verify the visitor's bot-check token. Its public site key goes in `app.config.ts`                         |
+
+Rotation steps for every secret are in [RUNBOOK.md](RUNBOOK.md).
+
+For local development, copy [`.env.example`](.env.example) to `.env` and fill in the values.
 
 Set them locally with `pnpm exec wrangler secret put <NAME>`, or in CI via the
 `deploy-worker.yml` `secrets:` block (GitHub repo secrets of the same name, plus

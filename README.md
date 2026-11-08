@@ -10,7 +10,9 @@ pnpm monorepo for [thanikc.github.io](https://thanikc.github.io):
   GitHub Pages.
 - **`apps/worker`** — Cloudflare Worker API backing AI Ling: RAG over a
   Vectorize index (Workers AI embeddings) with a Groq → Google AI → OpenRouter
-  provider chain. Deploys to Cloudflare. See [`apps/worker/README.md`](apps/worker/README.md).
+  provider chain. Deploys to Cloudflare. See [`apps/worker/README.md`](apps/worker/README.md),
+  which explains every secret the worker and its CI need
+  ([Configuration](apps/worker/README.md#configuration)).
 
 ## Project Structure
 
