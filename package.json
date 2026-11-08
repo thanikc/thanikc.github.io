@@ -17,6 +17,8 @@
     "e2e:only": "pnpm --filter @thanikc/ui exec playwright test",
     "ingest": "pnpm --filter @thanikc/worker ingest",
     "ingest:deployed": "pnpm --filter @thanikc/worker ingest:deployed",
+    "eval": "pnpm --filter @thanikc/worker eval",
+    "eval:deployed": "pnpm --filter @thanikc/worker eval:deployed",
     "format": "prettier --write \"apps/**/*.{ts,html,scss,json}\"",
     "format:check": "prettier --check \"apps/**/*.{ts,html,scss,json}\"",
     "prepare": "husky"
