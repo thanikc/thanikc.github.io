@@ -20,6 +20,8 @@ interface EvalQuestion {
   locale?: string;
   forbid?: string[];
   expectSources?: string[];
+  probe?: true;
+  forbidPatterns?: string[];
 }
 
 describe('EVAL_QUESTIONS', () => {
@@ -136,6 +138,37 @@ describe('grade', () => {
   });
 });
 
+describe('grade probes', () => {
+  const item = {
+    question: 'q',
+    expectAny: [],
+    probe: true,
+    forbidPatterns: ['\\b\\d+\\s+(engineers|people)\\b'],
+  };
+
+  it('fails a probe whose answer matches a forbidden pattern, ignoring case', () => {
+    expect(grade(item, 'He led 12 ENGINEERS.')).toEqual({
+      pass: false,
+      missing: [],
+      fabricated: item.forbidPatterns,
+    });
+  });
+
+  it('passes a probe that admits not knowing', () => {
+    expect(grade(item, "I can't answer that one — ask Thanik.")).toMatchObject({ pass: true });
+  });
+});
+
+describe('EVAL_QUESTIONS probes', () => {
+  it('has at least 5 hallucination probes, each with forbidPatterns, covering de and th', () => {
+    const probes = (EVAL_QUESTIONS as EvalQuestion[]).filter(q => q.probe);
+
+    expect(probes.length).toBeGreaterThanOrEqual(5);
+    expect(probes.every(q => (q.forbidPatterns?.length ?? 0) > 0)).toBe(true);
+    expect(probes.map(q => q.locale)).toEqual(expect.arrayContaining(['de', 'th']));
+  });
+});
+
 describe('parseArgs', () => {
   it('defaults to the local wrangler dev server', () => {
     expect(parseArgs([], {})).toMatchObject({ url: 'http://localhost:8787' });
@@ -234,6 +267,16 @@ describe('verdict recall', () => {
     expect(result.reason).toContain('recall');
   });
 
+  it('fails on any probe failure, regardless of the pass rate', () => {
+    const result = verdict(
+      [ok, ok, ok, ok, { question: 'q', pass: false, missing: [], probe: true }],
+      0.5,
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain('probe');
+  });
+
   it('ignores results without recallHit', () => {
     expect(verdict([ok, ok, { ...ok, recallHit: true }], 0.5, 0.8).ok).toBe(true);
   });
@@ -251,6 +294,19 @@ describe('summarize recall', () => {
 
     expect(report).toContain('retrieval recall@5 3/4');
     expect(report).toContain('MISS  D? (got: Skills)');
+  });
+});
+
+describe('summarize probes', () => {
+  it('reports the hallucination rate and names the fabricated patterns', () => {
+    const base = { pass: true, missing: [], probe: true };
+    const report = summarize([
+      { ...base, question: 'A?' },
+      { ...base, question: 'B?', pass: false, fabricated: ['\\d+ people'] },
+    ]);
+
+    expect(report).toContain('hallucination 1/2');
+    expect(report).toContain('FAIL  B? (fabricated: \\d+ people)');
   });
 });
 
