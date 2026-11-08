@@ -59,7 +59,11 @@ describe('ChatPanelComponent', () => {
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
       imports: [ChatPanelComponent],
-      providers: [provideRouter([]), { provide: SpeechRecognitionService, useValue: speech }],
+      providers: [
+        // The disclaimer link navigates here; without a route the navigation rejects unhandled.
+        provideRouter([{ path: 'privacy-policy', children: [] }]),
+        { provide: SpeechRecognitionService, useValue: speech },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ChatPanelComponent);
