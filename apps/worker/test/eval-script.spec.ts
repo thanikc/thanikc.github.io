@@ -308,6 +308,18 @@ describe('summarize probes', () => {
     expect(report).toContain('hallucination 1/2');
     expect(report).toContain('FAIL  B? (fabricated: \\d+ people)');
   });
+
+  // A rate-limited or failed request said nothing, so it can't have fabricated anything.
+  it('counts only answered probes, and only fabrications as hallucinations', () => {
+    const base = { missing: [], probe: true };
+    const report = summarize([
+      { ...base, question: 'A?', pass: true },
+      { ...base, question: 'B?', pass: false, fabricated: ['x'] },
+      { ...base, question: 'C?', pass: false, missing: ['HTTP 429'], httpError: true },
+    ]);
+
+    expect(report).toContain('hallucination 1/2');
+  });
 });
 
 describe('CONTRAST_PAIRS', () => {

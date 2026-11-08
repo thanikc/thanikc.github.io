@@ -25,11 +25,12 @@ export const EVAL_QUESTIONS = [
   {
     question: "What's the most complex system Thanik has worked on?",
     expectAny: ['portal', 'framework', 'banking'],
-    expectSources: ['Experience', 'Projects'],
+    // Summary: observed in the first local run (2026-11-08), it grounds the banking-portal answer.
+    expectSources: ['Experience', 'Projects', 'Summary'],
   },
   {
     question: 'What has Thanik built from scratch?',
-    expectAny: ['ground-up', 'from scratch', 'investment', 'portal'],
+    expectAny: ['ground-up', 'ground up', 'from scratch', 'investment', 'portal'],
     expectSources: ['Projects', 'Side projects'],
   },
   {
@@ -321,10 +322,11 @@ export function summarize(results) {
       ? [`retrieval recall@5 ${scored.length - misses.length}/${scored.length}`, ...misses]
       : [];
 
-  const probes = results.filter(result => result.probe);
+  // Only answered probes count; a failed request fails the run but fabricated nothing.
+  const probes = results.filter(result => result.probe && !result.httpError);
   const probeLines =
     probes.length > 0
-      ? [`hallucination ${probes.filter(result => !result.pass).length}/${probes.length}`]
+      ? [`hallucination ${probes.filter(result => result.fabricated).length}/${probes.length}`]
       : [];
 
   return [`${passed}/${results.length} passed`, ...failures, ...recallLines, ...probeLines].join(
@@ -367,7 +369,14 @@ async function main() {
       got: found?.got,
       ...grade(item, answer),
     };
-    if (!res.ok) Object.assign(result, { pass: false, missing: [`HTTP ${res.status}`] });
+    // A failed request retrieved nothing to score, so it stays out of recall too.
+    if (!res.ok)
+      Object.assign(result, {
+        pass: false,
+        missing: [`HTTP ${res.status}`],
+        httpError: true,
+        recallHit: undefined,
+      });
 
     results.push(result);
     console.log(

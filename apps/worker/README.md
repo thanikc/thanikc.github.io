@@ -144,6 +144,7 @@ a stored answer is reusable on the very next request.
 
 ```bash
 pnpm exec wrangler d1 migrations apply CACHE_DB --remote   # CI also runs this before each deploy
+pnpm exec wrangler d1 migrations apply CACHE_DB --local    # once per checkout, for wrangler dev and pnpm eval
 ```
 
 An ingest that changes the index empties the cache, so answers grounded on old content
