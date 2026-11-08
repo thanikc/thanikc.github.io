@@ -137,7 +137,8 @@ See `content/README.md` for the file format.
 `/api/chat` caches the opening message of a conversation in D1 (`CACHE_DB`, table
 `answer_cache`). An exact repeat (case and whitespace ignored, per locale) is answered
 before any embedding; otherwise the query embedding is compared with the newest 200
-cached questions and a cosine similarity of 0.95 or more reuses that answer. Hits carry
+cached questions and a cosine similarity of 0.975 or more reuses that answer (lower lets
+negations through: "have" vs "lack" Java experience scores 0.961). Hits carry
 `cached: 'exact' | 'semantic'`. Follow-ups (non-empty `history`) and declines are never
 cached, and a missing or failing D1 just means no caching (a failure logs a warning). Unlike the Vectorize index,
 a stored answer is reusable on the very next request.

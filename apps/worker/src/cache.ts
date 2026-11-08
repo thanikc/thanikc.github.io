@@ -16,8 +16,12 @@ export interface CacheEntry extends CachedAnswer {
 
 const TTL_SECONDS = 7 * 24 * 60 * 60;
 
-/** Cosine similarity at or above which a paraphrase counts as the same question. */
-export const CACHE_MIN_SIMILARITY = 0.95;
+/**
+ * Cosine similarity at or above which a paraphrase counts as the same question. bge-m3 puts
+ * negations close (have/lack 0.961, know/doesn't know 0.970, measured 2026-11-08), so only
+ * near-verbatim rewordings (0.98+) may share an answer; real paraphrases are answered afresh.
+ */
+export const CACHE_MIN_SIMILARITY = 0.975;
 
 /** Newest rows the semantic tier compares against. */
 const SCAN_LIMIT = 200;

@@ -5,7 +5,7 @@ import dropQuestion from '../migrations/0002_drop_cached_question.sql?raw';
 import dropEpoch from '../migrations/0003_drop_epoch.sql?raw';
 import app from '../src/index';
 import { issueSession } from '../src/gate';
-import { MAX_ROWS } from '../src/cache';
+import { CACHE_MIN_SIMILARITY, MAX_ROWS } from '../src/cache';
 import { declineAnswer, MIN_SCORE } from '../src/rag';
 import { CACHE_MARGIN, MODERATION_MODEL } from '../src/safety';
 
@@ -477,5 +477,33 @@ describe('answer cache: retention', () => {
 
     await ageRow(2);
     expect((await json(await post({ message: 'Who is Thanik?' }))).cached).toBeUndefined();
+  });
+});
+
+// bge-m3 cosine similarities measured through Workers AI on 2026-11-08. Look-alikes with
+// another meaning must never share an answer; near-verbatim rewordings may.
+describe('CACHE_MIN_SIMILARITY', () => {
+  const CONTRAST = {
+    'have / lack Java experience': 0.9607,
+    'open / not open to senior roles': 0.9442,
+    'built with Angular / Spring Boot': 0.7515,
+    "know / doesn't know Python": 0.9702,
+    'good / bad team lead': 0.9432,
+    'worked / never worked remotely': 0.9222,
+    'like / dislike Angular': 0.906,
+  };
+  const NEAR_VERBATIM = {
+    'what / which roles': 0.9979,
+    'with / without the question mark': 0.9887,
+    'other developers / developers': 0.9819,
+    "what's … has / what is …": 0.9889,
+  };
+
+  it.each(Object.entries(CONTRAST))('keeps %s apart', (_, similarity) => {
+    expect(similarity).toBeLessThan(CACHE_MIN_SIMILARITY);
+  });
+
+  it.each(Object.entries(NEAR_VERBATIM))('still matches %s', (_, similarity) => {
+    expect(similarity).toBeGreaterThanOrEqual(CACHE_MIN_SIMILARITY);
   });
 });
