@@ -53,10 +53,12 @@ failure can't be retried without producing a garbled, truncated answer.
 `wrangler.jsonc` declares the bindings (`AI`, `VECTORIZE`) and non-secret `vars`
 (allowed origin, model ids). Secrets are **not** committed:
 
-```
-GROQ_API_KEY  GOOGLE_AI_API_KEY  OPENROUTER_API_KEY  INGEST_TOKEN
-TURNSTILE_SECRET  SESSION_SECRET
-```
+| Secret                                                    | Where it comes from                                                                                            |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `GROQ_API_KEY`, `GOOGLE_AI_API_KEY`, `OPENROUTER_API_KEY` | API key from each provider's console                                                                           |
+| `INGEST_TOKEN`                                            | You generate it: `openssl rand -base64 32`. CI mints short-lived ingest tokens from it                         |
+| `TURNSTILE_SECRET`                                        | Secret key of a Cloudflare Turnstile widget for the site's domain. Its public site key goes in `app.config.ts` |
+| `SESSION_SECRET`                                          | You generate it: `openssl rand -base64 32`. Signs chat sessions and answers                                    |
 
 Set them locally with `pnpm exec wrangler secret put <NAME>`, or in CI via the
 `deploy-worker.yml` `secrets:` block (GitHub repo secrets of the same name, plus
