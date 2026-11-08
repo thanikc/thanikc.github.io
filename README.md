@@ -58,6 +58,19 @@ pnpm -r test                              # every package
 pnpm format                               # prettier across apps/
 ```
 
+## How AI Ling is tested and protected
+
+- **Eval:** nightly against production and on worker/content PRs
+  ([`eval-worker.yml`](.github/workflows/eval-worker.yml), [`apps/worker/scripts/eval.mjs`](apps/worker/scripts/eval.mjs)):
+  keyword pass rate, retrieval recall@5, hallucination probes, plus hard gates for prompt injection
+  and cache mix-ups. Failures open an `ai-ling-alert` issue.
+- **Abuse and cost control:** Turnstile-issued sessions, a 10/min rate limit, a daily generation
+  budget and a kill switch.
+- **Output safety:** Llama Guard moderation, a cache-safe filter (no links, images or HTML in shared
+  answers) and PII redaction.
+- **Operations:** [`apps/worker/RUNBOOK.md`](apps/worker/RUNBOOK.md); hourly alerts.
+- **Design record:** [`docs/specs/2026-11-02-ai-ling-hardening-design.md`](docs/specs/2026-11-02-ai-ling-hardening-design.md).
+
 ## Languages
 
 The site is published in English, German and Thai with Angular's compile-time i18n,

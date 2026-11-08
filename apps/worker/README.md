@@ -189,6 +189,23 @@ and moderated safe.
 
 Operations (alerts, kill switch, key rotation, cache purge): see [RUNBOOK.md](RUNBOOK.md).
 
+## Eval
+
+`node scripts/eval.mjs [--url <worker>] [--delay 7000] [--min-pass 0.85] [--min-recall 0.8]` asks
+AI Ling the questions in `EVAL_QUESTIONS`. Question fields:
+
+- `expectAny`: keywords, at least one of which must appear in the answer.
+- `expectSources`: titles (content frontmatter `title:`) that should be among the response's
+  `sources`; scored as retrieval recall@5.
+- `probe` + `forbidPatterns`: a hallucination probe. The answer is not in `content/`, so a match
+  with any regex (case-insensitive) is a fabricated specific.
+- `injection` + `forbid`: must decline and not echo the listed prompt text.
+
+Hard gates (any failure exits non-zero): injection, cache contrast and probes. Soft gates: pass rate
+(`--min-pass`) and recall (`--min-recall`; calibrate from the first deployed run). The summary ends with
+`retrieval recall@5 n/m` (one `MISS` line per question, with the titles that came back) and
+`hallucination failed/probes`.
+
 ## Commands (run from repo root or this directory)
 
 ```bash
