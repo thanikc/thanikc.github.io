@@ -5,6 +5,7 @@ import {
   EVAL_QUESTIONS,
   grade,
   parseArgs,
+  recall,
   sessionHeader,
   summarize,
   verdict,
@@ -18,6 +19,7 @@ interface EvalQuestion {
   injection?: boolean;
   locale?: string;
   forbid?: string[];
+  expectSources?: string[];
 }
 
 describe('EVAL_QUESTIONS', () => {
@@ -53,6 +55,50 @@ describe('EVAL_QUESTIONS', () => {
     expect(injections.length).toBeGreaterThanOrEqual(5);
     expect(injections.every(q => q.expectAny.length > 0 && (q.forbid?.length ?? 0) > 0)).toBe(true);
     expect(injections.map(q => q.locale)).toEqual(expect.arrayContaining(['de', 'th']));
+  });
+});
+
+describe('EVAL_QUESTIONS sources', () => {
+  const questions = EVAL_QUESTIONS as EvalQuestion[];
+  const files = import.meta.glob('../content/*.md', {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  }) as Record<string, string>;
+  const titles = Object.values(files).flatMap(text => text.match(/^title: (.+)$/m)?.[1] ?? []);
+
+  it('gives every in-scope question an expected source that exists in content/', () => {
+    const inScope = questions.filter(q => !q.injection && !q.offTopic && q.expectAny.length > 0);
+
+    expect(inScope.length).toBeGreaterThan(0);
+    for (const q of inScope) {
+      expect(q.expectSources?.length ?? 0, q.question).toBeGreaterThan(0);
+    }
+    for (const title of questions.flatMap(q => q.expectSources ?? [])) {
+      expect(titles).toContain(title);
+    }
+  });
+});
+
+describe('recall', () => {
+  it('hits when any expected title is among the sources', () => {
+    expect(
+      recall({ expectSources: ['Experience'] }, [
+        { title: 'Projects', score: 0.6 },
+        { title: 'Experience', score: 0.5 },
+      ]),
+    ).toEqual({ hit: true, got: ['Projects', 'Experience'] });
+  });
+
+  it('misses on empty or untitled sources', () => {
+    expect(recall({ expectSources: ['Experience'] }, [])).toMatchObject({ hit: false });
+    expect(recall({ expectSources: ['Experience'] }, [{ score: 0.6 }])).toMatchObject({
+      hit: false,
+    });
+  });
+
+  it('returns null for a question without expectSources', () => {
+    expect(recall({}, [{ title: 'Experience', score: 0.5 }])).toBeNull();
   });
 });
 
@@ -104,6 +150,11 @@ describe('parseArgs', () => {
       delayMs: 7000,
       minPass: 0.9,
     });
+  });
+
+  it('defaults --min-recall to 0.8 and takes --min-recall=0.9', () => {
+    expect(parseArgs([], {})).toMatchObject({ minRecall: 0.8 });
+    expect(parseArgs(['--min-recall=0.9'], {})).toMatchObject({ minRecall: 0.9 });
   });
 
   it('takes --url (either form) and drops a trailing slash', () => {
@@ -163,6 +214,43 @@ describe('verdict', () => {
 
     expect(result.ok).toBe(false);
     expect(result.reason).toContain('contrast');
+  });
+});
+
+describe('verdict recall', () => {
+  const ok = { question: 'q', pass: true, missing: [] };
+
+  it('fails when recall is under minRecall, regardless of the pass rate', () => {
+    const result = verdict(
+      [
+        { ...ok, recallHit: true },
+        { ...ok, recallHit: false },
+      ],
+      0.5,
+      0.8,
+    );
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain('recall');
+  });
+
+  it('ignores results without recallHit', () => {
+    expect(verdict([ok, ok, { ...ok, recallHit: true }], 0.5, 0.8).ok).toBe(true);
+  });
+});
+
+describe('summarize recall', () => {
+  it('reports retrieval recall and lists each miss with what came back', () => {
+    const base = { pass: true, missing: [] };
+    const report = summarize([
+      { ...base, question: 'A?', recallHit: true },
+      { ...base, question: 'B?', recallHit: true },
+      { ...base, question: 'C?', recallHit: true },
+      { ...base, question: 'D?', recallHit: false, got: ['Skills'] },
+    ]);
+
+    expect(report).toContain('retrieval recall@5 3/4');
+    expect(report).toContain('MISS  D? (got: Skills)');
   });
 });
 

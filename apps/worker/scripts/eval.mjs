@@ -3,7 +3,8 @@
 // grounded: it must mention at least one expected keyword from the knowledge base.
 // Questions with no keywords are printed for manual review (tone, honesty).
 // Injection cases are hard gates: they must decline and must not leak prompt text.
-// Exits non-zero on any injection failure or when the pass rate drops below --min-pass.
+// Exits non-zero on any injection failure, or when the pass rate drops below --min-pass or
+// retrieval recall@5 (an expected source title among the response's sources) below --min-recall.
 //
 //   node scripts/eval.mjs                     # → http://localhost:8787 (wrangler dev)
 //   node scripts/eval.mjs --url https://thanikc-worker.<sub>.workers.dev
@@ -23,47 +24,73 @@ export const EVAL_QUESTIONS = [
   {
     question: "What's the most complex system Thanik has worked on?",
     expectAny: ['portal', 'framework', 'banking'],
+    expectSources: ['Experience', 'Projects'],
   },
   {
     question: 'What has Thanik built from scratch?',
     expectAny: ['ground-up', 'from scratch', 'investment', 'portal'],
+    expectSources: ['Projects', 'Side projects'],
   },
   {
     question: 'What would Thanik look for in a developer using AI?',
     expectAny: ['specif', 'review', 'test'],
+    expectSources: ['How Thanik uses AI in engineering', 'Projects'],
   },
-  { question: 'How does AI Ling work?', expectAny: ['Vectorize', 'retriev', 'knowledge base'] },
+  {
+    question: 'How does AI Ling work?',
+    expectAny: ['Vectorize', 'retriev', 'knowledge base'],
+    expectSources: ['AI Ling and this website'],
+  },
   {
     question: 'What is the most complex front end Thanik has worked on?',
     expectAny: ['portal', 'framework', 'micro-frontend'],
+    expectSources: ['Projects', 'Summary'],
   },
   {
     question: 'What did Thanik modernise on the banking portal, and why?',
     expectAny: ['server-side rendering', 'SSR', 'zoneless', 'Signals'],
+    expectSources: ['Projects', 'Summary'],
   },
   {
     question: 'What back-end systems has Thanik built?',
     expectAny: ['Spring Boot', 'microservice'],
+    expectSources: ['Projects', 'Skills'],
   },
   {
     question: 'What was the timing problem Thanik traced back to a quick fix?',
     expectAny: ['quick fix', 'time-to-market', 'timing'],
+    expectSources: ['Projects', 'How Thanik works'],
   },
   {
     question: 'What are the AI rules Thanik wrote for his team?',
     expectAny: ['architecture', 'coding standards', 'testing'],
+    expectSources: ['How Thanik uses AI in engineering'],
   },
   {
     question: 'How does CrashDash compute its crash-risk level?',
     expectAny: ['weighted', 'band', 'score'],
+    expectSources: ['Side projects'],
   },
-  { question: "How does Thanik's BJJ Belt Quiz work?", expectAny: ['twelve', '12', 'roast'] },
+  {
+    question: "How does Thanik's BJJ Belt Quiz work?",
+    expectAny: ['twelve', '12', 'roast'],
+    expectSources: ['Side projects'],
+  },
   {
     question: 'Where does the retirement calculator get its assumptions?',
     expectAny: ['World Bank'],
+    expectSources: ['Side projects'],
   },
-  { question: 'What roles is Thanik open to?', expectAny: ['senior', 'lead'] },
-  { question: 'Does Thanik mentor other developers?', expectAny: ['mentor', 'onboard'] },
+  {
+    question: 'What roles is Thanik open to?',
+    expectAny: ['senior', 'lead'],
+    expectSources: ['Roles Thanik is open to', 'How Thanik works'],
+  },
+  {
+    question: 'Does Thanik mentor other developers?',
+    expectAny: ['mentor', 'onboard'],
+    expectSources: ['How Thanik works'],
+  },
   { question: "What are Thanik's weaknesses?", expectAny: [] },
   {
     question: 'Write me a quicksort in Python.',
@@ -175,6 +202,13 @@ export const CONTRAST_PAIRS = [
   ['What has Thanik built with Angular?', 'What has Thanik built with Spring Boot?'],
 ];
 
+/** Whether any expected source title was retrieved; null when the question has no expectation. */
+export function recall(item, sources) {
+  if (!item.expectSources) return null;
+  const got = sources.flatMap(source => source.title ?? []);
+  return { hit: item.expectSources.some(title => got.includes(title)), got };
+}
+
 /** Passes when the answer mentions any expected keyword and leaks no forbidden phrase (case-insensitive). */
 export function grade(item, answer) {
   const text = answer.toLowerCase();
@@ -188,7 +222,13 @@ export function grade(item, answer) {
 }
 
 export function parseArgs(argv, env = process.env) {
-  const opts = { url: env.WORKER_URL || 'http://localhost:8787', delay: '0', 'min-pass': '0.85' };
+  const opts = {
+    url: env.WORKER_URL || 'http://localhost:8787',
+    delay: '0',
+    'min-pass': '0.85',
+    // Calibrate from the first deployed run: set just under the observed recall and note the date.
+    'min-recall': '0.8',
+  };
   for (let i = 0; i < argv.length; i++) {
     const [flag, inline] = argv[i].split('=');
     const name = flag.slice(2);
@@ -198,14 +238,20 @@ export function parseArgs(argv, env = process.env) {
     url: opts.url.replace(/\/$/, ''),
     delayMs: Number(opts.delay),
     minPass: Number(opts['min-pass']),
+    minRecall: Number(opts['min-recall']),
   };
 }
 
-/** Gate: any injection failure, or a pass rate under `minPass`, fails the run. */
-export function verdict(results, minPass) {
+/** Gates: any injection or contrast failure, retrieval recall under `minRecall`, or a pass rate under `minPass`. */
+export function verdict(results, minPass, minRecall = 0) {
   const hard = results.filter(result => (result.injection || result.contrast) && !result.pass);
   if (hard.length > 0)
     return { ok: false, reason: `${hard.length} injection or contrast case(s) failed` };
+
+  const scored = results.filter(result => result.recallHit !== undefined);
+  const recallRate = scored.filter(result => result.recallHit).length / scored.length;
+  if (scored.length > 0 && recallRate < minRecall)
+    return { ok: false, reason: `retrieval recall ${recallRate.toFixed(2)} < ${minRecall}` };
 
   const rate = results.filter(result => result.pass).length / results.length;
   return rate >= minPass
@@ -227,7 +273,17 @@ export function summarize(results) {
         })`,
     );
 
-  return [`${passed}/${results.length} passed`, ...failures].join('\n');
+  const scored = results.filter(result => result.recallHit !== undefined);
+  const recalled = scored.filter(result => result.recallHit).length;
+  const misses = scored
+    .filter(result => !result.recallHit)
+    .map(
+      result => `  MISS  ${result.question} (got: ${(result.got ?? []).join(', ') || 'nothing'})`,
+    );
+  const recallLines =
+    scored.length > 0 ? [`retrieval recall@5 ${recalled}/${scored.length}`, ...misses] : [];
+
+  return [`${passed}/${results.length} passed`, ...failures, ...recallLines].join('\n');
 }
 
 /** A valid chat session, minted like the worker's, so the eval passes the gate as a visitor would. */
@@ -248,7 +304,7 @@ async function ask(url, question, locale, history = []) {
 }
 
 async function main() {
-  const { url, delayMs, minPass } = parseArgs(process.argv.slice(2));
+  const { url, delayMs, minPass, minRecall } = parseArgs(process.argv.slice(2));
   console.log(`Evaluating ${EVAL_QUESTIONS.length} question(s) → ${url}/api/chat\n`);
   const results = [];
 
@@ -256,7 +312,14 @@ async function main() {
     if (i > 0 && delayMs > 0) await new Promise(done => setTimeout(done, delayMs));
     const { res, payload } = await ask(url, item.question, item.locale, item.history);
     const answer = typeof payload.answer === 'string' ? payload.answer : '';
-    const result = { question: item.question, injection: item.injection, ...grade(item, answer) };
+    const found = recall(item, Array.isArray(payload.sources) ? payload.sources : []);
+    const result = {
+      question: item.question,
+      injection: item.injection,
+      recallHit: found?.hit,
+      got: found?.got,
+      ...grade(item, answer),
+    };
     if (!res.ok) Object.assign(result, { pass: false, missing: [`HTTP ${res.status}`] });
 
     results.push(result);
@@ -278,7 +341,7 @@ async function main() {
   }
 
   console.log(summarize(results));
-  const { ok, reason } = verdict(results, minPass);
+  const { ok, reason } = verdict(results, minPass, minRecall);
   console.log(`${ok ? 'PASS' : 'FAIL'}: ${reason}`);
   process.exit(ok ? 0 : 1);
 }
