@@ -418,8 +418,15 @@ async function main() {
       if (question === first) continue;
       // An exact hit is a repeat run; only a paraphrase match can be the mix-up.
       const pass = res.ok && payload.cached !== 'semantic';
-      results.push({ question, contrast: true, pass, missing: ['a fresh answer'] });
-      log(`${pass ? 'ok  ' : 'FAIL'}  ${question} (cache: ${payload.cached ?? 'none'})\n`);
+      // Name a failed request, so it isn't mistaken for a cache mix-up.
+      const outcome = res.ok ? `cache: ${payload.cached ?? 'none'}` : `HTTP ${res.status}`;
+      results.push({
+        question,
+        contrast: true,
+        pass,
+        missing: [res.ok ? 'a fresh answer' : `HTTP ${res.status}`],
+      });
+      log(`${pass ? 'ok  ' : 'FAIL'}  ${question} (${outcome})\n`);
     }
   }
 
