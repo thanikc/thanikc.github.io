@@ -4,7 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { LOCALE_ID } from '@angular/core';
 import { ChatService } from './chat.service';
 import { CHAT_API_URL } from './chat.config';
-import { CHAT_ERROR_MESSAGE } from './chat.constants';
+import { CHAT_ERROR_MESSAGE, CHAT_RATE_LIMITED_MESSAGE, CHAT_STORAGE_KEY } from './chat.constants';
 import { ChatResponse, ChatTurn } from './chat.models';
 import { TurnstileService } from './turnstile.service';
 
@@ -25,6 +25,7 @@ describe('ChatService', () => {
   };
 
   beforeEach(() => {
+    sessionStorage.clear();
     turnstile.token.mockReset().mockResolvedValue('tok');
     TestBed.configureTestingModule({
       providers: [
@@ -206,6 +207,34 @@ describe('ChatService', () => {
     expect(service.pending()).toBe(false);
     // The question stays visible so it can be retried.
     expect(service.turns()).toEqual([{ role: 'user', content: 'Hello' }]);
+  });
+
+  // The kill switch answers 503 with a message in the visitor's language; retrying won't help.
+  it("shows the worker's own message when the chat is switched off", async () => {
+    const done = service.send('Hello');
+    (await nextRequest()).flush(
+      { error: 'disabled', answer: 'AI Ling ist vorübergehend abgeschaltet.' },
+      { status: 503, statusText: 'Service Unavailable' },
+    );
+    await done;
+
+    expect(service.error()).toBeNull();
+    expect(service.turns().at(-1)).toEqual({
+      role: 'assistant',
+      content: 'AI Ling ist vorübergehend abgeschaltet.',
+    });
+  });
+
+  it('says to wait, not that the answer failed, when rate limited', async () => {
+    const done = service.send('Hello');
+    (await nextRequest()).flush(
+      { error: 'rate limited' },
+      { status: 429, statusText: 'Too Many Requests' },
+    );
+    await done;
+
+    expect(service.error()).toBe(CHAT_RATE_LIMITED_MESSAGE);
+    expect(CHAT_RATE_LIMITED_MESSAGE).not.toBe(CHAT_ERROR_MESSAGE);
   });
 
   it('sets an error on a network failure', async () => {
@@ -411,6 +440,73 @@ describe('ChatService', () => {
       expect(service.isOpen()).toBe(false);
       expect(service.turns()).toHaveLength(2);
     });
+  });
+});
+
+describe('ChatService persistence', () => {
+  const setup = () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CHAT_API_URL, useValue: API_URL },
+        { provide: TurnstileService, useValue: { token: vi.fn().mockResolvedValue('tok') } },
+      ],
+    });
+    return {
+      service: TestBed.inject(ChatService),
+      httpMock: TestBed.inject(HttpTestingController),
+    };
+  };
+
+  const ANSWERED: ChatTurn[] = [
+    { role: 'user', content: 'Where does Thanik work?' },
+    { role: 'assistant', content: 'At a consultancy.', sources: ['Experience'], answerSig: 'sig' },
+  ];
+
+  beforeEach(() => sessionStorage.clear());
+
+  // A reload or a language switch (a full navigation) must not throw the conversation away.
+  it('keeps the conversation in session storage as it grows', async () => {
+    const { service, httpMock } = setup();
+
+    const done = service.send('Where does Thanik work?');
+    await new Promise(resolve => setTimeout(resolve));
+    httpMock.expectOne(CHAT_ENDPOINT).flush({
+      answer: 'At a consultancy.',
+      provider: 'groq',
+      sources: [{ title: 'Experience', score: 0.9 }],
+      answerSig: 'sig',
+    });
+    await done;
+    TestBed.tick();
+
+    expect(JSON.parse(sessionStorage.getItem(CHAT_STORAGE_KEY)!)).toEqual(ANSWERED);
+  });
+
+  it('restores the conversation in a new page load', () => {
+    sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(ANSWERED));
+
+    expect(setup().service.turns()).toEqual(ANSWERED);
+  });
+
+  // Its request died with the old page, and without an error there is no retry button.
+  it('drops a trailing question that never got its answer', () => {
+    sessionStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify([...ANSWERED, { role: 'user', content: 'Since when?' }]),
+    );
+
+    expect(setup().service.turns()).toEqual(ANSWERED);
+  });
+
+  it('starts empty when the stored value is not a list of turns', () => {
+    for (const stored of ['{not json', '{"role":"user"}', '[{"role":"system","content":"x"}]']) {
+      sessionStorage.setItem(CHAT_STORAGE_KEY, stored);
+
+      expect(setup().service.turns()).toEqual([]);
+    }
   });
 });
 

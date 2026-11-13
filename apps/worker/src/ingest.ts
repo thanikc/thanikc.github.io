@@ -31,8 +31,29 @@ export function chunk(text: string, size = 800, overlap = 100): string[] {
   return chunks.filter(c => c !== '');
 }
 
+/** Bump when chunking or labelling changes, so unchanged documents are embedded again. */
+const CHUNKER_VERSION = 2;
+
+/**
+ * "Title — Section" for each chunk: the nearest Markdown heading above it. A chunk cut from
+ * the middle of a section otherwise no longer says which project or employer it describes.
+ */
+function headings(text: string, chunks: string[], title: unknown): string[] {
+  const normalized = text.replace(/\r\n/g, '\n');
+  let from = 0;
+  return chunks.map(content => {
+    const at = normalized.indexOf(content, from);
+    from = at + 1;
+    // Up to the end of the chunk's first line, so a chunk opening on a heading uses its own.
+    const lineEnd = normalized.indexOf('\n', at);
+    const above = normalized.slice(0, lineEnd < 0 ? normalized.length : lineEnd);
+    const section = [...above.matchAll(/^#{1,6} +(.+)$/gm)].at(-1)?.[1]?.trim();
+    return [...new Set([title, section])].filter(part => typeof part === 'string').join(' — ');
+  });
+}
+
 async function contentHash(text: string, metadata: Record<string, unknown>): Promise<string> {
-  const bytes = new TextEncoder().encode(JSON.stringify([text, metadata]));
+  const bytes = new TextEncoder().encode(JSON.stringify([CHUNKER_VERSION, text, metadata]));
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
 }
@@ -61,15 +82,17 @@ export async function ingest(
     return { chunks: 0, skipped: true, hash };
   }
 
+  const labels = headings(text, chunks, metadata.title);
   const vectors = await Promise.all(
     chunks.map(async (content, i) => ({
       id: `${docId}:${i}`,
-      values: await embed(content, env),
+      values: await embed(labels[i] ? `${labels[i]}\n${content}` : content, env),
       metadata: {
         ...metadata,
         docId,
         contentHash: hash,
         text: content,
+        ...(labels[i] && { heading: labels[i] }),
         chunkIndex: i,
         totalChunks: chunks.length,
         ...(i > 0 && { prevChunk: chunks[i - 1] }),

@@ -62,7 +62,7 @@ describe('signed assistant turns', () => {
   it('signs a generated answer', async () => {
     vi.stubGlobal('fetch', answering());
 
-    const body = (await (await post(chatEnv(), { message: 'hi' })).json()) as {
+    const body = (await (await post(chatEnv(), { message: 'who is thanik?' })).json()) as {
       answer: string;
       answerSig: string;
     };
@@ -75,7 +75,7 @@ describe('signed assistant turns', () => {
       VECTORIZE: { query: vi.fn().mockResolvedValue({ matches: [{ score: MIN_SCORE - 0.1 }] }) },
     });
 
-    const body = (await (await post(env, { message: 'hi' })).json()) as {
+    const body = (await (await post(env, { message: 'who is thanik?' })).json()) as {
       answer: string;
       answerSig: string;
     };
@@ -87,7 +87,7 @@ describe('signed assistant turns', () => {
     vi.stubGlobal('fetch', answering());
 
     const body = await (
-      await post(chatEnv({ SESSION_SECRET: undefined }), { message: 'hi' })
+      await post(chatEnv({ SESSION_SECRET: undefined }), { message: 'who is thanik?' })
     ).json();
 
     expect(body).not.toHaveProperty('answerSig');

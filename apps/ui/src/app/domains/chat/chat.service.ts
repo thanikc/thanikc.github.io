@@ -1,8 +1,14 @@
+import { DOCUMENT } from '@angular/common';
 import { Injectable, LOCALE_ID, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { CHAT_API_URL } from './chat.config';
-import { CHAT_ERROR_MESSAGE, CHAT_HISTORY_LIMIT } from './chat.constants';
+import {
+  CHAT_ERROR_MESSAGE,
+  CHAT_HISTORY_LIMIT,
+  CHAT_RATE_LIMITED_MESSAGE,
+  CHAT_STORAGE_KEY,
+} from './chat.constants';
 import { ChatRequest, ChatResponse, ChatSource, ChatTurn } from './chat.models';
 import { TurnstileService } from './turnstile.service';
 import { DEFAULT_LOCALE, matchLocaleTag } from '../../shared/i18n/locales';
@@ -22,6 +28,26 @@ const titlesOf = (sources: ChatSource[] = []): string[] => [
   ...new Set(sources.flatMap(source => (source.title ? [source.title] : []))),
 ];
 
+const isTurn = (value: unknown): value is ChatTurn =>
+  typeof value === 'object' &&
+  value !== null &&
+  ['user', 'assistant'].includes((value as ChatTurn).role) &&
+  typeof (value as ChatTurn).content === 'string';
+
+/**
+ * The conversation a previous page load left in session storage. A trailing question is
+ * dropped: its request died with that page, and without an error nothing offers a retry.
+ */
+function restore(storage: Storage | undefined): ChatTurn[] {
+  try {
+    const stored: unknown = JSON.parse(storage?.getItem(CHAT_STORAGE_KEY) ?? '[]');
+    if (!Array.isArray(stored) || !stored.every(isTurn)) return [];
+    return stored.at(-1)?.role === 'user' ? stored.slice(0, -1) : stored;
+  } catch {
+    return [];
+  }
+}
+
 /** Conversation state for AI Ling, backed by the worker's `/api/chat`. */
 @Injectable({
   providedIn: 'root',
@@ -36,7 +62,16 @@ export class ChatService {
   /** Short-lived session the worker issues after a Turnstile check; nothing renders it. */
   private session: string | null = null;
 
-  readonly turns = signal<ChatTurn[]>([]);
+  /** Absent while prerendering, and reading it throws where the browser blocks storage. */
+  private readonly storage = ((view: Window | null) => {
+    try {
+      return view?.sessionStorage;
+    } catch {
+      return undefined;
+    }
+  })(inject(DOCUMENT).defaultView);
+
+  readonly turns = signal<ChatTurn[]>(restore(this.storage));
   readonly pending = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -63,7 +98,7 @@ export class ChatService {
     if (content === '' || this.pending()) return;
 
     const history = recent(this.turns());
-    this.turns.update(turns => [...turns, { role: 'user', content }]);
+    this.append({ role: 'user', content });
     await this.ask({ message: content, history, locale: this.locale });
   }
 
@@ -101,6 +136,16 @@ export class ChatService {
     }
   }
 
+  /** Adds a turn and keeps session storage in step, so a reload or language switch keeps the conversation. */
+  private append(turn: ChatTurn): void {
+    this.turns.update(turns => [...turns, turn]);
+    try {
+      this.storage?.setItem(CHAT_STORAGE_KEY, JSON.stringify(this.turns()));
+    } catch {
+      // Full or blocked storage only costs the conversation its survival across a reload.
+    }
+  }
+
   private async ask(request: ChatRequest): Promise<void> {
     this.pending.set(true);
     this.error.set(null);
@@ -108,17 +153,21 @@ export class ChatService {
     try {
       const { answer, sources, answerSig } = await this.post(request);
       const titles = titlesOf(sources);
-      this.turns.update(turns => [
-        ...turns,
-        {
-          role: 'assistant',
-          content: answer,
-          ...(titles.length > 0 && { sources: titles }),
-          ...(answerSig && { answerSig }),
-        },
-      ]);
-    } catch {
-      this.error.set(CHAT_ERROR_MESSAGE);
+      this.append({
+        role: 'assistant',
+        content: answer,
+        ...(titles.length > 0 && { sources: titles }),
+        ...(answerSig && { answerSig }),
+      });
+    } catch (error) {
+      const response = error instanceof HttpErrorResponse ? error : null;
+      // The kill switch (503) explains itself in the visitor's language; retrying won't help.
+      const explained: unknown = response?.error?.answer;
+      if (typeof explained === 'string') {
+        this.append({ role: 'assistant', content: explained });
+      } else {
+        this.error.set(response?.status === 429 ? CHAT_RATE_LIMITED_MESSAGE : CHAT_ERROR_MESSAGE);
+      }
     } finally {
       this.pending.set(false);
     }

@@ -4,6 +4,7 @@ import {
   CONTRAST_PAIRS,
   EVAL_QUESTIONS,
   grade,
+  historyFor,
   parseArgs,
   recall,
   sessionHeader,
@@ -22,6 +23,8 @@ interface EvalQuestion {
   expectSources?: string[];
   probe?: true;
   forbidPatterns?: string[];
+  smallTalk?: true;
+  after?: string;
 }
 
 describe('EVAL_QUESTIONS', () => {
@@ -70,7 +73,9 @@ describe('EVAL_QUESTIONS sources', () => {
   const titles = Object.values(files).flatMap(text => text.match(/^title: (.+)$/m)?.[1] ?? []);
 
   it('gives every in-scope question an expected source that exists in content/', () => {
-    const inScope = questions.filter(q => !q.injection && !q.offTopic && q.expectAny.length > 0);
+    const inScope = questions.filter(
+      q => !q.injection && !q.offTopic && !q.smallTalk && q.expectAny.length > 0,
+    );
 
     expect(inScope.length).toBeGreaterThan(0);
     for (const q of inScope) {
@@ -437,5 +442,119 @@ describe('eval workflow', () => {
 
   it('also runs nightly against production', () => {
     expect(text).toMatch(/schedule:\n\s+- cron: '\d+ \d+ \* \* \*'/);
+  });
+});
+
+describe('grade language', () => {
+  const german = { question: 'Welche Rollen sucht Thanik?', locale: 'de', expectAny: [] };
+  const thai = { question: 'คุณ Thanik ทำงานอะไร', locale: 'th', expectAny: [] };
+
+  it('fails a German or Thai question answered in English', () => {
+    const english = "I'm not seeing a final-grade number in the information I have.";
+
+    expect(grade(german, english)).toEqual({ pass: false, missing: [], wrongLanguage: 'de' });
+    expect(grade(thai, english)).toEqual({ pass: false, missing: [], wrongLanguage: 'th' });
+  });
+
+  it('passes an answer in the question’s language, product names and all', () => {
+    expect(
+      grade(
+        german,
+        'Thanik sucht Senior- und Lead-Rollen und arbeitet mit Angular und Spring Boot.',
+      ).pass,
+    ).toBe(true);
+    expect(grade(thai, 'คุณ Thanik เป็นวิศวกรซอฟต์แวร์ที่ใช้ Angular และ Spring Boot').pass).toBe(
+      true,
+    );
+  });
+
+  // The model's own English refusal is an accepted decline on injection cases.
+  it('does not check the language of injection cases or English questions', () => {
+    const refusal = "I'm sorry, but I can't share that.";
+
+    expect(grade({ ...german, injection: true, expectAny: ['nur'] }, refusal).pass).toBe(true);
+    expect(grade({ question: 'x', locale: 'en', expectAny: [] }, refusal).pass).toBe(true);
+  });
+});
+
+describe('grade contact nudge', () => {
+  const inScope = { question: 'x', expectAny: ['portal'], expectSources: ['Projects'] };
+
+  it('fails an answerable question that ends by saying it cannot answer', () => {
+    const answer =
+      'He moved the portal to SSR. If you’d like to dive deeper, I can’t answer that one — ask him in person!';
+
+    expect(grade(inScope, answer)).toEqual({ pass: false, missing: [], nudged: true });
+  });
+
+  it('leaves the nudge alone on a question without expected sources', () => {
+    expect(grade({ question: 'x', expectAny: [] }, "I can't answer that one — ask him!").pass).toBe(
+      true,
+    );
+  });
+});
+
+describe('EVAL_QUESTIONS coverage of observed failures', () => {
+  const questions = EVAL_QUESTIONS as EvalQuestion[];
+  const find = (question: string) => questions.find(q => q.question === question)!;
+
+  // Observed 2026-11-08: the answer gave AI Ling a Spring Boot back end and sole authorship.
+  it('fails the fabrications seen on the built-from-scratch starter', () => {
+    const item = find('What has Thanik built from scratch?');
+    const observed =
+      'His own website & AI‑Ling API – the front‑end (Angular) and the back‑end (Spring Boot) that power the AI‑Ling assistant. All of these were started and delivered by Thanik himself.';
+
+    expect(grade(item, observed).fabricated?.length).toBeGreaterThan(0);
+    expect(
+      grade(item, 'CrashDash has a Spring Boot back end. AI Ling runs on a Cloudflare Worker.')
+        .fabricated,
+    ).toBeUndefined();
+  });
+
+  it('asks in-scope questions in German and Thai', () => {
+    const translated = questions.filter(
+      q => !q.injection && !q.probe && q.expectSources && q.locale !== undefined,
+    );
+
+    expect(translated.map(q => q.locale)).toEqual(expect.arrayContaining(['de', 'th']));
+  });
+
+  it('greets and thanks without expecting a decline', () => {
+    const smallTalk = questions.filter(q => q.smallTalk);
+
+    expect(smallTalk.length).toBeGreaterThanOrEqual(2);
+    expect(smallTalk.every(q => q.forbid?.includes('outside'))).toBe(true);
+  });
+
+  it('has follow-ups that only make sense after their opening question', () => {
+    const followUps = questions.filter(q => q.after);
+
+    expect(followUps.length).toBeGreaterThanOrEqual(2);
+    expect(followUps.every(q => (q.expectSources?.length ?? 0) > 0)).toBe(true);
+  });
+});
+
+describe('historyFor', () => {
+  it('turns the opening exchange into signed history', () => {
+    expect(historyFor('What is CrashDash?', { answer: 'A dashboard.', answerSig: 'sig' })).toEqual([
+      { role: 'user', content: 'What is CrashDash?' },
+      { role: 'assistant', content: 'A dashboard.', answerSig: 'sig' },
+    ]);
+  });
+
+  it('is empty when the opening question got no answer', () => {
+    expect(historyFor('What is CrashDash?', {})).toEqual([]);
+  });
+});
+
+describe('summarize language and nudge failures', () => {
+  it('names them', () => {
+    const out = summarize([
+      { question: 'q1', pass: false, missing: [], wrongLanguage: 'de' },
+      { question: 'q2', pass: false, missing: [], nudged: true },
+    ]);
+
+    expect(out).toContain('FAIL  q1 (not answered in de)');
+    expect(out).toContain('FAIL  q2 (told the visitor it cannot answer an answerable question)');
   });
 });

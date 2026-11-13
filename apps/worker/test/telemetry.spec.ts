@@ -85,7 +85,7 @@ describe('chat telemetry', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('boom', { status: 500 })));
     const writeDataPoint = vi.fn();
 
-    const res = await post(setup(0.9, { writeDataPoint }), { message: 'hi' });
+    const res = await post(setup(0.9, { writeDataPoint }), { message: 'who is thanik?' });
 
     expect(res.status).toBe(502);
     const point = writeDataPoint.mock.calls[0]![0];
@@ -96,7 +96,7 @@ describe('chat telemetry', () => {
   it('still answers when the ANALYTICS binding is absent', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(completion('ok')));
 
-    const res = await post(setup(0.9, undefined), { message: 'hi' });
+    const res = await post(setup(0.9, undefined), { message: 'who is thanik?' });
 
     expect(res.status).toBe(200);
     expect(res.headers.get('X-Request-Id')).toBeTruthy();
@@ -108,7 +108,7 @@ describe('chat telemetry', () => {
 
     const AI = { run: vi.fn().mockResolvedValue({ data: [[0.1]], response: '\n\nsafe' }) };
 
-    await post(setup(0.99, { writeDataPoint }, { AI }), { message: 'hi' });
+    await post(setup(0.99, { writeDataPoint }, { AI }), { message: 'who is thanik?' });
 
     expect(writeDataPoint.mock.calls[0]![0].doubles[4]).toBe(1);
   });
@@ -117,7 +117,7 @@ describe('chat telemetry', () => {
     const writeDataPoint = vi.fn();
     const env = setup(0.9, { writeDataPoint }, { TURNSTILE_SECRET: 'ts', SESSION_SECRET: 's' });
 
-    const res = await post(env, { message: 'hi' });
+    const res = await post(env, { message: 'who is thanik?' });
 
     expect(res.status).toBe(403);
     expect(writeDataPoint.mock.calls[0]![0].blobs.slice(0, 4)).toEqual([
@@ -136,7 +136,7 @@ describe('kill switch', () => {
     const writeDataPoint = vi.fn();
     const env = setup(0.9, { writeDataPoint }, { CHAT_DISABLED: 'true' });
 
-    const res = await post(env, { message: 'hi', locale: 'de' });
+    const res = await post(env, { message: 'who is thanik?', locale: 'de' });
 
     expect(res.status).toBe(503);
     const body = (await res.json()) as { error: string; answer: string };
@@ -157,7 +157,9 @@ describe('kill switch', () => {
   it.each([undefined, 'false', ''])('is off when CHAT_DISABLED is %j', async value => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(completion('ok')));
 
-    const res = await post(setup(0.9, undefined, { CHAT_DISABLED: value }), { message: 'hi' });
+    const res = await post(setup(0.9, undefined, { CHAT_DISABLED: value }), {
+      message: 'who is thanik?',
+    });
 
     expect(res.status).toBe(200);
   });

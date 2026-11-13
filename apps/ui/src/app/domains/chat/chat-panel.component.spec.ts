@@ -175,6 +175,51 @@ describe('ChatPanelComponent', () => {
       expect(sendSpy).toHaveBeenCalledWith(suggestion.textContent!.trim());
     });
 
+    describe('follow-up suggestions', () => {
+      const ANSWERED: ChatTurn[] = [
+        { role: 'user', content: 'How does AI Ling work?' },
+        { role: 'assistant', content: 'With retrieval.' },
+      ];
+      const followUps = () =>
+        [...el().querySelectorAll<HTMLButtonElement>('.chat-follow-ups button')].map(b =>
+          b.textContent!.trim(),
+        );
+
+      // After the first answer the starters used to vanish, leaving a blank composer.
+      it('offers the starters not asked yet under the latest answer', () => {
+        setInputs({ turns: ANSWERED });
+
+        expect(followUps()).toEqual([
+          "What's the most complex system Thanik has worked on?",
+          'What has Thanik built from scratch?',
+          'What would Thanik look for in a developer using AI?',
+        ]);
+        expect(el().querySelector('.chat-follow-ups')?.textContent).toContain(
+          'You could also ask:',
+        );
+      });
+
+      it('emits a follow-up suggestion as a send', () => {
+        setInputs({ turns: ANSWERED });
+        el().querySelector<HTMLButtonElement>('.chat-follow-ups button')!.click();
+
+        expect(sendSpy).toHaveBeenCalledWith(
+          "What's the most complex system Thanik has worked on?",
+        );
+      });
+
+      it('offers none while a reply is pending, after an error, or before the first answer', () => {
+        setInputs({ turns: ANSWERED, pending: true });
+        expect(followUps()).toEqual([]);
+
+        setInputs({ turns: TURNS, pending: false, error: 'failed' });
+        expect(followUps()).toEqual([]);
+
+        setInputs({ turns: [], error: null });
+        expect(followUps()).toEqual([]);
+      });
+    });
+
     // "Looked in", not "based on": retrieval always returns its closest chunks, so
     // the label claims only where the assistant searched, not what it used.
     it('lists where an answer looked, under the answer', () => {

@@ -46,14 +46,25 @@ export function vectorize(env: Env): VectorizeLike {
 export async function search(vector: number[], env: Env, topK = 5): Promise<RetrievedChunk[]> {
   const { matches } = await vectorize(env).query(vector, { topK, returnMetadata: 'all' });
 
+  // Adjacent chunks of one document often match together; each is sent once.
+  const sent = new Set<string>();
   return matches
     .map((match): RetrievedChunk => {
-      const { text, title, prevChunk, nextChunk } = match.metadata ?? {};
-      const stitched = [prevChunk, text, nextChunk]
-        .filter((part): part is string => typeof part === 'string')
-        .join('\n\n');
+      const { text, title, heading, prevChunk, nextChunk, docId, chunkIndex } =
+        match.metadata ?? {};
+      const unsent = (part: unknown, offset: number): string[] => {
+        if (typeof part !== 'string') return [];
+        if (typeof docId !== 'string') return [part];
+        const key = `${docId}:${Number(chunkIndex) + offset}`;
+        if (sent.has(key)) return [];
+        sent.add(key);
+        return [part];
+      };
+      const stitched = [...unsent(prevChunk, -1), ...unsent(text, 0), ...unsent(nextChunk, 1)].join(
+        '\n\n',
+      );
       return {
-        text: stitched,
+        text: stitched && typeof heading === 'string' ? `${heading}\n${stitched}` : stitched,
         score: match.score,
         ...(typeof title === 'string' && { title }),
       };
@@ -97,6 +108,44 @@ const DISABLED_ANSWERS: Record<string, string> = {
   th: 'ตอนนี้ AI Ling ปิดให้บริการชั่วคราว ลองกลับมาใหม่ภายหลัง หรือติดต่อคุณ Thanik โดยตรงได้เลย (อีเมลและ LinkedIn อยู่ที่ท้ายเว็บไซต์)',
 };
 
+const GREETING_ANSWERS: Record<string, string> = {
+  en: "Hi, I'm AI Ling! Ask me anything about Thanik: his projects, his experience, how he works, or what he's looking for next.",
+  de: 'Hallo, ich bin AI Ling! Frag mich alles über Thanik: seine Projekte, seine Erfahrung, wie er arbeitet oder was er als Nächstes sucht.',
+  th: 'สวัสดีค่ะ Ling เองนะ ถามเรื่องคุณ Thanik ได้ทุกอย่างเลย ทั้งโปรเจกต์ ประสบการณ์ วิธีทำงาน หรืองานที่เขากำลังมองหา',
+};
+
+const THANKS_ANSWERS: Record<string, string> = {
+  en: "You're welcome! Ask away if there's anything else you'd like to know about Thanik.",
+  de: 'Gern geschehen! Frag einfach weiter, wenn du noch etwas über Thanik wissen möchtest.',
+  th: 'ยินดีค่ะ ถ้าอยากรู้เรื่องคุณ Thanik เพิ่มเติม ถามมาได้เลยนะ',
+};
+
+const GREETING =
+  /^(hi|hello|hey|hallo|moin|servus|good (morning|afternoon|evening)|guten (tag|morgen|abend)|สวัสดี|หวัดดี)( there| ling| ai ling)?(ครับ|ค่ะ|คะ|จ้า)?$/;
+const THANKS =
+  /^(thanks|thank you|thx|danke|danke ?schön|vielen dank|ขอบคุณ|ขอบใจ)( a lot| so much| very much| dir| ling| มาก)?(ครับ|ค่ะ|คะ|นะ)?$/;
+
+/**
+ * A canned reply to a bare greeting or thank-you, which matches nothing in the knowledge
+ * base and would otherwise be declined as off-topic; null for anything else.
+ */
+export function smallTalkAnswer(message: string, locale: unknown): string | null {
+  // Letters, Thai marks and single spaces only: "Hi!", "hello 👋" and "Hello" read alike.
+  const words = message
+    .toLowerCase()
+    .replace(/[^\p{L}\p{M}]+/gu, ' ')
+    .trim();
+  const answers = GREETING.test(words)
+    ? GREETING_ANSWERS
+    : THANKS.test(words)
+      ? THANKS_ANSWERS
+      : null;
+  if (!answers) return null;
+  return typeof locale === 'string' && Object.hasOwn(answers, locale)
+    ? answers[locale]!
+    : answers['en']!;
+}
+
 /** Canned answer for when the kill switch is on, in the site locale. */
 export function disabledAnswer(locale: unknown): string {
   return typeof locale === 'string' && Object.hasOwn(DISABLED_ANSWERS, locale)
@@ -139,11 +188,18 @@ export function buildMessages(
     'but keep the content specific and factual: name the concrete systems, decisions, and',
     'outcomes the context describes, and let the facts make the case. Do not exaggerate or',
     'add praise the context does not support, and answer questions about gaps or weaknesses',
-    'honestly from what the context says. Never invent facts. If the context does not contain',
-    "the answer, don't just say you don't know — keep it upbeat and turn it into a nudge:",
-    "admit you can't answer that one, then invite",
-    'the visitor to contact Thanik directly (his email and LinkedIn are in the site footer)',
-    'and ask him in person.',
+    'honestly from what the context says. Never invent facts. Open with the answer itself, not',
+    'a greeting or an exclamation, and use at most one emoji.',
+    '',
+    'Accuracy: keep each fact with the project, employer and period the context gives it, and',
+    'do not carry a technology or detail over from one project to another. Describe his role',
+    'as the context states it, and do not say he built alone what the context does not say he',
+    'built alone.',
+    '',
+    'Only when the context does not contain the answer, keep it upbeat and turn it into a',
+    "nudge: admit you can't answer that one, then invite the visitor to contact Thanik directly",
+    '(his email and LinkedIn are in the site footer) and ask him in person.',
+    'Do not add that invitation to an answer the context supports; such an answer simply ends.',
     '',
     'Formatting: never use tables (including Markdown tables) — this is a narrow chat panel on',
     'mobile and desktop, and tables do not render readably there. Prefer short paragraphs or',
@@ -170,7 +226,8 @@ export function buildMessages(
     `switches partway through the conversation. If a message is ambiguous or too short to tell`,
     `(a greeting, an emoji, "ok"), fall back to ${defaultLanguage}. The context is in English —`,
     'translate what you need from it rather than quoting it untranslated. Keep names,',
-    'technologies and product names as they are.',
+    'technologies and product names as they are. This holds for every reply,',
+    'including when you decline or cannot answer.',
   );
 
   const systemPrompt = system.join('\n');

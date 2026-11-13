@@ -74,6 +74,14 @@ export class ChatPanelComponent {
     () => [...this.turns()].reverse().find(turn => turn.role === 'assistant')?.content ?? '',
   );
 
+  /** Starters not asked yet, offered again once an answer is in so the visitor isn't left at a blank composer. */
+  protected readonly followUps = computed(() => {
+    const turns = this.turns();
+    if (this.pending() || this.error() || turns.at(-1)?.role !== 'assistant') return [];
+    const asked = new Set(turns.map(turn => turn.content));
+    return this.suggestions.filter(suggestion => !asked.has(suggestion));
+  });
+
   protected readonly canSend = computed(() => this.draft().trim() !== '' && !this.pending());
   protected readonly headingId = `chat-heading-${nextId}`;
   protected readonly inputId = `chat-input-${nextId++}`;

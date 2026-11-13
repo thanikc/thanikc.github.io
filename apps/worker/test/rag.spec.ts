@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildMessages, embed, search } from '../src/rag';
+import { buildMessages, embed, search, smallTalkAnswer } from '../src/rag';
 
 function fakeEnv(overrides: Partial<Env> = {}): Env {
   return {
@@ -45,6 +45,35 @@ describe('buildMessages', () => {
     expect(lower).not.toContain('hype man');
     expect(lower).not.toContain('positive spin');
     expect(lower).not.toContain('flattering');
+  });
+
+  // A fully answered question must not end with "I can't answer that one — ask him in person".
+  it('keeps the contact nudge for questions the context cannot answer', () => {
+    const lower = (buildMessages('what did he build?', [])[0]?.content ?? '').toLowerCase();
+
+    expect(lower).toContain('only when the context does not contain the answer');
+    expect(lower).toContain('do not add that invitation to an answer the context supports');
+  });
+
+  it('asks for the answer first, without a greeting opener', () => {
+    const lower = (buildMessages('what did he build?', [])[0]?.content ?? '').toLowerCase();
+
+    expect(lower).toContain('open with the answer itself');
+    expect(lower).toContain('at most one emoji');
+  });
+
+  // A small model otherwise carries a stack from one project over to another.
+  it('tells the model to keep each fact with its own project and role', () => {
+    const lower = (buildMessages('what did he build?', [])[0]?.content ?? '').toLowerCase();
+
+    expect(lower).toContain('do not carry a technology or detail over from one project to another');
+    expect(lower).toContain('built alone');
+  });
+
+  it('applies the language rule to declines too', () => {
+    const system = buildMessages('Wie hoch war die Note?', [], [], 'de')[0]?.content ?? '';
+
+    expect(system).toContain('including when you decline or cannot answer');
   });
 
   it('restricts the assistant to Thanik-related topics and refuses unrelated requests', () => {
@@ -156,6 +185,47 @@ describe('embed + search', () => {
     expect(chunks).toEqual([{ text: 'start part\n\nmiddle part\n\nend part', score: 0.9 }]);
   });
 
+  it('puts the chunk heading above the stitched text', async () => {
+    const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+    const query = vi.fn().mockResolvedValue({
+      matches: [
+        {
+          score: 0.9,
+          metadata: { text: 'body', heading: 'Projects — CrashDash', prevChunk: 'before' },
+        },
+      ],
+    });
+    const env = fakeEnv({ AI: { run }, VECTORIZE: { query } } as unknown as Partial<Env>);
+
+    expect(await retrieve('question', env)).toEqual([
+      { text: 'Projects — CrashDash\nbefore\n\nbody', score: 0.9 },
+    ]);
+  });
+
+  // Adjacent chunks that both match would otherwise send the same text twice.
+  it('sends each chunk of a document once when neighbors both match', async () => {
+    const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
+    const at = (chunkIndex: number, extra: Record<string, unknown>) => ({
+      docId: 'projects',
+      chunkIndex,
+      text: `c${chunkIndex}`,
+      ...extra,
+    });
+    const query = vi.fn().mockResolvedValue({
+      matches: [
+        { score: 0.9, metadata: at(1, { prevChunk: 'c0', nextChunk: 'c2' }) },
+        { score: 0.8, metadata: at(2, { prevChunk: 'c1', nextChunk: 'c3' }) },
+        { score: 0.7, metadata: at(0, { nextChunk: 'c1' }) },
+      ],
+    });
+    const env = fakeEnv({ AI: { run }, VECTORIZE: { query } } as unknown as Partial<Env>);
+
+    expect(await retrieve('question', env)).toEqual([
+      { text: 'c0\n\nc1\n\nc2', score: 0.9 },
+      { text: 'c3', score: 0.8 },
+    ]);
+  });
+
   it('leaves the text alone when there is no neighbor metadata', async () => {
     const run = vi.fn().mockResolvedValue({ data: [[0.1]] });
     const query = vi.fn().mockResolvedValue({
@@ -166,5 +236,29 @@ describe('embed + search', () => {
     const chunks = await retrieve('question', env);
 
     expect(chunks).toEqual([{ text: 'lone chunk', score: 0.9 }]);
+  });
+});
+
+describe('smallTalkAnswer', () => {
+  it('greets back, in the site locale', () => {
+    expect(smallTalkAnswer('Hi!', 'en')).toContain('AI Ling');
+    expect(smallTalkAnswer('hallo', 'de')).toContain('Frag');
+    expect(smallTalkAnswer('สวัสดีครับ', 'th')).toContain('Ling');
+    expect(smallTalkAnswer('Good morning 👋', undefined)).toBe(smallTalkAnswer('hey', 'en'));
+  });
+
+  it('answers thanks differently from a greeting', () => {
+    const thanks = smallTalkAnswer('Thanks a lot!', 'en');
+
+    expect(thanks).not.toBeNull();
+    expect(thanks).not.toBe(smallTalkAnswer('hi', 'en'));
+    expect(smallTalkAnswer('Vielen Dank', 'de')).not.toBe(thanks);
+    expect(smallTalkAnswer('ขอบคุณค่ะ', 'th')).not.toBeNull();
+  });
+
+  it('leaves real questions alone, even ones that start with a greeting', () => {
+    expect(smallTalkAnswer('Hi, what has Thanik built?', 'en')).toBeNull();
+    expect(smallTalkAnswer('thanks, and his Java experience?', 'en')).toBeNull();
+    expect(smallTalkAnswer('write me quicksort', 'en')).toBeNull();
   });
 });

@@ -9,6 +9,7 @@ import {
   embed,
   MIN_SCORE,
   search,
+  smallTalkAnswer,
 } from './rag';
 import { generate, ChatError, type ChatMessage } from './chat/client';
 import { ingest } from './ingest';
@@ -162,8 +163,8 @@ app.post('/api/chat', async c => {
   // A follow-up's answer depends on the turns before it, so only a conversation's
   // opening message goes through the cache.
   const cacheable = history.length === 0 && !hasPii;
-  // A follow-up ("tell me more") embeds poorly alone, so it is searched with the turn before it.
-  const lastUserTurn = history.filter(m => m.role === 'user').at(-1)?.content ?? '';
+  // A follow-up ("tell me more") embeds poorly alone, so it is searched with the questions before it.
+  const query = [...history.filter(m => m.role === 'user').map(m => m.content), message].join('\n');
   // Every answer goes back signed, so the client can prove its assistant turns on follow-ups.
   const reply = async <T extends { answer: string }>(payload: T) =>
     c.json(
@@ -171,6 +172,12 @@ app.post('/api/chat', async c => {
         ? { ...payload, answerSig: await signAnswer(SESSION_SECRET, payload.answer) }
         : payload,
     );
+  const smallTalk = smallTalkAnswer(message, locale);
+  if (smallTalk) {
+    track({ provider: 'none', cache: 'none', outcome: 'ok', answerLength: smallTalk.length });
+    return reply({ answer: smallTalk, provider: 'none', sources: [] });
+  }
+
   const lang = cacheLocale(locale);
   const key = await cacheKey(message, lang);
   if (cacheable) {
@@ -189,7 +196,7 @@ app.post('/api/chat', async c => {
   let topScore = -1;
   try {
     // One embedding serves both the semantic lookup and retrieval.
-    const vector = await embed(cacheable ? message : [lastUserTurn, message].join('\n'), c.env);
+    const vector = await embed(query, c.env);
     if (cacheable) {
       const hit = await lookupSemantic(c.env, vector, lang);
       if (hit) {
@@ -234,7 +241,10 @@ app.post('/api/chat', async c => {
       buildMessages(message, chunks, history, locale),
       c.env,
     );
-    const sources = chunks.map(({ title, score }) => ({ title, score }));
+    // Only what cleared the bar: a weak match was retrieved but is not where the answer came from.
+    const sources = chunks
+      .filter(chunk => chunk.score >= MIN_SCORE)
+      .map(({ title, score }) => ({ title, score }));
     const safeToCache = isCacheSafe(answer);
     const wouldCache =
       cacheable && !truncated && topScore >= MIN_SCORE + CACHE_MARGIN && safeToCache;

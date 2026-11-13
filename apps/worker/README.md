@@ -23,6 +23,11 @@ Bodies are capped (chat 32 KiB, ingest 1 MiB → 413). An unknown `locale` or mo
 turns → 400. With `SESSION_SECRET` set, each answer carries `answerSig` (HMAC of the answer) and
 assistant turns in `history` without a valid one are dropped with the user turn before them.
 
+`sources` lists only the retrieved chunks that scored at least `MIN_SCORE`. A bare greeting or
+thank-you gets a canned reply in the site locale (`smallTalkAnswer`, `provider: 'none'`) before
+the cache, retrieval or any provider is touched. A follow-up is searched together with every
+earlier user turn in `history`.
+
 CORS allows `ALLOWED_ORIGIN` (comma-separated). For local UI work, put
 `ALLOWED_ORIGIN=https://thanikc.github.io,http://localhost:4200` in `.env` (alongside the provider keys; `wrangler dev` reads `.env` only when no `.dev.vars` exists).
 
@@ -130,6 +135,11 @@ pnpm --filter @thanikc/worker ingest:deployed
 Upserts reach the index asynchronously: `sources` can stay stale for 1–3 minutes
 after `/api/ingest` returns 200.
 
+Each chunk is embedded and stored with a `heading` ("Title — Section", the nearest Markdown
+heading above it), and `search` sends each chunk of a document once even when neighbours both
+match. Changing how chunks are cut or labelled needs `CHUNKER_VERSION` in `src/ingest.ts`
+bumped, so the next ingest embeds unchanged documents again.
+
 See `content/README.md` for the file format.
 
 ## Answer cache (D1)
@@ -203,6 +213,11 @@ AI Ling the questions in `EVAL_QUESTIONS`. Question fields:
 - `probe` + `forbidPatterns`: a hallucination probe. The answer is not in `content/`, so a match
   with any regex (case-insensitive) is a fabricated specific.
 - `injection` + `forbid`: must decline and not echo the listed prompt text.
+- `locale` `de` / `th` (injection cases aside): the answer must be in that language.
+- `after`: asked as a follow-up to that opening question, with its signed answer as history.
+- `smallTalk`: a greeting or thank-you, which must not come back as the off-topic decline.
+
+A question with `expectSources` also fails if its answer says it can't answer.
 
 Hard gates (any failure exits non-zero): injection, cache contrast and probes. Soft gates: pass rate
 (`--min-pass`) and recall (`--min-recall`; 14/14 observed on 2026-11-08). The summary ends with

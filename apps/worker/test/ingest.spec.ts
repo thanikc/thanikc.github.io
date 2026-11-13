@@ -42,6 +42,32 @@ describe('ingest', () => {
     });
   });
 
+  // A chunk cut from the middle of a section no longer says which project it describes.
+  it('labels each chunk with the document title and the section heading above it', async () => {
+    const { env, upsert, run } = fakeEnv();
+    const text = `# Projects\n\n## CrashDash\n\n${'a'.repeat(900)}\n${'b'.repeat(900)}\n\n## Belt Quiz\n\nquiz text`;
+
+    await ingest('doc', text, { title: 'Projects' }, env);
+
+    const vectors = upsert.mock.calls[0]?.[0] as Array<{ metadata: Record<string, string> }>;
+    const tail = vectors.find(v => v.metadata.text!.startsWith('b'))!;
+    expect(tail.metadata.heading).toBe('Projects — CrashDash');
+    // A chunk opening on the title heading is not labelled with it twice.
+    expect(vectors[0]!.metadata.heading).toBe('Projects');
+    // The label is embedded with the chunk, so retrieval sees it too.
+    expect(run).toHaveBeenCalledWith(undefined, {
+      text: [`Projects — CrashDash\n${tail.metadata.text}`],
+    });
+  });
+
+  it('adds no heading to a document without a title or headings', async () => {
+    const { env, upsert } = fakeEnv();
+
+    await ingest('doc', 'short text', {}, env);
+
+    expect(upsert.mock.calls[0]?.[0][0].metadata).not.toHaveProperty('heading');
+  });
+
   it('omits neighbor metadata for a single-chunk document', async () => {
     const { env, upsert } = fakeEnv();
 
